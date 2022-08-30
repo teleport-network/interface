@@ -25,12 +25,12 @@ contract TeleswapV2Factory is ITeleswapV2Factory {
     }
 
     function createPair(address tokenA, address tokenB, bool stable) override external returns (address pair) {
-        require(tokenA != tokenB, 'TeleswapV2: IDENTICAL_ADDRESSES');
+        require(tokenA != tokenB, 'Teleswap: IDENTICAL_ADDRESSES');
         // BaseV1: IDENTICAL_ADDRESSES
         (address token0, address token1) = tokenA < tokenB ? (tokenA, tokenB) : (tokenB, tokenA);
-        require(token0 != address(0), 'TeleswapV2: ZERO_ADDRESS');
+        require(token0 != address(0), 'Teleswap: ZERO_ADDRESS');
         // BaseV1: ZERO_ADDRESS
-        require(getPair[token0][token1][stable] == address(0), 'TeleswapV2: PAIR_EXISTS');
+        require(getPair[token0][token1][stable] == address(0), 'Teleswap: PAIR_EXISTS');
         // BaseV1: PAIR_EXISTS - single check is sufficient
         bytes32 salt = keccak256(abi.encodePacked(token0, token1, stable));
         // notice salt includes stable as well, 3 parameters
