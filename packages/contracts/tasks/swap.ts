@@ -378,9 +378,10 @@ task("removeLiquidityWithPermit", "removeLiquidityWithPermit 取消消除流动�
     .addParam("router02address", "uniswapV2Router02Address合约地址")
     .addParam("privatekey", "签名私钥")
     .addParam("pairaddress", "token对应的pairaddress合约地址")
+    .addParam("stable", "# 兑换方式 false->volatile true->stableswap",false,types.boolean)
     .setAction(async (taskArgs, hre) => {
-        const uniswapV2Router02 = await hre.ethers.getContractFactory('UniswapV2Router02')
-        const router02address = await uniswapV2Router02.attach(taskArgs.router02address)
+        const teleswapV2Router02 = await hre.ethers.getContractFactory('TeleswapV2Router02')
+        const router02address = await teleswapV2Router02.attach(taskArgs.router02address)
 
         let url = "https://goerli.optimism.io";
         let customHttpProvider = new ethers.providers.JsonRpcProvider(url);
@@ -389,7 +390,7 @@ task("removeLiquidityWithPermit", "removeLiquidityWithPermit 取消消除流动�
         let  nonce =await pair.nonces(wallet.address)
         let date1 =Math.round((new Date().getTime()+3600000)/1000)
         const typedData: TypedData = {
-             types :{
+            types :{
                 EIP712Domain: [
                     {name: 'name', type: 'string'},
                     {name: 'version', type: 'string'},
@@ -420,28 +421,26 @@ task("removeLiquidityWithPermit", "removeLiquidityWithPermit 取消消除流动�
             }
         };
         const signingKey = new utils.SigningKey(wallet.privateKey);
-       // Get a signable message from the typed data
+        // Get a signable message from the typed data
         const message = getMessage(typedData, true);
-       // Sign the message with the private key
-        const { r, s, v } = signingKey.signDigest(message);
         console.info(`typedData-data:`,typedData)
-
-        const removeLiquidityWithPermitData: [string,string,string,string,string,string,number,boolean,number,string,string] = [
-            taskArgs.token1,
-            taskArgs.token2,
+        let route= {
+            from:  taskArgs.token1,
+            to: taskArgs.token2,
+            stable:taskArgs.stable
+        }
+        let removeLiquidityWithPermitRes= await router02address.removeLiquidityWithPermit(
+            route,
             taskArgs.liquidity,
             taskArgs.amountamin.toString(),
             taskArgs.amountbmin.toString(),
             taskArgs.to,
             date1.valueOf(),
             false,
-            v,
-            r,
-            s
-        ]
-        let removeLiquidityWithPermitRes= await router02address.removeLiquidityWithPermit(...removeLiquidityWithPermitData)
+            signingKey.signDigest(message))
         console.log("removeLiquidityWithPermitRes->hash=%s", removeLiquidityWithPermitRes.hash)
     });
+
 
 /**
  *
@@ -505,6 +504,23 @@ task("getPair", "getPair")
         ]
         console.log("export getPair=%s",await uniswapV2.getPair(...getPairData))
     });
+
+
+/**
+ * hh getPairBalanceOf --proportion 10 --teleswapv2pairaddress 0x395E10137bA69D941E5acC5A287398f949Cc7109 --to 0xD6f15EAC1Cb3B4131Ab4899a52E711e19DEeA73f  --network opg
+ * */
+// pair比例值查询
+task("getPairBalanceOf", "getPair")
+    .addParam("teleswapv2pairaddress", "teleswapV2Pairaddress合约地址")
+    .addParam("to", "taddress")
+    .addParam("proportion", "%比例" ,1 ,types.int)
+    .setAction(async (taskArgs, hre) => {
+        const teleswapV2Pair = await hre.ethers.getContractFactory('TeleswapV2Pair')
+        const uniswapV2 = await teleswapV2Pair.attach(taskArgs.teleswapv2pairaddress)
+        const balanceOf=await uniswapV2.balanceOf(taskArgs.to)
+        console.log("export balanceOf=%s",balanceOf.mul(taskArgs.proportion).div(100))
+    });
+
 
 /**
  * export ERC20_TOKEN_02=0xdb15d02b15918e0a0bdbfde45857b096e7c36a61 tw
