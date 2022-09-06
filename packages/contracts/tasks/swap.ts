@@ -129,7 +129,7 @@ task("getAmountsOut", "getAmountsOut")
     .setAction(async (taskArgs, hre) => {
         const teleswapV2Router02 = await hre.ethers.getContractFactory('TeleswapV2Router02')
         const router02address = await teleswapV2Router02.attach(taskArgs.router02address)
-        let amountIn = expandTo18Decimals(taskArgs.amountin)
+        let amountIn = taskArgs.amountin
         let routes = [{
             from   :   taskArgs.token1,
             to:       taskArgs.token2,
@@ -302,9 +302,8 @@ task("addLiquidity", "增加流通性")
 task("addLiquidityEth", "增加流通性")
     .addParam("token1", "token1")
     .addParam("token2", "token2")
-    .addParam("amounttokendesired", "amountTokenDesired")
-    .addParam("amounttokenmin", "amountTokenMin")
-    .addParam("amountethmin", "amountETHMin")
+    .addParam("amount1desired", "amount1desired")
+    .addParam("amount2desired", "amount2desired")
     .addParam("to", "to，一般为调用者钱包地址")
     .addParam("router02address", "TeleswapV2Router02合约地址")
     .addParam("stable", "# 兑换方式 false->volatile true->stableswap",false,types.boolean)
@@ -318,13 +317,15 @@ task("addLiquidityEth", "增加流通性")
             stable:taskArgs.stable
         }
         let addLiquidityRes= await router02address.addLiquidityETH(route,
-            taskArgs.amounttokendesired,
-            taskArgs.amounttokenmin,
-            taskArgs.amountethmin,
+            taskArgs.amount1desired,
+            0,
+            0,
             taskArgs.to,
-            date1.valueOf())
-        console.log("addLiquidityRes->hash=%s", addLiquidityRes.hash)
+            date1.valueOf(),{value: taskArgs.amount2desired})
+        console.log("addLiquidityEth->hash=%s", addLiquidityRes.hash)
     });
+
+
 
 /**
  * 50,00000000,20,00000000
@@ -361,6 +362,66 @@ task("swapExactTokensForTokens", "swapExactTokensForTokens")
         let swapExactTokensForTokensRes= await router02address.swapExactTokensForTokens(...swapExactTokensForTokensData)
         console.log("swapExactTokensForTokens->hash=%s", swapExactTokensForTokensRes.hash)
     });
+
+
+task("swapExactETHForTokens", "swapExactETHForTokens")
+    .addParam("amountin", "使用金额")
+    .addParam("amountoutmin", "最低到账金额")
+    .addParam("token1", "token1")
+    .addParam("token2", "token2")
+    .addParam("to", "to，钱包地址")
+    .addParam("router02address", "uniswapV2Router02Address合约地址")
+    .addParam("stable", "# 兑换方式 false->volatile true->stableswap",false,types.boolean)
+    .setAction(async (taskArgs, hre) => {
+        let date1 =Math.round((new Date().getTime()+3600000)/1000)
+        const teleswapV2Router02 = await hre.ethers.getContractFactory('TeleswapV2Router02')
+        const router02address = await teleswapV2Router02.attach(taskArgs.router02address)
+        let route= [
+            taskArgs.token1,
+            taskArgs.token2,
+            taskArgs.stable
+        ]
+        let amountIn = taskArgs.amountin
+        const swapExactETHForTokensData: [BigNumber,any[],string,number] = [
+            taskArgs.amountoutmin,
+            new Array(route),
+            taskArgs.to,
+            date1.valueOf(),
+        ]
+        let swapExactETHForTokensRes= await router02address.swapExactETHForTokens(...swapExactETHForTokensData,{value:amountIn})
+        console.log("swapExactETHForTokensRes->hash=%s", swapExactETHForTokensRes.hash)
+    });
+
+
+task("swapTokensForExactETH", "swapTokensForExactETH")
+    .addParam("amountout", "使用金额")
+    .addParam("token1", "token1")
+    .addParam("token2", "token2")
+    .addParam("to", "to，钱包地址")
+    .addParam("router02address", "uniswapV2Router02Address合约地址")
+    .addParam("stable", "# 兑换方式 false->volatile true->stableswap",false,types.boolean)
+    .setAction(async (taskArgs, hre) => {
+        let date1 =Math.round((new Date().getTime()+3600000)/1000)
+        const teleswapV2Router02 = await hre.ethers.getContractFactory('TeleswapV2Router02')
+        const router02address = await teleswapV2Router02.attach(taskArgs.router02address)
+        let route= [
+            taskArgs.token1,
+            taskArgs.token2,
+            taskArgs.stable
+        ]
+        let amountOut = expandTo18Decimals(taskArgs.amountout)
+        const swapTokensForExactETHData: [BigNumber,BigNumber,any[],string,number] = [
+            amountOut,
+            amountOut.mul(BigNumber.from(2)),
+            new Array(route),
+            taskArgs.to,
+            date1.valueOf(),
+        ]
+        console.log("swapTokensForExactETHData->%s", swapTokensForExactETHData)
+        let swapTokensForExactETHRes= await router02address.swapTokensForExactETH(...swapTokensForExactETHData)
+        console.log("swapTokensForExactETHRes->hash=%s", swapTokensForExactETHRes.hash)
+    });
+
 
 /**
  * 50,00000000,20,00000000
