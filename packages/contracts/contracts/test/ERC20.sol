@@ -6,7 +6,7 @@ contract ERC20 {
     using SafeMath for uint;
 
     string public constant name = 'Test Token';
-    string public constant symbol = 'TT';
+    string public constant symbol = 'AA';
     uint8 public constant decimals = 18;
     uint  public totalSupply;
     mapping(address => uint) public balanceOf;
