@@ -409,10 +409,9 @@ task("swapTokensForExactETH", "swapTokensForExactETH")
             taskArgs.token2,
             taskArgs.stable
         ]
-        let amountOut = expandTo18Decimals(taskArgs.amountout)
-        const swapTokensForExactETHData: [BigNumber,BigNumber,any[],string,number] = [
-            amountOut,
-            amountOut.mul(BigNumber.from(2)),
+        let amountOut = taskArgs.amountout
+        const swapTokensForExactETHData: [BigNumber,number,any[],string,number] = [
+            amountOut, 0,
             new Array(route),
             taskArgs.to,
             date1.valueOf(),
