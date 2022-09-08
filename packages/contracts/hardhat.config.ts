@@ -62,8 +62,8 @@ module.exports = {
             gasPrice: 1500000000,
             chainId: 4,
             gas: 5000000,
-            accounts: [process.env.PRI_KEY]
-            //accounts:['0x7eefd641410560e690736ee331bd32512c9b58419a877eff2189facbef33cd1e']
+            // accounts: [process.env.PRI_KEY]
+            accounts:['0x7eefd641410560e690736ee331bd32512c9b58419a877eff2189facbef33cd1e']
             //accounts:['8f14df1da1a318bec99800b72c5031e4fdc4ec017f00ab9659339ecb0193120e']
         },
         bsctest: {

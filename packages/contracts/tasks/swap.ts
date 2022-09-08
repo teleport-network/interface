@@ -9,12 +9,11 @@ require('dotenv').config()
 /**
  *
  * hh deployToken --network opg
- *
  * export ERC20_TOKEN_01=0x960203b9c264823b1d520418b78ff18325444305 tt
  * export WETH9_TOKEN_02=0x33e831a5cb918a72065854e6085bdbd7ea5c2c45 WETH9
  * hh deployToken --network rinkeby
+ * 部署合约并获取token对
  */
-// 部署合约并获取token对
 task("deployToken", "Deploy Token")
     .setAction(async (taskArgs, hre) => {
         const tokenFactory = await hre.ethers.getContractFactory('ERC20')
@@ -28,10 +27,8 @@ task("deployToken", "Deploy Token")
     });
 
 
-
 /**
  * 部署task新的网络需要部署，部署好后直接使用就好
- *
  * hh deploySwapAll --factoryaddress 0x91ca2eeead12c7de23461d49f1dd1b9e7bd61506 --wethaddress 0x33e831a5cb918a72065854e6085bdbd7ea5c2c45 --network bitnetwork
  */
 task("deploySwapAll", "Deploy Token")
@@ -117,9 +114,8 @@ task("getConsult", "获取Consult")
 
 /**
  * getAmountsOut
- * hh getAmountsOut --amountin 10 --token1 0x3D810bB0feDdCE224E3E1903B4629AB113EF9523 --token2 0xD1A52D3DF694CFc3f3171e8F4345539EF46A7D72 --router02address 0x548001f9a76aCC1e8ba5aAf86f9777d414b02bbf --network opg
+ * 查询任意金额可兑换额度
  */
-// 查询金额可兑换额度
 task("getAmountsOut", "getAmountsOut")
     .addParam("token1", "token1")
     .addParam("token2", "token2")
@@ -140,7 +136,31 @@ task("getAmountsOut", "getAmountsOut")
         console.log("volatile getAmountsOutRes:", getAmountsOutRes.map((item: ethers.BigNumberish) => ethers.utils.formatEther(item)))
     });
 
-// 查询ERC20合约 token的余额
+
+task("getAmountsIn", "getAmountsIn")
+    .addParam("token1", "token1")
+    .addParam("token2", "token2")
+    .addParam("router02address", "TeleswapV2Router02.sol合约地址")
+    .addParam("amountout", "amountout")
+    .addParam("stable", "# 兑换方式 false->volatile true->stableswap",false,types.boolean)
+    .setAction(async (taskArgs, hre) => {
+        const teleswapV2Router02 = await hre.ethers.getContractFactory('TeleswapV2Router02')
+        const router02address = await teleswapV2Router02.attach(taskArgs.router02address)
+        let amountOut = taskArgs.amountout
+        let routes = [{
+            from   :   taskArgs.token1,
+            to:       taskArgs.token2,
+            stable:   taskArgs.stable
+        }]
+        console.log("export route=%s", JSON.stringify(routes))
+        let getAmountsOutRes= await router02address.getAmountsOut(amountOut,routes)
+        console.log("volatile getAmountsIn:", getAmountsOutRes.map((item: ethers.BigNumberish) => ethers.utils.formatEther(item)))
+    });
+
+/**
+ * 使用的token及私钥地址可在.env文件中进行配置
+ * 查询ERC20合约 token的余额
+ */
 task("qBalancesERC20", "查询余额或者代币余额")
     .addParam("token", "代币地址", "")
     .addParam("wallet", "待查询的钱包地址")
@@ -163,7 +183,10 @@ task("qBalancesERC20", "查询余额或者代币余额")
         console.log("time: ", (new Date()).valueOf())
     });
 
-// 查询WETH合约 token的余额
+
+/**
+ * 查询WETH合约 token的余额
+ */
 task("qBalancesWETH", "查询余额或者代币余额")
     .addParam("token", "代币地址", "")
     .addParam("wallet", "待查询的钱包地址")
@@ -186,9 +209,9 @@ task("qBalancesWETH", "查询余额或者代币余额")
         console.log("time: ", (new Date()).valueOf())
     });
 
-
-
-// 查询 ERC20合约token的Allowance
+/**
+ * 查询 ERC20合约token的Allowance
+ */
 task("qAllowanceERC20", "查询允许调用的额度")
     .addParam("token", "代币地址")
     .addParam("router02", "被授权的router02合约地址")
@@ -203,7 +226,9 @@ task("qAllowanceERC20", "查询允许调用的额度")
         console.log("time: ", (new Date()).valueOf())
     });
 
-// 查询 WETH合约token的Allowance
+/**
+ * 查询 WETH合约token的Allowance
+ */
 task("qAllowanceWETH", "查询允许调用的额度")
     .addParam("token", "代币地址")
     .addParam("router02", "被授权的router02合约地址")
@@ -219,10 +244,8 @@ task("qAllowanceWETH", "查询允许调用的额度")
     });
 
 /**
- *
- * hh rApproveERC20 --token 0x1E0600188690F46aC97674ae922f73a1948a346b --router02 0x87f3C84Fc7a6f9361Dc6865984D03D1156522A9c --amount 98765432100000000000 --network opg
+ * ERC20 授权额度查询
  */
-// ERC20 授权额度查询
 task("rApproveERC20", "授权调用额度")
     .addParam("token", "代币地址")
     .addParam("router02", "被授权的router02合约地址")
@@ -238,10 +261,8 @@ task("rApproveERC20", "授权调用额度")
     });
 
 /**
- *
- * hh rApproveWETH --token 0x4E283927E35b7118eA546Ef58Ea60bfF59E857DB --router02 0x87f3C84Fc7a6f9361Dc6865984D03D1156522A9c --amount 98765432100000000000 --network opg
+ * WETH 授权额度查询
  */
-// WETH 授权额度查询
 task("rApproveWETH", "授权调用额度")
     .addParam("token", "代币地址")
     .addParam("router02", "被授权的router02合约地址")
@@ -259,10 +280,9 @@ task("rApproveWETH", "授权调用额度")
 /**
  * 5000000000,2000000000
  * 部署task新的网络需要部署，部署好后直接使用就好,注意token的精读
- * hh addLiquidity --token1 0x4E283927E35b7118eA546Ef58Ea60bfF59E857DB --token2 0x1E0600188690F46aC97674ae922f73a1948a346b --amount1desired 5000000000000000000 --amount2desired 5000000000000000000 --amount1min 0 --amount2min 0 --to 0xD6f15EAC1Cb3B4131Ab4899a52E711e19DEeA73f --router02address 0x87f3C84Fc7a6f9361Dc6865984D03D1156522A9c --network opg
+ * ERC20 添加liquidity
+ * 操作过程中Allowance中需要始终保持有额度，否则将影响后续操作
  */
-// ERC20 添加liquidity
-// Allowance中需要始终保持有额度，否则将影响后续操作
 task("addLiquidity", "增加流通性")
     .addParam("token1", "token1")
     .addParam("token2", "token2")
@@ -296,9 +316,8 @@ task("addLiquidity", "增加流通性")
 /**
  * 5000000000,2000000000
  * 部署task新的网络需要部署，部署好后直接使用就好,注意token的精读
- * hh addLiquidityEth --token1 0x4E283927E35b7118eA546Ef58Ea60bfF59E857DB --token2 0x1E0600188690F46aC97674ae922f73a1948a346b --amount1desired 5000000 --amount2desired 5000000 --amount1min 0 --amount2min 0 --to 0xD6f15EAC1Cb3B4131Ab4899a52E711e19DEeA73f --router02address 0x87f3C84Fc7a6f9361Dc6865984D03D1156522A9c --network opg
+ * WETH 增加liquidity
  */
-// WETH 增加liquidity
 task("addLiquidityEth", "增加流通性")
     .addParam("token1", "token1")
     .addParam("token2", "token2")
@@ -326,14 +345,12 @@ task("addLiquidityEth", "增加流通性")
     });
 
 
-
 /**
  * 50,00000000,20,00000000
  * 注意token的精读 代币替换代币
- * hh swapExactTokensForTokens --token1 0x5444548282666a1Cf54698445cc98CB9b6B73831 --token2 0xd5f61c8786c71a2A0C80F6fC405814952AEE7696  --amountin 1 --amountoutmin 1 --to 0xD6f15EAC1Cb3B4131Ab4899a52E711e19DEeA73f  --router02address 0x5C3A929Fe2F96F6767830e73375AE59cdd020447 --network opg
+ * 执行swap
+ * amountin 是有增加系数的，若需要支持小数则需要更新task，hardhat不支持输入小数
  */
-// 执行swap
-// amountin 是有增加系数的， 1≠1
 task("swapExactTokensForTokens", "swapExactTokensForTokens")
     .addParam("amountin", "使用金额")
     .addParam("amountoutmin", "最低到账金额")
@@ -363,7 +380,9 @@ task("swapExactTokensForTokens", "swapExactTokensForTokens")
         console.log("swapExactTokensForTokens->hash=%s", swapExactTokensForTokensRes.hash)
     });
 
-
+/**
+ * eth --> tokens
+ */
 task("swapExactETHForTokens", "swapExactETHForTokens")
     .addParam("amountin", "使用金额")
     .addParam("amountoutmin", "最低到账金额")
@@ -392,7 +411,9 @@ task("swapExactETHForTokens", "swapExactETHForTokens")
         console.log("swapExactETHForTokensRes->hash=%s", swapExactETHForTokensRes.hash)
     });
 
-
+/**
+ * tokens -> eth
+ */
 task("swapTokensForExactETH", "swapTokensForExactETH")
     .addParam("amountout", "使用金额")
     .addParam("token1", "token1")
@@ -410,24 +431,55 @@ task("swapTokensForExactETH", "swapTokensForExactETH")
             taskArgs.stable
         ]
         let amountOut = taskArgs.amountout
-        const swapTokensForExactETHData: [BigNumber,number,any[],string,number] = [
-            amountOut, 0,
+        const swapTokensForExactETHData: [BigNumber,string,any[],string,number] = [
+            amountOut, '100000000000000000000',
             new Array(route),
             taskArgs.to,
             date1.valueOf(),
         ]
-        console.log("swapTokensForExactETHData->%s", swapTokensForExactETHData)
+        //console.log("swapTokensForExactETHData->%s", swapTokensForExactETHData)
         let swapTokensForExactETHRes= await router02address.swapTokensForExactETH(...swapTokensForExactETHData)
         console.log("swapTokensForExactETHRes->hash=%s", swapTokensForExactETHRes.hash)
     });
 
 
 /**
+ * 删除liquidity（ETH）
+ */
+task("removeLiquidityETH", "removeLiquidityETH 取消消除流动性")
+    .addParam("liquidity", "流动性")
+    .addParam("erc20addr", "erc20地址")
+    .addParam("wethaddr", "weth地址")
+    .addParam("to", "to，钱包地址")
+    .addParam("router02address", "uniswapV2Router02Address合约地址")
+    .addParam("stable", "# 兑换方式 false->volatile true->stableswap",false,types.boolean)
+    .setAction(async (taskArgs, hre) => {
+        const teleswapV2Router02 = await hre.ethers.getContractFactory('TeleswapV2Router02')
+        const router02address = await teleswapV2Router02.attach(taskArgs.router02address)
+
+        let date1 =Math.round((new Date().getTime()+3600000)/1000)
+        let route= {
+            from:  taskArgs.erc20addr,
+            to: taskArgs.wethaddr,
+            stable:taskArgs.stable
+        }
+        let removeLiquidityETHRes= await router02address.removeLiquidityETH(
+            route,
+            taskArgs.liquidity,
+            0,
+            0,
+            taskArgs.to,
+            date1.valueOf()
+        )
+        console.log("removeLiquidityETH->hash=%s", removeLiquidityETHRes.hash)
+    });
+
+/**
  * 50,00000000,20,00000000
  * 注意token的精度 removeLiquidityWithPermit 取消消除流动性
- * hh removeLiquidityWithPermit --pairaddress 0x395E10137bA69D941E5acC5A287398f949Cc7109 --privatekey 7eefd641410560e690736ee331bd32512c9b58419a877eff2189facbef33cd1e --token2 0x5e19ed03cea5bbf12939d3cc096f5597b91fcf8a --token1 0x40429f9578811b7ca3a1e806784bbdd50a9a3b5b --liquidity 499999000 --amountamin 593998812 --amountbmin 412705528 --to 0xD6f15EAC1Cb3B4131Ab4899a52E711e19DEeA73f  --router02address 0xcf5716e86273a0f53fe6ad6f37abdbe8680f2a2f --network bitnetwork
+  * remove liqudity
+ * task中有url/chainId 必须与执行的网络保持一致
  */
-// remove 池子
 task("removeLiquidityWithPermit", "removeLiquidityWithPermit 取消消除流动性")
     .addParam("liquidity", "流动性")
     .addParam("amountamin", "amountamin")
@@ -501,13 +553,85 @@ task("removeLiquidityWithPermit", "removeLiquidityWithPermit 取消消除流动�
         console.log("removeLiquidityWithPermitRes->hash=%s", removeLiquidityWithPermitRes.hash)
     });
 
+/**
+ * task中有url/chainId 必须与执行的网络保持一致
+ */
+task("removeLiquidityETHWithPermit", "removeLiquidityETHWithPermit 取消消除流动性")
+    .addParam("liquidity", "流动性")
+    .addParam("erc20addr", "erc20地址")
+    .addParam("wethaddr", "weth地址")
+    .addParam("to", "to，钱包地址")
+    .addParam("router02address", "uniswapV2Router02Address合约地址")
+    .addParam("privatekey", "签名私钥")
+    .addParam("pairaddress", "token对应的pairaddress合约地址")
+    .addParam("stable", "# 兑换方式 false->volatile true->stableswap",false,types.boolean)
+    .setAction(async (taskArgs, hre) => {
+        const teleswapV2Router02 = await hre.ethers.getContractFactory('TeleswapV2Router02')
+        const router02address = await teleswapV2Router02.attach(taskArgs.router02address)
+
+        let url = "https://rinkeby.infura.io/v3/023f2af0f670457d9c4ea9cb524f0810";
+        let customHttpProvider = new ethers.providers.JsonRpcProvider(url);
+        let wallet = new hre.ethers.Wallet(taskArgs.privatekey, customHttpProvider);
+        const pair =new hre.ethers.Contract(taskArgs.pairaddress, TeleswapV2Pair, wallet)
+        let  nonce =await pair.nonces(wallet.address)
+        let date1 =Math.round((new Date().getTime()+3600000)/1000)
+        const typedData: TypedData = {
+            types :{
+                EIP712Domain: [
+                    {name: 'name', type: 'string'},
+                    {name: 'version', type: 'string'},
+                    {name: 'chainId', type: 'uint256'},
+                    {name: 'verifyingContract', type: 'address'},
+                ],
+                Permit: [
+                    {name: 'owner', type: 'address'},
+                    {name: 'spender', type: 'address'},
+                    {name: 'value', type: 'uint256'},
+                    {name: 'nonce', type: 'uint256'},
+                    {name: 'deadline', type: 'uint256'}
+                ]
+            },
+            primaryType: 'Permit',
+            domain : {
+                name:  'Teleswap V2',
+                version: '1',
+                chainId: 4,
+                verifyingContract: taskArgs.pairaddress
+            },
+            message : {
+                owner: wallet.address,
+                spender: taskArgs.router02address,
+                value: taskArgs.liquidity,
+                nonce: nonce.toNumber(),
+                deadline: date1.valueOf()
+            }
+        };
+        const signingKey = new utils.SigningKey(wallet.privateKey);
+        // Get a signable message from the typed data
+        const message = getMessage(typedData, true);
+        console.info(`typedData-data:`,typedData)
+        let route= {
+            from:  taskArgs.wethaddr,
+            to: taskArgs.erc20addr,
+            stable:taskArgs.stable
+        }
+        let removeLiquidityETHWithPermitRes= await router02address.removeLiquidityETHWithPermit(
+            route,
+            taskArgs.liquidity,
+            0,
+            0,
+            taskArgs.to,
+            date1.valueOf(),
+            false,
+            signingKey.signDigest(message))
+        console.log("removeLiquidityETHWithPermit->hash=%s", removeLiquidityETHWithPermitRes.hash)
+    });
 
 /**
- *
  * hh mint --erc20address 0xd5f61c8786c71a2A0C80F6fC405814952AEE7696 --network opg
  * hh mint --erc20address 0x960203b9c264823b1d520418b78ff18325444305 --network rinkeby
+ * mint操作不需要指定to及金额，合约中写死了
  */
-// mint操作不需要指定to及金额，合约中写死了
 task("mint", "mint 初始化")
     .addParam("erc20address", "erc20address合约地址")
     .setAction(async (taskArgs, hre) => {
@@ -518,7 +642,6 @@ task("mint", "mint 初始化")
     });
 
 /**
- *
  * hh mintWETH --wethaddress 0x4E283927E35b7118eA546Ef58Ea60bfF59E857DB --network opg
  * hh mintWETH --wethaddress 0x33e831a5cb918a72065854e6085bdbd7ea5c2c45 --network rinkeby
  */
@@ -546,7 +669,7 @@ task("getFactoryInitCode", "getFactoryInitCode")
     });
 
 /**
- * hh getPair --factoryaddress 0xDE15CBA96deAD6Bdd201aa27fc19e15F2bAB6D02 --token1 0x4E283927E35b7118eA546Ef58Ea60bfF59E857DB --token2 0x1E0600188690F46aC97674ae922f73a1948a346b --network opg
+ * 查询token对相应的pair地址
  * export getPair=0x395E10137bA69D941E5acC5A287398f949Cc7109
  * */
 task("getPair", "getPair")
@@ -567,9 +690,8 @@ task("getPair", "getPair")
 
 
 /**
- * hh getPairBalanceOf --proportion 10 --teleswapv2pairaddress 0x395E10137bA69D941E5acC5A287398f949Cc7109 --to 0xD6f15EAC1Cb3B4131Ab4899a52E711e19DEeA73f  --network opg
+ * pair比例值查询
  * */
-// pair比例值查询
 task("getPairBalanceOf", "getPair")
     .addParam("teleswapv2pairaddress", "teleswapV2Pairaddress合约地址")
     .addParam("to", "taddress")
@@ -622,8 +744,8 @@ task("getReserves", "allPairs")
 
 /**
  * hh getHash --hash 0x6ee8ae7c6a0f4a54fa8f6d5736c16ec5d8206c37a51f84f0b6fdf034ee35192c --network opg
+ * 可查询交易hash详情
  */
-// 交易hash详情
 task("getHash","获取交易凭证信息")
     .addParam("hash", "交易hash")
     .setAction(async(taskArgs,hre)=>{
@@ -647,4 +769,7 @@ function expandTo18Decimals(n: string) {
     return BigNumber.from(n).mul(BigNumber.from("10").pow(18))
 }
 module.exports = {}
+
+
+
 
