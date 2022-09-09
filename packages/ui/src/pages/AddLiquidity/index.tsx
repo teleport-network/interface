@@ -13,7 +13,7 @@ import { ButtonError, ButtonLight, ButtonPrimary } from '../../components/Button
 import { AutoColumn, ColumnCenter } from '../../components/Column'
 import TransactionConfirmationModal, { ConfirmationModalContent } from '../../components/TransactionConfirmationModal'
 import CurrencyInputPanel from '../../components/CurrencyInputPanel'
-import { MinimalPositionCard } from '../../components/PositionCard'
+import { MinimalPositionCardPart } from '../../components/PositionCard'
 import { AutoRow, RowBetween } from '../../components/Row'
 
 import { PairState } from '../../data/Reserves'
@@ -42,6 +42,8 @@ import Settings from 'components/Settings'
 import CurrencyLogo from 'components/CurrencyLogo'
 import { ROUTER_ADDRESS } from '@teleswap/sdk'
 import { BackToMyLiquidity } from 'components/Liquidity'
+import getRoutePairMode from 'utils/getRoutePairMode'
+import QuestionHelper from 'components/QuestionHelper'
 
 const BorderVerticalContainer = styled(Flex)`
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -61,7 +63,7 @@ export default function AddLiquidity({
 }: RouteComponentProps<{ currencyIdA?: string; currencyIdB?: string }>) {
   const { account, chainId, library } = useActiveWeb3React()
   const theme = useThemedContext()
-
+  const [pairModeStable, setPairModeStable] = useState(true)
   const currencyA = useCurrency(currencyIdA)
   const currencyB = useCurrency(currencyIdB)
 
@@ -74,6 +76,7 @@ export default function AddLiquidity({
   const toggleWalletModal = useWalletModalToggle() // toggle wallet when disconnected
 
   const expertMode = useIsExpertMode()
+
 
   // mint state
   const { independentField, typedValue, otherTypedValue } = useMintState()
@@ -154,37 +157,33 @@ export default function AddLiquidity({
       method: (...args: any) => Promise<TransactionResponse>,
       args: Array<string | string[] | number | { from: string | undefined; to: string | undefined; stable: boolean } | Array<any>>,
       value: BigNumber | null
-    // if (currencyA === ETHER || currencyB === ETHER) {
-    if (false) {
-      // const tokenBIsETH = currencyB === ETHER
-      // estimate = router.estimateGas.addLiquidityETH
-      // method = router.addLiquidityETH
-      // args = [
-      //   // wrappedCurrency(tokenBIsETH ? currencyA : currencyB, chainId)?.address ?? '', // token
-      //   {
-      //     from: wrappedCurrency(currencyA, chainId)?.address,
-      //     to: wrappedCurrency(currencyB, chainId)?.address,
-      //     stable: true,
-      //   },
-      //   (tokenBIsETH ? parsedAmountA : parsedAmountB).raw.toString(), // token desired
-      //   amountsMin[tokenBIsETH ? Field.CURRENCY_A : Field.CURRENCY_B].toString(), // token min
-      //   amountsMin[tokenBIsETH ? Field.CURRENCY_B : Field.CURRENCY_A].toString(), // eth min
-      //   account,
-      //   deadline.toHexString(),
-      // ]
-      // value = BigNumber.from((tokenBIsETH ? parsedAmountB : parsedAmountA).raw.toString())
+    if (currencyA === ETHER || currencyB === ETHER) {
+      const tokenBIsETH = currencyB === ETHER
+      estimate = router.estimateGas.addLiquidityETH
+      method = router.addLiquidityETH
+      args = [
+        // {
+        //   from: wrappedCurrency(currencyA, chainId)?.address,
+        //   to: wrappedCurrency(currencyB, chainId)?.address,
+        //   stable: true,
+        // },
+        [tokenBIsETH ? wrappedCurrency(currencyA, chainId)?.address ?? '' : wrappedCurrency(currencyB, chainId)?.address ?? '', tokenBIsETH ? wrappedCurrency(currencyB, chainId)?.address ?? '' : wrappedCurrency(currencyA, chainId)?.address ?? '', getRoutePairMode()],
+        (tokenBIsETH ? parsedAmountA : parsedAmountB).raw.toString(), // token desired
+        amountsMin[tokenBIsETH ? Field.CURRENCY_A : Field.CURRENCY_B].toString(), // token min
+        amountsMin[tokenBIsETH ? Field.CURRENCY_B : Field.CURRENCY_A].toString(), // eth min
+        account,
+        deadline.toHexString(),
+      ]
+      value = BigNumber.from((tokenBIsETH ? parsedAmountB : parsedAmountA).raw.toString())
     } else {
       estimate = router.estimateGas.addLiquidity
       method = router.addLiquidity
       args = [
-        [wrappedCurrency(currencyA, chainId)?.address ?? '',
-        wrappedCurrency(currencyB, chainId)?.address ?? '', false],
+        [wrappedCurrency(currencyA, chainId)?.address ?? '', wrappedCurrency(currencyB, chainId)?.address ?? '', pairModeStable],
         parsedAmountA.raw.toString(),
         parsedAmountB.raw.toString(),
-        // amountsMin[Field.CURRENCY_A].toString(),
-        // amountsMin[Field.CURRENCY_B].toString(),
-        "1",
-        "1",
+        amountsMin[Field.CURRENCY_A].toString(),
+        amountsMin[Field.CURRENCY_B].toString(),
         account,
         deadline.toHexString(),
       ]
@@ -192,7 +191,7 @@ export default function AddLiquidity({
     }
     setAttemptingTxn(true)
     await estimate(...args, value ? { value } : {})
-      .then((estimatedGasLimit) =>
+      .then((estimatedGasLimit) => {
         method(...args, {
           ...(value ? { value } : {}),
           gasLimit: calculateGasMargin(estimatedGasLimit),
@@ -219,7 +218,7 @@ export default function AddLiquidity({
             label: [currencies[Field.CURRENCY_A]?.symbol, currencies[Field.CURRENCY_B]?.symbol].join('/'),
           })
         })
-      )
+      })
       .catch((error) => {
         setAttemptingTxn(false)
         // we only care if the error is something _other_ than the user rejected the tx
@@ -508,7 +507,7 @@ export default function AddLiquidity({
 
   return (
     <>
-      <Flex alignItems={'flex-start'} width="556px" maxWidth="420px">
+      <Flex alignItems={'flex-start'} width="19rem">
         <BackToMyLiquidity />
       </Flex>
       <AppBody
@@ -516,15 +515,15 @@ export default function AddLiquidity({
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'stretch',
-          padding: '36px 28px',
-          width: '556px',
-          maxWidth: '420px',
-          maxHeight: '638px',
-          height: 'fit-content',
-          background: 'rgba(51, 51, 51, 0.5)',
+          padding: '1.2rem .9rem',
+          width: '19rem',
+          // maxWidth: '420px',
+          // maxHeight: '638px',
+          // height: 'fit-content',
+          backgroundColor: "#394e5a",
           boxShadow: '0px -2px 0px #39E1BA',
           backdropFilter: 'blur(60px)',
-          borderRadius: '48px',
+          borderRadius: '1.6rem',
         }}
       >
         <TransactionConfirmationModal
@@ -544,10 +543,11 @@ export default function AddLiquidity({
           pendingText={pendingText}
           currencyToAdd={pair?.liquidityToken}
         />
-        <AutoRow justify="flex-end">
+        <AutoRow justify="space-between" style={{ marginBottom: ".9rem" }}>
+          <span style={{ fontFamily: 'Dela Gothic One', fontWeight: 400, fontSize: ".7rem", color: "#FFFFFF" }}>Add  Liquidity</span>
           <Settings />
         </AutoRow>
-        <AutoColumn gap="12px">
+        <AutoColumn gap=".4rem">
           {/* {noLiquidity ||
               (isCreate ? (
                 <ColumnCenter>
@@ -597,7 +597,7 @@ export default function AddLiquidity({
           />
           <ColumnCenter style={{ position: 'relative' }}>
             {/* <Plus size="16" color={theme.text2} /> */}
-            <img src={SwapIcon} style={{ position: 'absolute', transform: 'translateY(-50%)' }} />
+            <img src={SwapIcon} style={{ position: 'absolute', transform: 'translateY(-50%)', width: "1.9rem", height: "1.9rem" }} />
           </ColumnCenter>
           <CurrencyInputPanel
             value={formattedAmounts[Field.CURRENCY_B]}
@@ -636,15 +636,48 @@ export default function AddLiquidity({
             </>
           )} */}
         </AutoColumn>
-        <Box sx={{ width: '100%', borderTop: '1px solid rgba(255,255,255,0.2)', height: '0', marginTop: '28px' }}></Box>
+        <Box sx={{ marginTop: '.9rem' }}>
+          <Box sx={{ fontWeight: 600, fontSize: ".7rem", marginBottom: ".5rem" }}>
+            Pair Mode
+          </Box>
+          <Box sx={{ display: 'flex', fontWeight: 400, fontSize: ".5rem", alignItems: "center" }}>
+            <Box sx={{ flex: 1 }} onClick={() => setPairModeStable(true)}>
+              <input type="radio" name="pairMode" id="Stable" style={{ position: "relative", top: ".2rem", margin: "unset" }} checked={pairModeStable} />
+              <label htmlFor="Stable" style={{ margin: "0 0 0 .7rem" }}>Stable</label>
+              <span style={{ position: "relative", top: "2px" }}>
+                <QuestionHelper text="Stable mode, using stable token algorithm curve, mainly designed for 1:1 or approximately equivalent trading pairs, like USDC+DAI or WETH+sETH." />
+              </span>
+            </Box>
+            <Box sx={{ flex: 1 }} onClick={() => setPairModeStable(false)}>
+              <input type="radio" name="pairMode" id="Volatile" style={{ position: "relative", top: ".2rem", margin: "unset" }} checked={!pairModeStable} />
+              <label style={{ margin: "0 0 0 .7rem" }} htmlFor="Volatile">Volatile</label>
+              <span style={{ position: "relative", top: "2px" }}>
+                <QuestionHelper text="Volatile mode, using non-stable currency algorithm curve, mainly designed for uncorrelated pools, like WETH+USDC or OP+WETH." />
+              </span>
+            </Box>
+          </Box>
+        </Box>
+        <Box sx={{ width: '100%', borderTop: '1px solid rgba(255,255,255,0.2)', height: '0', marginTop: '.9rem' }}></Box>
+        {!addIsUnsupported ? (
+          pair && !noLiquidity && pairState !== PairState.INVALID ? (
+            <AutoColumn style={{ marginTop: '1rem' }}>
+              <MinimalPositionCardPart showUnwrapped={oneCurrencyIsWETH} pair={pair} />
+            </AutoColumn>
+          ) : null
+        ) : (
+            <UnsupportedCurrencyFooter
+              show={addIsUnsupported}
+              currencies={[currencies.CURRENCY_A, currencies.CURRENCY_B]}
+            />
+          )}
         <Text
           sx={{
             fontFamily: 'Poppins',
             fontStyle: 'normal',
             fontWeight: '400',
-            fontSize: '12px',
-            lineHeight: '18px',
-            margin: '28px 0',
+            fontSize: '.4rem',
+            // lineHeight: '18px',
+            margin: '.9rem 0',
             color: '#D7DCE0',
           }}
         >
@@ -654,26 +687,20 @@ export default function AddLiquidity({
         <Box sx={{ width: '100%', borderTop: '1px solid rgba(255,255,255,0.2)', height: '0' }}></Box>
       </AppBody>
       <Box
-        width="420px"
-        maxWidth={'420px'}
-        sx={{
-          '*': {
-            maxWidth: '420px',
-          },
-        }}
+        width="19rem"
       >
         {addIsUnsupported ? (
-          <AutoColumn style={{ minWidth: '20rem', width: '100%', maxWidth: '420px', marginTop: '1rem' }}>
+          <AutoColumn style={{ marginTop: '1rem' }}>
             <ButtonPrimary disabled={true}>
               <TYPE.main mb="4px">Unsupported Asset</TYPE.main>
             </ButtonPrimary>
           </AutoColumn>
         ) : !account ? (
-          <AutoColumn style={{ minWidth: '20rem', width: '100%', maxWidth: '420px', marginTop: '1rem' }}>
+          <AutoColumn style={{ marginTop: '1rem' }}>
             <ButtonLight onClick={toggleWalletModal}>Connect Wallet</ButtonLight>
           </AutoColumn>
         ) : (
-              <AutoColumn style={{ minWidth: '20rem', width: '100%', maxWidth: '420px', marginTop: '1rem' }}>
+              <AutoColumn style={{ marginTop: '1rem' }}>
                 {(approvalA === ApprovalState.NOT_APPROVED ||
                   approvalA === ApprovalState.PENDING ||
                   approvalB === ApprovalState.NOT_APPROVED ||
@@ -721,7 +748,7 @@ export default function AddLiquidity({
                 </ButtonError>
               </AutoColumn>
             )}
-        {!addIsUnsupported ? (
+        {/* {!addIsUnsupported ? (
           pair && !noLiquidity && pairState !== PairState.INVALID ? (
             <AutoColumn style={{ minWidth: '20rem', width: '100%', maxWidth: '420px', marginTop: '1rem' }}>
               <MinimalPositionCard showUnwrapped={oneCurrencyIsWETH} pair={pair} />
@@ -732,7 +759,7 @@ export default function AddLiquidity({
               show={addIsUnsupported}
               currencies={[currencies.CURRENCY_A, currencies.CURRENCY_B]}
             />
-          )}
+          )} */}
       </Box>
     </>
   )
