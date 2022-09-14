@@ -56,7 +56,7 @@ const AutoSizerWrap = styled.div`
     margin: 1rem 1.6rem;
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: .8rem;
-    padding: 1rem 0;
+    padding: 1rem 0.2rem;
     ${({ theme }) => theme.mediaWidth.upToSmall`
       margin: 0;
       border: none;
