@@ -11,19 +11,21 @@ require('dotenv').config()
  * hh deployToken --network opg
  * export ERC20_TOKEN_01=0x960203b9c264823b1d520418b78ff18325444305 tt
  * export WETH9_TOKEN_02=0x33e831a5cb918a72065854e6085bdbd7ea5c2c45 WETH9
- * hh deployToken --network rinkeby
+ * ERC20_TOKEN_01=0x61a8a9eb8af2018efdd3a861db60f16758cb5078 AA
+ * ERC20_TOKEN_01=0x99f9641ac02c0c8a1206698e9f9e08618cb7477b BB
+ * hh deployToken --network opg
  * 部署合约并获取token对
  */
 task("deployToken", "Deploy Token")
     .setAction(async (taskArgs, hre) => {
-        const tokenFactory = await hre.ethers.getContractFactory('ERC20')
+        const tokenFactory = await hre.ethers.getContractFactory('TT')
         const token = await tokenFactory.deploy()
         await token.deployed();
         console.log("export ERC20_TOKEN_01=%s", token.address.toLocaleLowerCase())
-        const tokenFactory01 = await hre.ethers.getContractFactory('WETH9')
-        const token01 = await tokenFactory01.deploy()
-        await token01.deployed();
-        console.log("export WETH9_TOKEN_02=%s", token01.address.toLocaleLowerCase())
+        // const tokenFactory01 = await hre.ethers.getContractFactory('WETH9')
+        // const token01 = await tokenFactory01.deploy()
+        // await token01.deployed();
+        // console.log("export WETH9_TOKEN_02=%s", token01.address.toLocaleLowerCase())
     });
 
 
@@ -173,7 +175,7 @@ task("qBalancesERC20", "查询余额或者代币余额")
             balances = await hre.web3.eth.getBalance(taskArgs.wallet)
         } else {
             // 查询代币余额
-            const tokenFactory = await hre.ethers.getContractFactory('ERC20')
+            const tokenFactory = await hre.ethers.getContractFactory('TT')
             const token = await tokenFactory.attach(taskArgs.token)
 
             balances = (await token.balanceOf(taskArgs.wallet)).toString()
@@ -209,6 +211,33 @@ task("qBalancesWETH", "查询余额或者代币余额")
         console.log("time: ", (new Date()).valueOf())
     });
 
+
+/**
+ * 查询收费合约 token的余额
+ */
+task("qBalancesSETH", "查询余额或者代币余额")
+    .addParam("token", "代币地址", "")
+    .addParam("wallet", "待查询的钱包地址")
+    .setAction(async (taskArgs, hre) => {
+        let balances: string
+
+        // 若果是address(0)，则直接查询余额
+        if (taskArgs.token === "" ||
+            taskArgs.token === "0x0000000000000000000000000000000000000000") {
+            balances = await hre.web3.eth.getBalance(taskArgs.wallet)
+        } else {
+            // 查询代币余额
+            const tokenFactory = await hre.ethers.getContractFactory('TetherToken')
+            const token = await tokenFactory.attach(taskArgs.token)
+
+            balances = (await token.balanceOf(taskArgs.wallet)).toString()
+        }
+
+        console.log("balance: ", balances)
+        console.log("time: ", (new Date()).valueOf())
+    });
+
+
 /**
  * 查询 ERC20合约token的Allowance
  */
@@ -217,7 +246,7 @@ task("qAllowanceERC20", "查询允许调用的额度")
     .addParam("router02", "被授权的router02合约地址")
     .addParam("wallet", "授权的钱包地址")
     .setAction(async (taskArgs, hre) => {
-        const tokenFactory = await hre.ethers.getContractFactory('ERC20')
+        const tokenFactory = await hre.ethers.getContractFactory('TT')
         const token = await tokenFactory.attach(taskArgs.token)
 
         let allowances = (await token.allowance(taskArgs.wallet, taskArgs.router02))
@@ -243,7 +272,27 @@ task("qAllowanceWETH", "查询允许调用的额度")
         console.log("time: ", (new Date()).valueOf())
     });
 
+
 /**
+ * 查询 收费合约token的Allowance
+ */
+task("qAllowanceSETH", "查询允许调用的额度")
+    .addParam("token", "代币地址")
+    .addParam("router02", "被授权的router02合约地址")
+    .addParam("wallet", "授权的钱包地址")
+    .setAction(async (taskArgs, hre) => {
+        const tokenFactory = await hre.ethers.getContractFactory('TetherToken')
+        const token = await tokenFactory.attach(taskArgs.token)
+
+        let allowances = (await token.allowance(taskArgs.wallet, taskArgs.router02))
+
+        console.log("allowances: ", allowances)
+        console.log("time: ", (new Date()).valueOf())
+    });
+
+
+/**
+ * yarn hardhat rApproveERC20 --token 0x99f9641ac02c0c8a1206698e9f9e08618cb7477b --router02 0x971a96fe8597fd7a042b5894600ba5e20EBB39ee --amount 200000000000000000000 --network opg
  * ERC20 授权额度查询
  */
 task("rApproveERC20", "授权调用额度")
@@ -251,7 +300,7 @@ task("rApproveERC20", "授权调用额度")
     .addParam("router02", "被授权的router02合约地址")
     .addParam("amount", "金额")
     .setAction(async (taskArgs, hre) => {
-        const tokenFactory = await hre.ethers.getContractFactory('ERC20')
+        const tokenFactory = await hre.ethers.getContractFactory('TT')
         const token = await tokenFactory.attach(taskArgs.token)
 
         let transaction = await token.approve(taskArgs.router02, taskArgs.amount)
@@ -277,8 +326,27 @@ task("rApproveWETH", "授权调用额度")
         console.log("time: ", (new Date()).valueOf())
     });
 
+
+/**
+ * 收费合约token 授权额度查询
+ */
+task("rApproveSETH", "授权调用额度")
+    .addParam("token", "代币地址")
+    .addParam("router02", "被授权的router02合约地址")
+    .addParam("amount", "金额")
+    .setAction(async (taskArgs, hre) => {
+        const tokenFactory = await hre.ethers.getContractFactory('TetherToken')
+        const token = await tokenFactory.attach(taskArgs.token)
+
+        let transaction = await token.approve(taskArgs.router02, taskArgs.amount)
+
+        console.log("approve txHash: ", transaction.hash)
+        console.log("time: ", (new Date()).valueOf())
+    });
+
 /**
  * 5000000000,2000000000
+ * yarn hardhat addLiquidity --token1 0x61a8a9eb8af2018efdd3a861db60f16758cb5078 --token2 0x99f9641ac02c0c8a1206698e9f9e08618cb7477b --amount1desired 50000000000000000000 --amount2desired 100000000000000000000 --amount1min 0 --amount2min 0 --to 0x68949B0eF5dE6087c64947bcA6c749e89B6a8bD9 --router02address 0x971a96fe8597fd7a042b5894600ba5e20EBB39ee --stable false --network opg
  * 部署task新的网络需要部署，部署好后直接使用就好,注意token的精读
  * ERC20 添加liquidity
  * 操作过程中Allowance中需要始终保持有额度，否则将影响后续操作
@@ -294,22 +362,22 @@ task("addLiquidity", "增加流通性")
     .addParam("router02address", "TeleswapV2Router02合约地址")
     .addParam("stable", "# 兑换方式 false->volatile true->stableswap",false,types.boolean)
     .setAction(async (taskArgs, hre) => {
-            const teleswapV2Router02 = await hre.ethers.getContractFactory('TeleswapV2Router02')
-            const router02address = await teleswapV2Router02.attach(taskArgs.router02address)
-            let date1 =Math.round((new Date().getTime()+3600000)/1000)
-            let route= {
-                    from:  taskArgs.token1,
-                    to: taskArgs.token2,
-                    stable:taskArgs.stable
-                }
-            let addLiquidityRes= await router02address.addLiquidity(route,
-                taskArgs.amount1desired,
-                taskArgs.amount2desired,
-                taskArgs.amount1min,
-                taskArgs.amount2min,
-                taskArgs.to,
-                date1.valueOf())
-            console.log("addLiquidityRes->hash=%s", addLiquidityRes.hash)
+        const teleswapV2Router02 = await hre.ethers.getContractFactory('TeleswapV2Router02')
+        const router02address = await teleswapV2Router02.attach(taskArgs.router02address)
+        let date1 =Math.round((new Date().getTime()+3600000)/1000)
+        let route= {
+            from:  taskArgs.token1,
+            to: taskArgs.token2,
+            stable:taskArgs.stable
+        }
+        let addLiquidityRes= await router02address.addLiquidity(route,
+            taskArgs.amount1desired,
+            taskArgs.amount2desired,
+            taskArgs.amount1min,
+            taskArgs.amount2min,
+            taskArgs.to,
+            date1.valueOf())
+        console.log("addLiquidityRes->hash=%s", addLiquidityRes.hash)
     });
 
 
@@ -444,6 +512,105 @@ task("swapTokensForExactETH", "swapTokensForExactETH")
 
 
 /**
+ * tokens -> 扣费合约token
+ */
+task("swapExactTokensForTokensSupportingFeeOnTransferTokens", "swapExactTokensForTokensSupportingFeeOnTransferTokens")
+    .addParam("amountin", "使用金额")
+    .addParam("token1", "token1")
+    .addParam("token2", "token2")
+    .addParam("to", "to，钱包地址")
+    .addParam("router02address", "uniswapV2Router02Address合约地址")
+    .addParam("stable", "# 兑换方式 false->volatile true->stableswap",false,types.boolean)
+    .setAction(async (taskArgs, hre) => {
+        let date1 =Math.round((new Date().getTime()+3600000)/1000)
+        const teleswapV2Router02 = await hre.ethers.getContractFactory('TeleswapV2Router02')
+        const router02address = await teleswapV2Router02.attach(taskArgs.router02address)
+        let route= [
+            taskArgs.token1,
+            taskArgs.token2,
+            taskArgs.stable
+        ]
+        let amountIn = expandTo18Decimals(taskArgs.amountin)
+        const swapExactTokensForTokensSupportingFeeOnTransferTokensData: [BigNumber,string,any[],string,number] = [
+            amountIn,
+            "0",
+            new Array(route),
+            taskArgs.to,
+            date1.valueOf(),
+        ]
+        //console.log("swapTokensForExactETHData->%s", swapTokensForExactETHData)
+        let swapExactTokensForTokensSupportingFeeOnTransferTokensDataRes= await router02address.swapExactTokensForTokensSupportingFeeOnTransferTokens(...swapExactTokensForTokensSupportingFeeOnTransferTokensData)
+        console.log("swapExactTokensForTokensSupportingFeeOnTransferTokensDataRes->hash=%s", swapExactTokensForTokensSupportingFeeOnTransferTokensDataRes.hash)
+    });
+
+
+/**
+ * eth --> 扣费合约token
+ */
+task("swapExactETHForTokensSupportingFeeOnTransferTokens", "swapExactETHForTokensSupportingFeeOnTransferTokens")
+    .addParam("amountin", "使用金额")
+    .addParam("amountoutmin", "最低到账金额")
+    .addParam("token1", "token1")
+    .addParam("token2", "token2")
+    .addParam("to", "to，钱包地址")
+    .addParam("router02address", "uniswapV2Router02Address合约地址")
+    .addParam("stable", "# 兑换方式 false->volatile true->stableswap",false,types.boolean)
+    .setAction(async (taskArgs, hre) => {
+        let date1 =Math.round((new Date().getTime()+3600000)/1000)
+        const teleswapV2Router02 = await hre.ethers.getContractFactory('TeleswapV2Router02')
+        const router02address = await teleswapV2Router02.attach(taskArgs.router02address)
+        let route= [
+            taskArgs.token1,
+            taskArgs.token2,
+            taskArgs.stable
+        ]
+        let amountIn = taskArgs.amountin
+        const swapExactETHForTokensSupportingFeeOnTransferTokensData: [BigNumber,any[],string,number] = [
+            taskArgs.amountoutmin,
+            new Array(route),
+            taskArgs.to,
+            date1.valueOf(),
+        ]
+        let swapExactETHForTokensSupportingFeeOnTransferTokensRes= await router02address.swapExactETHForTokensSupportingFeeOnTransferTokens(...swapExactETHForTokensSupportingFeeOnTransferTokensData,{value:amountIn})
+        console.log("swapExactETHForTokensSupportingFeeOnTransferTokensRes->hash=%s", swapExactETHForTokensSupportingFeeOnTransferTokensRes.hash)
+    });
+
+/**
+ * 扣费合约token -> eth
+ */
+task("swapExactTokensForETHSupportingFeeOnTransferTokens", "swapExactTokensForETHSupportingFeeOnTransferTokens")
+    .addParam("amountout", "使用金额")
+    .addParam("token1", "token1")
+    .addParam("token2", "token2")
+    .addParam("to", "to，钱包地址")
+    .addParam("router02address", "uniswapV2Router02Address合约地址")
+    .addParam("stable", "# 兑换方式 false->volatile true->stableswap",false,types.boolean)
+    .setAction(async (taskArgs, hre) => {
+        let date1 =Math.round((new Date().getTime()+3600000)/1000)
+        const teleswapV2Router02 = await hre.ethers.getContractFactory('TeleswapV2Router02')
+        const router02address = await teleswapV2Router02.attach(taskArgs.router02address)
+        let route= [
+            taskArgs.token1,
+            taskArgs.token2,
+            taskArgs.stable
+        ]
+        let amountOut = taskArgs.amountout
+        const swapExactTokensForETHSupportingFeeOnTransferTokensData: [BigNumber,string,any[],string,number] = [
+            amountOut,
+            '0',
+            new Array(route),
+            taskArgs.to,
+            date1.valueOf(),
+        ]
+        //console.log("swapTokensForExactETHData->%s", swapTokensForExactETHData)
+        let swapExactTokensForETHSupportingFeeOnTransferTokensRes= await router02address.swapExactTokensForETHSupportingFeeOnTransferTokens(...swapExactTokensForETHSupportingFeeOnTransferTokensData)
+        console.log("swapExactTokensForETHSupportingFeeOnTransferTokensRes->hash=%s", swapExactTokensForETHSupportingFeeOnTransferTokensRes.hash)
+    });
+
+
+// ---------分-----------割-----------线------下----
+
+/**
  * 删除liquidity（ETH）
  */
 task("removeLiquidityETH", "removeLiquidityETH 取消消除流动性")
@@ -477,7 +644,7 @@ task("removeLiquidityETH", "removeLiquidityETH 取消消除流动性")
 /**
  * 50,00000000,20,00000000
  * 注意token的精度 removeLiquidityWithPermit 取消消除流动性
-  * remove liqudity
+ * remove liqudity
  * task中有url/chainId 必须与执行的网络保持一致
  */
 task("removeLiquidityWithPermit", "removeLiquidityWithPermit 取消消除流动性")
@@ -533,6 +700,7 @@ task("removeLiquidityWithPermit", "removeLiquidityWithPermit 取消消除流动�
             }
         };
         const signingKey = new utils.SigningKey(wallet.privateKey);
+        console.info(`typedData-data:`,typedData)
         // Get a signable message from the typed data
         const message = getMessage(typedData, true);
         console.info(`typedData-data:`,typedData)
@@ -627,18 +795,105 @@ task("removeLiquidityETHWithPermit", "removeLiquidityETHWithPermit 取消消除�
         console.log("removeLiquidityETHWithPermit->hash=%s", removeLiquidityETHWithPermitRes.hash)
     });
 
+
 /**
- * hh mint --erc20address 0xd5f61c8786c71a2A0C80F6fC405814952AEE7696 --network opg
+ * remove liquidity 收费合约
+ * task中有url/chainId 必须与执行的网络保持一致
+ */
+task("removeLiquidityETHSupportingFeeOnTransferTokens", "removeLiquidityETHSupportingFeeOnTransferTokens 取消消除流动性")
+    .addParam("liquidity", "流动性")
+    .addParam("erc20addr", "erc20地址")
+    .addParam("wethaddr", "weth地址")
+    .addParam("to", "to，钱包地址")
+    .addParam("router02address", "uniswapV2Router02Address合约地址")
+    .addParam("privatekey", "签名私钥")
+    .addParam("pairaddress", "token对应的pairaddress合约地址")
+    .addParam("stable", "# 兑换方式 false->volatile true->stableswap",false,types.boolean)
+    .setAction(async (taskArgs, hre) => {
+        const teleswapV2Router02 = await hre.ethers.getContractFactory('TeleswapV2Router02')
+        const router02address = await teleswapV2Router02.attach(taskArgs.router02address)
+
+        let url = "https://rinkeby.infura.io/v3/023f2af0f670457d9c4ea9cb524f0810";
+        let customHttpProvider = new ethers.providers.JsonRpcProvider(url);
+        let wallet = new hre.ethers.Wallet(taskArgs.privatekey, customHttpProvider);
+        const pair =new hre.ethers.Contract(taskArgs.pairaddress, TeleswapV2Pair, wallet)
+        let  nonce =await pair.nonces(wallet.address)
+        let date1 =Math.round((new Date().getTime()+3600000)/1000)
+        const typedData: TypedData = {
+            types :{
+                EIP712Domain: [
+                    {name: 'name', type: 'string'},
+                    {name: 'version', type: 'string'},
+                    {name: 'chainId', type: 'uint256'},
+                    {name: 'verifyingContract', type: 'address'},
+                ],
+                Permit: [
+                    {name: 'owner', type: 'address'},
+                    {name: 'spender', type: 'address'},
+                    {name: 'value', type: 'uint256'},
+                    {name: 'nonce', type: 'uint256'},
+                    {name: 'deadline', type: 'uint256'}
+                ]
+            },
+            primaryType: 'Permit',
+            domain : {
+                name:  'Teleswap V2',
+                version: '1',
+                chainId: 4,
+                verifyingContract: taskArgs.pairaddress
+            },
+            message : {
+                owner: wallet.address,
+                spender: taskArgs.router02address,
+                value: taskArgs.liquidity,
+                nonce: nonce.toNumber(),
+                deadline: date1.valueOf()
+            }
+        };
+        const signingKey = new utils.SigningKey(wallet.privateKey);
+        // Get a signable message from the typed data
+        const message = getMessage(typedData, true);
+        console.info(`typedData-data:`,typedData)
+        let route= {
+            from:  taskArgs.erc20addr,
+            to: taskArgs.wethaddr,
+            stable:taskArgs.stable
+        }
+        let removeLiquidityETHSupportingFeeOnTransferTokensRes= await router02address.removeLiquidityETHSupportingFeeOnTransferTokens(
+            route,
+            taskArgs.liquidity,
+            0,
+            0,
+            taskArgs.to,
+            date1.valueOf())
+        console.log("removeLiquidityETHSupportingFeeOnTransferTokensRes->hash=%s", removeLiquidityETHSupportingFeeOnTransferTokensRes.hash)
+    });
+
+
+/**
+ * yarn hardhat mint --erc20address 0x99f9641ac02c0c8a1206698e9f9e08618cb7477b --network opg
  * hh mint --erc20address 0x960203b9c264823b1d520418b78ff18325444305 --network rinkeby
  * mint操作不需要指定to及金额，合约中写死了
  */
 task("mint", "mint 初始化")
     .addParam("erc20address", "erc20address合约地址")
     .setAction(async (taskArgs, hre) => {
-        const erc20 = await hre.ethers.getContractFactory('ERC20')
+        const erc20 = await hre.ethers.getContractFactory('TT')
         const uniswapV2 = await erc20.attach(taskArgs.erc20address)
         let mintRes =await uniswapV2.mint()
         console.log("mintRes:",mintRes)
+    });
+
+
+/**
+ * yarn hardhat deployTetherToken --network opg
+ */
+task("deployTetherToken", "deployTetherToken")
+    .setAction(async (taskArgs, hre) => {
+        const tetherToken = await hre.ethers.getContractFactory('TetherToken')
+        let deployRes =await tetherToken.deploy("10000000000000000000000","ser","SETH",18)
+        await deployRes.deployed();
+        console.log("deployRes:",deployRes.address.toLocaleLowerCase())
     });
 
 /**
@@ -670,6 +925,7 @@ task("getFactoryInitCode", "getFactoryInitCode")
 
 /**
  * 查询token对相应的pair地址
+ * yarn hardhat getPair --factoryaddress 0xc58E0590015aeF1b28B69213808Adf2e21A4dAe5 --token1 0x61a8a9eb8af2018efdd3a861db60f16758cb5078 --token2 0x99f9641ac02c0c8a1206698e9f9e08618cb7477b --stable false --network opg
  * export getPair=0x395E10137bA69D941E5acC5A287398f949Cc7109
  * */
 task("getPair", "getPair")
@@ -713,7 +969,7 @@ task("qDecimals", "查询ERC20合约的decimal")
     .addParam("token", "代币地址")
     .setAction(async (taskArgs, hre) => {
         // 链接合约
-        const tokenFactory = await hre.ethers.getContractFactory('ERC20')
+        const tokenFactory = await hre.ethers.getContractFactory('TT')
         const token = await tokenFactory.attach(taskArgs.token)
 
         const name = await token.name()
