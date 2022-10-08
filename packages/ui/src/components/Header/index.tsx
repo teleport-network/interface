@@ -1,16 +1,18 @@
-import {
-  ChainId
-  // TokenAmount
-} from '@teleswap/sdk'
-import useThemedContext from 'hooks/useThemedContext'
-import React, { useState } from 'react'
-// import { darken } from 'polished'
-import { useTranslation } from 'react-i18next'
-import { NavLink } from 'react-router-dom'
-import { Box, Flex, Text } from 'rebass'
-import styled from 'styled-components'
+// import {
+//   ChainId
+//   // TokenAmount
+// } from '@teleswap/sdk'
 import TeleLogo from 'assets/images/tele/logo.svg'
 import TextLogo from 'assets/svg/textLogo.svg'
+import { ENABLED_NETWORK_LABELS } from 'constants/index'
+import useThemedContext from 'hooks/useThemedContext'
+import React, { useLayoutEffect, useState } from 'react'
+import { useRef } from 'react'
+// import { darken } from 'polished'
+import { useTranslation } from 'react-i18next'
+import { NavLink, NavLinkProps } from 'react-router-dom'
+import { Box, Flex, Text } from 'rebass'
+import styled from 'styled-components'
 
 // import usePrevious from '../../hooks/usePrevious'
 // import TeleLogoText from '../../assets/images/tele/logoText.svg'
@@ -300,8 +302,9 @@ const StyledNavLink = styled(NavLink).attrs((props) => ({
     position: relative;
     right: -1px;
   }
+  min-width: fit-content;
   height: 100%;
-  padding: 0 1rem;
+  // padding: 0 1rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -310,7 +313,7 @@ const StyledNavLink = styled(NavLink).attrs((props) => ({
   cursor: pointer;
   text-decoration: none;
   // color: ${({ theme }) => theme.text2};
-  width: max-content;
+  // width: max-content;
   margin: 0;
   font-weight: 600;
   border-radius: 0.8rem;
@@ -342,6 +345,22 @@ const StyledNavLink = styled(NavLink).attrs((props) => ({
     border: 1px solid green;
   } */
 `
+
+const FixedWidthStyledNavLink = function ({
+  ...rest
+}: React.PropsWithoutRef<NavLinkProps> & React.RefAttributes<HTMLAnchorElement>) {
+  const ref = useRef<any>()
+  useLayoutEffect(() => {
+    if (ref.current) {
+      ref.current.style.width = `calc(${window.getComputedStyle(ref.current.childNodes[0]).width} + 2rem)`
+    }
+  }, [])
+  return (
+    <StyledNavLink {...rest} ref={ref}>
+      {rest.children}
+    </StyledNavLink>
+  )
+}
 
 // const StyledExternalLink = styled(ExternalLink).attrs({
 //   activeClassName
@@ -403,14 +422,6 @@ export const StyledMenuButton = styled.button`
   }
 `
 
-const NETWORK_LABELS: { [chainId in ChainId]?: string } = {
-  [ChainId.RINKEBY]: 'Rinkeby',
-  [ChainId.ROPSTEN]: 'Ropsten',
-  [ChainId.GÖRLI]: 'Görli',
-  [ChainId.OP_GOERLI]: 'OpGörli',
-  [ChainId.KOVAN]: 'Kovan'
-}
-
 export default function Header() {
   const { account, chainId } = useActiveWeb3React()
   const { t } = useTranslation()
@@ -457,10 +468,10 @@ export default function Header() {
           </HeadLogoView>
           <HeadTabView style={{ gridArea: 'a2', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
             <HeaderLinks>
-              <StyledNavLink id={`swap-nav-link`} to={'/swap'}>
-                {t('Swap')}
-              </StyledNavLink>
-              <StyledNavLink
+              <FixedWidthStyledNavLink id={`swap-nav-link`} to={'/swap'}>
+                <Text>{t('Swap')}</Text>
+              </FixedWidthStyledNavLink>
+              <FixedWidthStyledNavLink
                 id={`pool-nav-link`}
                 to={'/liquidity'}
                 isActive={(match, { pathname }) =>
@@ -471,11 +482,11 @@ export default function Header() {
                   pathname.startsWith('/find')
                 }
               >
-                {t('Liquidity')}
-              </StyledNavLink>
-              <StyledNavLink id={`earn-nav-link`} to={'/farm'}>
-                {t('Earn')}
-              </StyledNavLink>
+                <Text>{t('Liquidity')}</Text>
+              </FixedWidthStyledNavLink>
+              <FixedWidthStyledNavLink id={`earn-nav-link`} to={'/farm'}>
+                <Text>{t('Earn')}</Text>
+              </FixedWidthStyledNavLink>
               {/* <StyledNavLink id={`stake-nav-link`} to={'/uni'}>
             UNI
           </StyledNavLink> */}
@@ -538,9 +549,9 @@ export default function Header() {
             }}
           >
             <HideSmall>
-              {chainId && NETWORK_LABELS[chainId] && (
-                <NetworkCard className="secondary-title" title={NETWORK_LABELS[chainId]}>
-                  {NETWORK_LABELS[chainId]}
+              {chainId && ENABLED_NETWORK_LABELS[chainId] && (
+                <NetworkCard className="secondary-title" title={ENABLED_NETWORK_LABELS[chainId]}>
+                  {ENABLED_NETWORK_LABELS[chainId]}
                 </NetworkCard>
               )}
             </HideSmall>

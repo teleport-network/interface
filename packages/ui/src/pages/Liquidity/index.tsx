@@ -4,6 +4,7 @@ import { Pair /* , JSBI */ /*  , Token  */ } from '@teleswap/sdk'
 import Bn from 'bignumber.js'
 import DoubleCurrencyLogoHorizontal from 'components/DoubleLogo'
 import { LiquidityCard } from 'components/PositionCard'
+import { ENABLED_NETWORK_LABELS } from 'constants/index'
 // import { BIG_INT_ZERO } from 'constants/index'
 import gql from 'graphql-tag'
 import useThemedContext from 'hooks/useThemedContext'
@@ -17,7 +18,6 @@ import styled from 'styled-components'
 import { client } from 'utils/apolloClient'
 
 import { ButtonPrimary, ButtonSecondary } from '../../components/Button'
-import Card from '../../components/Card'
 import { AutoColumn } from '../../components/Column'
 import { DataCard } from '../../components/earn/styled'
 import { SwapPoolTabs } from '../../components/NavigationTabs'
@@ -27,7 +27,7 @@ import { usePairs } from '../../data/Reserves'
 import { useActiveWeb3React } from '../../hooks'
 import { toV2LiquidityToken, useTrackedTokenPairs } from '../../state/user/hooks'
 import { useTokenBalancesWithLoadingIndicator } from '../../state/wallet/hooks'
-import { /* StyledInternalLink, */ TYPE } from '../../theme'
+import { /* StyledInternalLink, */ StyledInternalLink, TYPE } from '../../theme'
 
 const PageWrapper = styled(AutoColumn)`
   max-width: 1132px;
@@ -124,6 +124,36 @@ const YourLiquidityGrid = styled(Box)`
   }
 `
 
+const MobileYourLiquidityGrid = styled(Box)`
+  // border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 1rem;
+  background-color: rgba(25, 36, 47, 1);
+  padding: 1.5rem;
+  display: grid;
+  grid-auto-rows: auto;
+  grid-template-columns: 1fr;
+  grid-row-gap: 1rem;
+  grid-auto-flow: row;
+  justify-items: flex-start;
+  align-items: center;
+  place-content: center center;
+`
+
+const MobileYourLiquidityCard = styled(Box)`
+  display: grid;
+  width: 100%;
+  grid-template-rows: 3fr 1fr 2fr;
+  grid-row-gap: 0.5rem;
+  grid-auto-flow: row dense;
+  grid-template-columns: 2fr 1fr 2fr;
+  .mobile-pair-icon {
+    grid-column: 1 / 3;
+  }
+  .mobile-pair-manage-link {
+    grid-column: 3 / 4;
+  }
+`
+
 const TopPoolsGrid = styled(Box)`
   // border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 1rem;
@@ -131,10 +161,10 @@ const TopPoolsGrid = styled(Box)`
   background-color: rgba(25, 36, 47, 1);
   padding: 1.5rem;
   display: grid;
-  grid-template-columns: 1fr 5fr 3fr 5fr;
+  grid-template-columns: ${() => (isMobile ? '1fr 1fr 0.5fr' : '1fr 5fr 2.5fr 5fr 4fr')};
   grid-template-rows: repeat(40px);
   grid-row-gap: 1rem;
-  grid-column-gap: ${() => (isMobile ? '0px' : '1rem')};
+  grid-column-gap: ${() => (isMobile ? '0px' : '0.75rem')};
   grid-auto-flow: row;
   justify-items: flex-start;
   align-items: center;
@@ -249,6 +279,7 @@ const StyledTableView = styled(Box)`
 
 const StyledLink = styled(ButtonPrimary)`
   & {
+    ${() => (isMobile ? 'width: 4rem;' : '')}
     display: inline-block !important;
     padding: 0.3rem;
     border-radius: 0.7rem !important;
@@ -261,7 +292,18 @@ export default function Liquidity() {
   // fetch the user's balances of all tracked V2 LP tokens
   const trackedTokenPairs = useTrackedTokenPairs()
   const tokenPairsWithLiquidityTokens = useMemo(
-    () => trackedTokenPairs.map((tokens) => ({ liquidityToken: toV2LiquidityToken(tokens), tokens })),
+    () =>
+      trackedTokenPairs
+        .filter(([token0, token1, stable]) => {
+          if (!token0.address || !token1.address) {
+            return false
+          }
+          if (!ENABLED_NETWORK_LABELS[token0.chainId]) {
+            return false
+          }
+          return true
+        })
+        .map((tokens) => ({ liquidityToken: toV2LiquidityToken(tokens), tokens })),
     [trackedTokenPairs]
   )
   const liquidityTokens = useMemo(
@@ -281,7 +323,6 @@ export default function Liquidity() {
       ),
     [tokenPairsWithLiquidityTokens, v2PairsBalances]
   )
-
   const v2Pairs = usePairs(liquidityTokensWithBalances.map(({ tokens }) => tokens))
   const v2IsLoading =
     fetchingV2PairBalances || v2Pairs?.length < liquidityTokensWithBalances.length || v2Pairs?.some((V2Pair) => !V2Pair)
@@ -317,18 +358,21 @@ export default function Liquidity() {
               id
               trackedReserveETH
               token0 {
+                decimals
                 id
                 symbol
                 name
                 derivedETH
               }
               token1 {
+                decimals
                 id
                 symbol
                 name
                 derivedETH
               }
               reserve0
+              stable
               reserve1
               reserveUSD
               totalSupply
@@ -428,18 +472,18 @@ export default function Liquidity() {
                 </ResponsiveButtonSecondary> */}
                 <ResponsiveButtonPrimary id="join-pool-button" as={Link} to="/add/ETH">
                   <Text className="AddLiquidity text-small" sx={{ fontWeight: 600, color: '#000000' }}>
-                    Add Liquidity
+                    {isMobile ? '+ Add' : `Add Liquidity`}
                   </Text>
                 </ResponsiveButtonPrimary>
               </ButtonRow>
             </TitleRow>
 
             {!account ? (
-              <Card padding="40px">
+              <EmptyProposals>
                 <TYPE.body color={theme.text3} textAlign="center">
                   Connect to a wallet to view your liquidity.
                 </TYPE.body>
-              </Card>
+              </EmptyProposals>
             ) : v2IsLoading || !ethPrice ? (
               <EmptyProposals>
                 <TYPE.body color={theme.text3} textAlign="center">
@@ -449,25 +493,44 @@ export default function Liquidity() {
             ) : allV2PairsWithLiquidity?.length > 0 && ethPrice !== undefined ? (
               //  || stakingPairs?.length > 0
               <>
-                <YourLiquidityGrid className="text">
-                  <HeaderItem>Pool</HeaderItem>
-                  <HeaderItem>Pair Mode</HeaderItem>
-                  <HeaderItem>Token</HeaderItem>
-                  <HeaderItem>Amount</HeaderItem>
-                  <HeaderItem>Value</HeaderItem>
-                  <HeaderItem></HeaderItem>
-                  {allV2PairsWithLiquidity.map((v2Pair, index) => (
-                    <LiquidityCard
-                      key={index}
-                      pair={v2Pair}
-                      needBgColor={false}
-                      // stakedBalance={stakingInfosWithBalance[index].stakedAmount}
-                      border={`1px solid rgba(255, 255, 255, 0.2)!important`}
-                      borderRadius={`24px`}
-                      ethPrice={ethPrice}
-                    ></LiquidityCard>
-                  ))}
-                </YourLiquidityGrid>
+                {!isMobile && (
+                  <YourLiquidityGrid className="text">
+                    <HeaderItem>Pool</HeaderItem>
+                    <HeaderItem>Pair Mode</HeaderItem>
+                    <HeaderItem>Token</HeaderItem>
+                    <HeaderItem>Amount</HeaderItem>
+                    <HeaderItem>Value</HeaderItem>
+                    <HeaderItem></HeaderItem>
+                    {allV2PairsWithLiquidity.map((v2Pair, index) => (
+                      <LiquidityCard
+                        key={index}
+                        pair={v2Pair}
+                        needBgColor={false}
+                        // stakedBalance={stakingInfosWithBalance[index].stakedAmount}
+                        border={`1px solid rgba(255, 255, 255, 0.2)!important`}
+                        borderRadius={`24px`}
+                        ethPrice={ethPrice}
+                      ></LiquidityCard>
+                    ))}
+                  </YourLiquidityGrid>
+                )}
+                {isMobile && (
+                  <MobileYourLiquidityGrid>
+                    {allV2PairsWithLiquidity.map((v2Pair, index) => (
+                      <MobileYourLiquidityCard key={v2Pair.liquidityToken.address}>
+                        <LiquidityCard
+                          key={index}
+                          pair={v2Pair}
+                          needBgColor={false}
+                          // stakedBalance={stakingInfosWithBalance[index].stakedAmount}
+                          border={`1px solid rgba(255, 255, 255, 0.2)!important`}
+                          borderRadius={`24px`}
+                          ethPrice={ethPrice}
+                        ></LiquidityCard>
+                      </MobileYourLiquidityCard>
+                    ))}
+                  </MobileYourLiquidityGrid>
+                )}
 
                 {/* <ButtonSecondary>
                   <RowBetween>
@@ -530,70 +593,23 @@ export default function Liquidity() {
               <HeaderItem>TVL</HeaderItem>
               <HeaderItem></HeaderItem> */}
             <TopPoolsGrid className="text">
-              <HeaderItem>#</HeaderItem>
+              {!isMobile && <HeaderItem>#</HeaderItem>}
               <HeaderItem>Pools</HeaderItem>
+              {!isMobile && <HeaderItem>Pair Mode</HeaderItem>}
               <HeaderItem>TVL</HeaderItem>
               <HeaderItem></HeaderItem>
               {pools.map((v2Pair, index) => {
-                return (
-                  <>
-                    <Box key={`${v2Pair.id}-1`}>{index + 1}</Box>
-                    <Box
-                      key={`${v2Pair.id}-2`}
-                      sx={{ textAlign: 'center', width: '10rem', display: 'flex', justifyContent: 'flex-start' }}
-                    >
-                      <Flex sx={{ gap: isMobile ? '0.25rem' : '1rem', width: '8rem' }}>
-                        <DoubleCurrencyLogoHorizontal currency0={v2Pair.token0} currency1={v2Pair.token1} />
-                        <Text
-                          sx={{
-                            whiteSpace: 'nowrap',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            width: 'min-content',
-                            minWidth: isMobile ? '7rem' : 'min-content',
-                            textAlign: 'left'
-                          }}
-                        >
-                          {v2Pair.token0?.symbol?.toUpperCase()}-{v2Pair.token1?.symbol?.toUpperCase()}
-                        </Text>
-                      </Flex>
-                    </Box>
-                    <Box key={`${v2Pair.id}-3`}>
-                      {ethPrice
-                        ? new Bn(v2Pair.trackedReserveETH)
-                            .multipliedBy(ethPrice)
-                            .decimalPlaces(4, Bn.ROUND_HALF_UP)
-                            .toString()
-                        : '-'}
-                      &nbsp; $
-                    </Box>
-                    <Box
-                      key={`${v2Pair.id}-4`}
-                      sx={{ display: 'flex', justifyContent: 'flex-end', width: 'max-content', justifySelf: 'end' }}
-                    >
-                      <ButtonPrimary
-                        className="text-small"
-                        style={{ display: 'inline-block !important', whiteSpace: 'nowrap' }}
-                        padding=".3rem"
-                        borderRadius=".5rem"
-                        as={Link}
-                        to={`/add/${v2Pair.token0.id}/${v2Pair.token1.id}`}
-                      >
-                        Provide Liquidity
-                      </ButtonPrimary>
-                    </Box>
-                  </>
-                )
+                return <TopPairRow v2Pair={v2Pair} key={v2Pair.id} index={index} ethPrice={ethPrice} />
               })}
             </TopPoolsGrid>
-            {/*  <AutoColumn justify={'center'} gap="md">
+            <AutoColumn justify={'center'} gap="md">
               <Text textAlign="center" fontSize={14} style={{ padding: '.5rem 0 .5rem 0' }}>
                 {`Don't see a pool you joined?`}&nbsp;
                 <StyledInternalLink id="import-pool-link" to="/find">
                   Import it.
                 </StyledInternalLink>
               </Text>
-            </AutoColumn> */}
+            </AutoColumn>
           </AutoColumn>
         </AutoColumn>
       </PageWrapper>
@@ -724,6 +740,59 @@ function Table() {
     </Flex>
   )
 } */
+
+function TopPairRow({ v2Pair, index, ethPrice }: { v2Pair: any; index: number; ethPrice?: Bn }) {
+  return (
+    <>
+      {!isMobile && <Box key={`${v2Pair.id}-1`}>{index + 1}</Box>}
+      <Box
+        key={`${v2Pair.id}-2`}
+        sx={{ textAlign: 'center', width: '10rem', display: 'flex', justifyContent: 'flex-start' }}
+      >
+        <Flex sx={{ gap: isMobile ? '0.25rem' : '0.25rem', width: '8rem' }}>
+          <DoubleCurrencyLogoHorizontal currency0={v2Pair.token0} currency1={v2Pair.token1} />
+          <Text
+            sx={{
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              width: 'min-content',
+              minWidth: isMobile ? '7rem' : 'min-content',
+              textAlign: 'left'
+            }}
+          >
+            {v2Pair.token0?.symbol?.toUpperCase()}-{v2Pair.token1?.symbol?.toUpperCase()}
+          </Text>
+        </Flex>
+      </Box>
+      {!isMobile && <Box key={`${v2Pair.id}-3`}>{v2Pair.stable ? 'Stable' : 'Volatile'}</Box>}
+      <Box key={`${v2Pair.id}-3`}>
+        {ethPrice
+          ? new Bn(v2Pair.trackedReserveETH).multipliedBy(ethPrice).decimalPlaces(4, Bn.ROUND_HALF_UP).toFixed(4)
+          : '-'}
+        &nbsp; $
+      </Box>
+      <Box
+        key={`${v2Pair.id}-4`}
+        sx={{ display: 'flex', justifyContent: 'flex-end', width: 'max-content', justifySelf: 'end' }}
+      >
+        {/*    <ButtonPrimary
+      className="text-small"
+      style={{ display: 'inline-block !important', whiteSpace: 'nowrap' }}
+      padding=".3rem"
+      borderRadius=".5rem"
+      as={Link}
+      to={`/add/${v2Pair.token0.id}/${v2Pair.token1.id}`}
+    >
+      Provide Liquidity
+    </ButtonPrimary> */}
+        <StyledLink as={Link} to={`/add/${v2Pair.token0.id}/${v2Pair.token1.id}/${v2Pair.stable}`}>
+          {isMobile ? '+' : 'Provide Liquidity'}
+        </StyledLink>
+      </Box>
+    </>
+  )
+}
 
 const range = (len) => {
   const arr: number[] = []

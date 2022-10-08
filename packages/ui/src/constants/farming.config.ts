@@ -54,7 +54,7 @@ export const CHAINID_TO_FARMING_CONFIG: { [chainId in ChainId]?: FarmConfig } = 
         isHidden: true,
         // pid 0 -- ABANDONED for changing the swap contract
         stakingAsset: {
-          name: 'USDC-USDT sLP',
+          name: 'USDC-USDT',
           decimal: 18,
           symbol: 'SLP',
           // if you disable a LP token pool, make sure to set `isLpToken` to `false`
@@ -65,7 +65,7 @@ export const CHAINID_TO_FARMING_CONFIG: { [chainId in ChainId]?: FarmConfig } = 
         isHidden: true,
         // pid 1 -- ABANDONED for changing the swap contract
         stakingAsset: {
-          name: 'USDC-USDT sLP',
+          name: 'USDC-USDT',
           decimal: 18,
           symbol: 'SLP',
           isLpToken: true,
@@ -78,7 +78,7 @@ export const CHAINID_TO_FARMING_CONFIG: { [chainId in ChainId]?: FarmConfig } = 
         isHidden: true,
         // pid 2 -- ABANDONED for changing the swap contract
         stakingAsset: {
-          name: 'USDT-ETH vLP (Bad Evaluation)',
+          name: 'USDT-ETH (Bad Evaluation)',
           decimal: 18,
           symbol: 'VLP',
           isLpToken: true,
@@ -91,7 +91,7 @@ export const CHAINID_TO_FARMING_CONFIG: { [chainId in ChainId]?: FarmConfig } = 
         isHidden: true,
         // pid 3 -- ABANDONED for changing the swap contract
         stakingAsset: {
-          name: 'USDC-ETH vLP',
+          name: 'USDC-ETH',
           decimal: 18,
           symbol: 'VLP',
           isLpToken: true,
@@ -104,7 +104,7 @@ export const CHAINID_TO_FARMING_CONFIG: { [chainId in ChainId]?: FarmConfig } = 
         isHidden: true,
         // pid 4 -- ABANDONED for changing the swap contract
         stakingAsset: {
-          name: 'USDC-USDT sLP',
+          name: 'USDC-USDT',
           decimal: 18,
           symbol: 'SLP',
           isLpToken: true,
@@ -114,9 +114,39 @@ export const CHAINID_TO_FARMING_CONFIG: { [chainId in ChainId]?: FarmConfig } = 
         }
       },
       {
-        // pid 5
+        isHidden: true,
+        // pid 5 -- ABANDONED for changing the swap contract
         stakingAsset: {
-          name: 'USDC-USDT sLP',
+          name: 'USDC-USDT',
+          decimal: 18,
+          symbol: 'SLP',
+          isLpToken: false
+        }
+      },
+      {
+        isHidden: true,
+        // pid 6 -- ABANDONED for changing the swap contract
+        stakingAsset: {
+          name: 'USDC-SUSHI',
+          decimal: 18,
+          symbol: 'SLP',
+          isLpToken: false
+        }
+      },
+      {
+        isHidden: true,
+        // pid 7 -- ABANDONED for changing the swap contract
+        stakingAsset: {
+          name: 'USDC-ETH',
+          decimal: 18,
+          symbol: 'VLP',
+          isLpToken: false
+        }
+      },
+      {
+        // pid 8
+        stakingAsset: {
+          name: 'USDC-USDT',
           decimal: 18,
           symbol: 'SLP',
           isLpToken: true,
@@ -126,9 +156,21 @@ export const CHAINID_TO_FARMING_CONFIG: { [chainId in ChainId]?: FarmConfig } = 
         }
       },
       {
-        // pid 6
+        // pid 9
         stakingAsset: {
-          name: 'USDC-SUSHI vLP',
+          name: 'USDC-ETH',
+          decimal: 18,
+          symbol: 'VLP',
+          isLpToken: true,
+          isStable: false,
+          tokenA: USDC,
+          tokenB: WETH[420]
+        }
+      },
+      {
+        // pid 10
+        stakingAsset: {
+          name: 'USDC-SUSHI',
           decimal: 18,
           symbol: 'SLP',
           isLpToken: true,

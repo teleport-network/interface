@@ -1,23 +1,24 @@
 import { BigNumber } from '@ethersproject/bignumber'
 import { TransactionResponse } from '@ethersproject/providers'
 import { Currency, currencyEquals, ETHER, TokenAmount, WETH } from '@teleswap/sdk'
+import LiquidityPlusIcon from 'assets/svg/liquidityPlusIcon.svg'
 import bn from 'bignumber.js'
 import CurrencyLogo from 'components/CurrencyLogo'
 import { BackToMyLiquidity } from 'components/LiquidityDetail'
 import QuestionHelper from 'components/QuestionHelper'
-// import Settings from 'components/Settings'
+import Settings from 'components/Settings'
 // import UnsupportedCurrencyFooter from 'components/swap/UnsupportedCurrencyFooter'
 import { useIsTransactionUnsupported } from 'hooks/Trades'
 import { usePresetPeripheryAddress } from 'hooks/usePresetContractAddress'
 import useThemedContext from 'hooks/useThemedContext'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { isMobile } from 'react-device-detect'
 import { ArrowLeft } from 'react-feather'
 import ReactGA from 'react-ga'
 import { useHistory, useParams } from 'react-router-dom'
 import { Box, Flex, Text } from 'rebass'
 import styled from 'styled-components'
 
-import LiquidityPlusIcon from 'assets/svg/liquidityPlusIcon.svg'
 import { ButtonError, ButtonLight, ButtonPrimary } from '../../components/Button'
 import { AutoColumn, ColumnCenter } from '../../components/Column'
 import CurrencyInputPanel from '../../components/CurrencyInputPanel'
@@ -54,9 +55,9 @@ const BorderVerticalContainer = styled(Flex)`
 
 const CustomizedRadio = styled.input`
   appearance: none;
-  border: 1px solid #4ed7b6;
-  width: 0.7rem;
-  height: 0.7rem;
+  border: 0.0875rem solid #4ed7b6;
+  width: 0.875rem;
+  height: 0.875rem;
   margin: 0;
   border-radius: 50%;
   position: relative;
@@ -65,18 +66,17 @@ const CustomizedRadio = styled.input`
   align-items: center;
   :before {
     content: '';
-    width: 0.7rem;
-    height: 0.7rem;
+    width: 0.4rem !important;
+    height: 0.4rem !important;
     border-radius: 50%;
     background-color: #4ed7b6;
     transition: 120ms all ease-in-out;
     box-shadow: inset 0.35rem 0.35rem #4ed7b6;
     transform: scale(0);
-    position: absolute;
   }
   :checked {
     :before {
-      transform: scale(0.5);
+      transform: scale(1);
     }
   }
 `
@@ -86,7 +86,7 @@ export default function AddLiquidity() {
   const { currencyIdA, currencyIdB, stable } = useParams<{ currencyIdA: string; currencyIdB: string; stable: string }>()
   const { account, chainId, library } = useActiveWeb3React()
   const theme = useThemedContext()
-  const [pairModeStable, setPairModeStable] = useState(false)
+  const [pairModeStable, setPairModeStable] = useState(!!stable)
   const currencyA = useCurrency(currencyIdA)
   const currencyB = useCurrency(currencyIdB)
 
@@ -190,11 +190,6 @@ export default function AddLiquidity() {
       estimate = router.estimateGas.addLiquidityETH
       method = router.addLiquidityETH
       args = [
-        // {
-        //   from: wrappedCurrency(currencyA, chainId)?.address,
-        //   to: wrappedCurrency(currencyB, chainId)?.address,
-        //   stable: true,
-        // },
         [
           tokenBIsETH
             ? wrappedCurrency(currencyA, chainId)?.address ?? ''
@@ -408,7 +403,7 @@ export default function AddLiquidity() {
                 color: '#999999'
               }}
             >
-              0.3%
+              {!pairModeStable ? '0.3%' : '0.01%'}
             </Text>
           </Flex>
         </BorderVerticalContainer>
@@ -584,8 +579,7 @@ export default function AddLiquidity() {
           <span style={{ fontFamily: 'Poppins', fontWeight: 400, color: '#FFFFFF' }} className={'title'}>
             Add Liquidity
           </span>
-          {/* <Settings /> */}
-          <Box width={24}></Box>
+          <Settings />
         </AutoRow>
         <AutoColumn gap=".4rem">
           {/* {noLiquidity ||
@@ -622,7 +616,8 @@ export default function AddLiquidity() {
             value={formattedAmounts[Field.CURRENCY_A]}
             onUserInput={onFieldAInput}
             onMax={() => {
-              onFieldAInput(maxAmounts[Field.CURRENCY_A]?.toExact() ?? '')
+              if (maxAmounts[Field.CURRENCY_A] && maxAmounts[Field.CURRENCY_A]?.toExact() !== '0')
+                onFieldAInput(maxAmounts[Field.CURRENCY_A]?.toExact() ?? '')
             }}
             onCurrencySelect={handleCurrencyASelect}
             showMaxButton={!atMaxAmounts[Field.CURRENCY_A]}
@@ -654,7 +649,8 @@ export default function AddLiquidity() {
             onUserInput={onFieldBInput}
             onCurrencySelect={handleCurrencyBSelect}
             onMax={() => {
-              onFieldBInput(maxAmounts[Field.CURRENCY_B]?.toExact() ?? '')
+              if (maxAmounts[Field.CURRENCY_B] && maxAmounts[Field.CURRENCY_B]?.toExact() !== '0')
+                onFieldBInput(maxAmounts[Field.CURRENCY_B]?.toExact() ?? '')
             }}
             showMaxButton={!atMaxAmounts[Field.CURRENCY_B]}
             currency={currencies[Field.CURRENCY_B]}
@@ -804,21 +800,13 @@ export default function AddLiquidity() {
             color: '#D7DCE0'
           }}
         >
-          By adding liquidity to this pair,you’ll earn 0.3% of all the trades on this pair proportional to your share of
+          By adding liquidity to this pair,you’ll earn 0.01% of all the trades on this pair proportional to your share of
           the pool. And earnings will be claimed while removing your liquidity.
         </Text>
         <Box sx={{ width: '100%', borderTop: '1px solid rgba(255,255,255,0.2)', height: '0' }}></Box> */}
         <Box
           sx={{
-            button: {
-              maxHeight: '3.5rem',
-              fontWeight: 400
-            },
-            a: {
-              maxHeight: '3.5rem',
-              fontWeight: 400
-            },
-            '*': {
+            'button,a': {
               maxHeight: '3.5rem',
               fontWeight: 400
             }
@@ -888,7 +876,7 @@ export default function AddLiquidity() {
                 )}
               <ButtonError
                 className="title"
-                sx={{ backgroundColor: '#CCCCCC!important', border: 'unset!important', fontWeight: '400!important' }}
+                sx={{ border: 'unset!important', fontWeight: '400!important' }}
                 onClick={() => {
                   expertMode ? onAdd() : setShowConfirm(true)
                 }}
@@ -920,7 +908,7 @@ export default function AddLiquidity() {
           fontFamily: 'Poppins',
           zIndex: -1,
           color: 'rgba(255,255,255,0.6)',
-          maxWidth: '30rem',
+          maxWidth: isMobile ? '100%' : '30rem',
           fontSize: '0.6rem',
           position: 'relative',
           width: '30rem',
@@ -931,9 +919,8 @@ export default function AddLiquidity() {
           backdropFilter: 'blur(36.9183px)'
         }}
       >
-        By adding liquidity to this pair,you’ll earn 0.3% of all the trades on this pair proportional to your share of
-        the pool. And earnings will be claimed while removing your liquidity. 0.044663 ETH 0.30% minimum received
-        slippage tolerance
+        By adding liquidity to this pair,you will earn {!pairModeStable ? '0.3%' : '0.01%'} of all the trades on this
+        pair proportional to your share of the pool. And earnings will be claimed while removing your liquidity.
       </Box>
     </>
   )
