@@ -920,7 +920,7 @@ export default function AddLiquidity() {
       </AppBody>
       {isMobile && (
         <>
-          <Box width="100%">
+          <Box width="100%" marginBottom={'1rem'}>
             <Box sx={{ marginTop: '1.5rem' }}>
               <Box sx={{ fontWeight: 400, marginBottom: '.5rem' }} className={'secondary-title'}>
                 Pair Mode
@@ -1047,98 +1047,99 @@ export default function AddLiquidity() {
         <Box sx={{ width: '100%', borderTop: '1px solid rgba(255,255,255,0.2)', height: '0' }}></Box> */}
           </Box>
           <MobileBottomShadowContainer>
-            <Text
-              sx={{
-                fontFamily: 'Poppins',
-                fontStyle: 'normal',
-                fontWeight: '400',
-                fontSize: '1rem',
-                lineHeight: '1rem',
-                color: 'rgba(255, 255, 255, 0.6)'
-              }}
-            >
-              By adding liquidity to this pair,you will earn {!pairModeStable ? '0.3%' : '0.01%'} of all the trades on
-              this pair proportional to your share of the pool. And earnings will be claimed while removing your
-              liquidity.
-            </Text>
-            {addIsUnsupported ? (
-              <AutoColumn style={{ marginTop: '1rem' }}>
-                <ButtonPrimary className="title" sx={{ fontWeight: '400!important' }} disabled={true}>
-                  <TYPE.main mb="4px">Unsupported Asset</TYPE.main>
-                </ButtonPrimary>
-              </AutoColumn>
-            ) : !account ? (
-              <AutoColumn style={{ marginTop: '1rem' }}>
-                <ButtonLight
-                  className="title"
-                  sx={{ backgroundColor: '#39E1BA', color: '#05050e', fontWeight: '400!important' }}
-                  onClick={toggleWalletModal}
-                >
-                  Connect Wallet
-                </ButtonLight>
-              </AutoColumn>
-            ) : (
-              <AutoColumn style={{ marginTop: '1rem' }}>
-                {(approvalA === ApprovalState.NOT_APPROVED ||
-                  approvalA === ApprovalState.PENDING ||
-                  approvalB === ApprovalState.NOT_APPROVED ||
-                  approvalB === ApprovalState.PENDING) &&
-                  isValid && (
-                    <RowBetween>
-                      {approvalA !== ApprovalState.APPROVED && (
-                        <ButtonPrimary
-                          className="title"
-                          style={{
-                            marginBottom: '0.5rem',
-                            fontWeight: '400!important'
-                          }}
-                          onClick={approveACallback}
-                          disabled={approvalA === ApprovalState.PENDING}
-                          width={approvalB !== ApprovalState.APPROVED ? '48%' : '100%'}
-                        >
-                          {approvalA === ApprovalState.PENDING ? (
-                            <Dots>Approving {currencies[Field.CURRENCY_A]?.symbol}</Dots>
-                          ) : (
-                            'Approve ' + currencies[Field.CURRENCY_A]?.symbol
-                          )}
-                        </ButtonPrimary>
-                      )}
-                      {approvalB !== ApprovalState.APPROVED && (
-                        <ButtonPrimary
-                          className="title"
-                          style={{
-                            marginBottom: '0.5rem',
-                            fontWeight: '400!important'
-                          }}
-                          onClick={approveBCallback}
-                          disabled={approvalB === ApprovalState.PENDING}
-                          width={approvalA !== ApprovalState.APPROVED ? '48%' : '100%'}
-                        >
-                          {approvalB === ApprovalState.PENDING ? (
-                            <Dots>Approving {currencies[Field.CURRENCY_B]?.symbol}</Dots>
-                          ) : (
-                            'Approve ' + currencies[Field.CURRENCY_B]?.symbol
-                          )}
-                        </ButtonPrimary>
-                      )}
-                    </RowBetween>
-                  )}
-                <ButtonError
-                  className="title"
-                  sx={{ border: 'unset!important', fontWeight: '400!important' }}
-                  onClick={() => {
-                    expertMode ? onAdd() : setShowConfirm(true)
-                  }}
-                  disabled={!isValid || approvalA !== ApprovalState.APPROVED || approvalB !== ApprovalState.APPROVED}
-                  error={
-                    !!error || (!isValid && !!parsedAmounts[Field.CURRENCY_A] && !!parsedAmounts[Field.CURRENCY_B])
-                  }
-                >
-                  <Text fontWeight={500}>{error ?? 'Supply'}</Text>
-                </ButtonError>
-              </AutoColumn>
-            )}
-            {/* {!addIsUnsupported ? (
+            <Box>
+              <Text
+                sx={{
+                  fontFamily: 'Poppins',
+                  fontStyle: 'normal',
+                  fontWeight: '400',
+                  fontSize: '1rem',
+                  lineHeight: '1rem',
+                  color: 'rgba(255, 255, 255, 0.6)'
+                }}
+              >
+                By adding liquidity to this pair,you will earn {!pairModeStable ? '0.3%' : '0.01%'} of all the trades on
+                this pair proportional to your share of the pool. And earnings will be claimed while removing your
+                liquidity.
+              </Text>
+              {addIsUnsupported ? (
+                <AutoColumn style={{ marginTop: '1rem' }}>
+                  <ButtonPrimary className="title" sx={{ fontWeight: '400!important' }} disabled={true}>
+                    <TYPE.main mb="4px">Unsupported Asset</TYPE.main>
+                  </ButtonPrimary>
+                </AutoColumn>
+              ) : !account ? (
+                <AutoColumn style={{ marginTop: '1rem' }}>
+                  <ButtonLight
+                    className="title"
+                    sx={{ backgroundColor: '#39E1BA', color: '#05050e', fontWeight: '400!important' }}
+                    onClick={toggleWalletModal}
+                  >
+                    Connect Wallet
+                  </ButtonLight>
+                </AutoColumn>
+              ) : (
+                <AutoColumn style={{ marginTop: '1rem' }}>
+                  {(approvalA === ApprovalState.NOT_APPROVED ||
+                    approvalA === ApprovalState.PENDING ||
+                    approvalB === ApprovalState.NOT_APPROVED ||
+                    approvalB === ApprovalState.PENDING) &&
+                    isValid && (
+                      <RowBetween>
+                        {approvalA !== ApprovalState.APPROVED && (
+                          <ButtonPrimary
+                            className="title"
+                            style={{
+                              marginBottom: '0.5rem',
+                              fontWeight: '400!important'
+                            }}
+                            onClick={approveACallback}
+                            disabled={approvalA === ApprovalState.PENDING}
+                            width={approvalB !== ApprovalState.APPROVED ? '48%' : '100%'}
+                          >
+                            {approvalA === ApprovalState.PENDING ? (
+                              <Dots>Approving {currencies[Field.CURRENCY_A]?.symbol}</Dots>
+                            ) : (
+                              'Approve ' + currencies[Field.CURRENCY_A]?.symbol
+                            )}
+                          </ButtonPrimary>
+                        )}
+                        {approvalB !== ApprovalState.APPROVED && (
+                          <ButtonPrimary
+                            className="title"
+                            style={{
+                              marginBottom: '0.5rem',
+                              fontWeight: '400!important'
+                            }}
+                            onClick={approveBCallback}
+                            disabled={approvalB === ApprovalState.PENDING}
+                            width={approvalA !== ApprovalState.APPROVED ? '48%' : '100%'}
+                          >
+                            {approvalB === ApprovalState.PENDING ? (
+                              <Dots>Approving {currencies[Field.CURRENCY_B]?.symbol}</Dots>
+                            ) : (
+                              'Approve ' + currencies[Field.CURRENCY_B]?.symbol
+                            )}
+                          </ButtonPrimary>
+                        )}
+                      </RowBetween>
+                    )}
+                  <ButtonError
+                    className="title"
+                    sx={{ border: 'unset!important', fontWeight: '400!important' }}
+                    onClick={() => {
+                      expertMode ? onAdd() : setShowConfirm(true)
+                    }}
+                    disabled={!isValid || approvalA !== ApprovalState.APPROVED || approvalB !== ApprovalState.APPROVED}
+                    error={
+                      !!error || (!isValid && !!parsedAmounts[Field.CURRENCY_A] && !!parsedAmounts[Field.CURRENCY_B])
+                    }
+                  >
+                    <Text fontWeight={500}>{error ?? 'Supply'}</Text>
+                  </ButtonError>
+                </AutoColumn>
+              )}
+              {/* {!addIsUnsupported ? (
       pair && !noLiquidity && pairState !== PairState.INVALID ? (
         <AutoColumn style={{ minWidth: '20rem', width: '100%', maxWidth: '420px', marginTop: '1rem' }}>
           <MinimalPositionCard showUnwrapped={oneCurrencyIsWETH} pair={pair} />
@@ -1150,6 +1151,7 @@ export default function AddLiquidity() {
           currencies={[currencies.CURRENCY_A, currencies.CURRENCY_B]}
         />
       )} */}
+            </Box>
           </MobileBottomShadowContainer>
         </>
       )}
