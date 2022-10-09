@@ -40,6 +40,8 @@ const PoolSection = styled.div`
   background: rgba(25, 36, 47, 1);
   padding: 3.5vw
   color: #39e1ba;
+
+  font-size: 1rem;
 `
 
 const DataRow = styled(RowBetween)`
