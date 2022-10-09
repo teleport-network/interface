@@ -7,8 +7,7 @@ import { Pool } from '@uniswap/v3-sdk'
 import JSBI from 'jsbi'
 import { GetQuoteResult, V2PoolInRoute, V3PoolInRoute } from 'state/routing/types'
 
-import { Field } from '../state/swap/actions'
-import { computeSlippageAdjustedAmountsByRoute, computeTradePriceBreakdownByRoute } from './prices'
+import { computeTradePriceBreakdownByRoute } from './prices'
 
 // from routing-api (https://github.com/Uniswap/routing-api/blob/main/lib/handlers/quote/quote.ts#L243-L311)
 export function transformSwapRouteToGetQuoteResult(
@@ -34,20 +33,20 @@ export function transformSwapRouteToGetQuoteResult(
 
   const percents: number[] = []
 
-  let maxInput = JSBI.BigInt(0)
-  let minOut = JSBI.BigInt(0)
+  // let maxInput = JSBI.BigInt(0)
+  // let minOut = JSBI.BigInt(0)
 
   for (const subRoute of route) {
     const { amount, quote, tokenPath, percent } = subRoute
     percents.push(percent)
 
-    const slippageAdjustedAmounts = computeSlippageAdjustedAmountsByRoute(
-      subRoute as V2RouteWithValidQuote,
-      new Percent(swapConfig.slippageTolerance.numerator, JSBI.BigInt(10000))
-    )
-
-    maxInput = JSBI.add(maxInput, JSBI.BigInt(slippageAdjustedAmounts[Field.INPUT]))
-    minOut = JSBI.add(minOut, JSBI.BigInt(slippageAdjustedAmounts[Field.OUTPUT]))
+    // const slippageAdjustedAmounts = computeSlippageAdjustedAmountsByRoute(
+    //   subRoute as V2RouteWithValidQuote,
+    //   new Percent(swapConfig.slippageTolerance.numerator, JSBI.BigInt(10000))
+    // )
+    //
+    // maxInput = JSBI.add(maxInput, JSBI.BigInt(slippageAdjustedAmounts[Field.INPUT]))
+    // minOut = JSBI.add(minOut, JSBI.BigInt(slippageAdjustedAmounts[Field.OUTPUT]))
 
     // subRoute.percent, subRoute.tokenPath
     const { priceImpactWithoutFee, realizedLPFee } = computeTradePriceBreakdownByRoute(
@@ -157,10 +156,10 @@ export function transformSwapRouteToGetQuoteResult(
     gasPriceWei: gasPriceWei.toString(),
     route: routeResponse,
     routeString: routeAmountsToString(route),
-    priceImpactWithoutFee: _priceImpactWithoutFee.toSignificant(4).toString(),
+    priceImpactWithoutFee: '', // _priceImpactWithoutFee.toSignificant(4).toString(),
     realizedLPFee: _realizedLPFee.toString(),
-    maxIn: new Fraction(maxInput, amount.denominator).toSignificant(4),
-    minOut: new Fraction(minOut, quote.denominator).toSignificant(4),
+    maxIn: '', // new Fraction(maxInput, amount.denominator).toSignificant(4),
+    minOut: '', // new Fraction(minOut, quote.denominator).toSignificant(4),
     percents
   }
 

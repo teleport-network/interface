@@ -1,8 +1,6 @@
 import { BigNumber } from '@ethersproject/bignumber';
-import { Protocol } from '@teleswap/router-sdk';
-import {Fraction, Percent } from "@teleswap/sdk/src";
-import {ONE, ZERO} from "@teleswap/sdk/src/constants";
-import { Token, TradeType } from '@uniswap/sdk-core';
+import {ONE, Protocol, ZERO} from '@teleswap/router-sdk';
+import {Fraction, Percent, Token, TradeType} from '@uniswap/sdk-core';
 import { Pool } from '@uniswap/v3-sdk';
 import _ from 'lodash';
 import invariant from "tiny-invariant";
