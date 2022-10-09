@@ -213,7 +213,7 @@ html, input, textarea, button {
 
 @font-face {
   font-family: 'Poppins';
-  src: url('../assets/fonts/font-poppins-regular.ttf');
+  src: url('/fonts/font-poppins-regular.ttf');
 }
 html,
 body {
