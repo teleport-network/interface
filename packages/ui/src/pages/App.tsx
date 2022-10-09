@@ -70,6 +70,10 @@ const BodyWrapper = styled.div<{ mobile?: boolean }>`
     padding: 1rem;
     padding-top: 4rem;
   `};
+  ${({ theme, mobile }) => theme.mediaWidth.upToExtraSmall`
+    padding-top: '2rem';
+    padding-bottom: ${mobile ? '0' : '2rem'};
+  `};
 
   z-index: 1;
 `
@@ -200,7 +204,7 @@ export default function App() {
               <Route component={RedirectPathToSwapOnly} />
             </Switch>
           </Web3ReactManager>
-          <Marginer />
+          {!isMobile && <Marginer />}
         </BodyWrapper>
       </AppWrapper>
     </Suspense>

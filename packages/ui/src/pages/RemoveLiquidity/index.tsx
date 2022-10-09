@@ -2,11 +2,16 @@ import { BigNumber } from '@ethersproject/bignumber'
 import { splitSignature } from '@ethersproject/bytes'
 import { Contract } from '@ethersproject/contracts'
 import { TransactionResponse } from '@ethersproject/providers'
+// import Slider from '../../components/Slider'
+import Slider from '@mui/material/Slider'
 import { Currency, currencyEquals, ETHER, Percent, WETH } from '@teleswap/sdk'
 import { BackToMyLiquidity } from 'components/LiquidityDetail'
+import Settings from 'components/Settings'
 import { usePresetPeripheryAddress } from 'hooks/usePresetContractAddress'
+import { MobileBottomShadowContainer } from 'pages/AddLiquidity'
 // import AppBody from 'pages/AppBody'
 import { useCallback, useMemo, useState } from 'react'
+import { isMobile } from 'react-device-detect'
 import { ArrowDown, Plus } from 'react-feather'
 import ReactGA from 'react-ga'
 import { useHistory, useParams } from 'react-router-dom'
@@ -21,8 +26,6 @@ import CurrencyLogo from '../../components/CurrencyLogo'
 // import { AddRemoveTabs } from '../../components/NavigationTabs'
 import { MinimalPositionCard } from '../../components/PositionCard'
 import Row, { RowBetween, RowFixed } from '../../components/Row'
-// import Slider from '../../components/Slider'
-import Slider from '@mui/material/Slider'
 import { Dots } from '../../components/swap/styleds'
 import TransactionConfirmationModal, { ConfirmationModalContent } from '../../components/TransactionConfirmationModal'
 import { DomainName } from '../../constants'
@@ -528,9 +531,46 @@ export default function RemoveLiquidity() {
 
   return (
     <>
-      <Flex justifyContent={'flex-start'} width="40rem">
-        <BackToMyLiquidity />
-      </Flex>
+      <Box
+        sx={
+          isMobile
+            ? {
+                display: 'grid',
+                gridTemplateColumns: '1fr 4fr 1fr',
+                alignItems: 'center',
+                marginBottom: '2rem'
+              }
+            : {
+                width: '40rem',
+                display: 'flex',
+                alignItems: 'flex-start',
+                maxWidth: '90vw'
+              }
+        }
+      >
+        <BackToMyLiquidity marginBottom={'unset'} height="100%" />
+        {isMobile && (
+          <>
+            <Box display="flex" justifyContent={'center'} alignItems="center">
+              <Text
+                sx={{
+                  fontFamily: 'Dela Gothic One',
+                  fontStyle: 'normal',
+                  fontWeight: '400',
+                  fontSize: '1rem',
+                  lineHeight: '1.5rem',
+                  color: '#FFFFFF',
+                  whiteSpace: 'nowrap',
+                  textOverflow: 'ellipsis'
+                }}
+              >
+                Remove Liquidity
+              </Text>
+            </Box>
+            <Settings />
+          </>
+        )}
+      </Box>
       <TransactionConfirmationModal
         isOpen={showConfirm}
         onDismiss={handleDismissConfirmation}
@@ -552,7 +592,7 @@ export default function RemoveLiquidity() {
           backgroundColor: 'rgba(25,36,47,1)',
           borderRadius: '1rem',
           width: '40rem',
-          maxWidth: '40rem'
+          maxWidth: isMobile ? '90vw' : '40rem'
         }}
       >
         {/* <BlueCard>
@@ -822,7 +862,7 @@ export default function RemoveLiquidity() {
         )}
       </AutoColumn>
       {pair ? (
-        <AutoColumn style={{ marginTop: '.8rem', width: '40rem', maxWidth: '40rem' }}>
+        <AutoColumn style={{ marginTop: '.8rem', width: '40rem', maxWidth: isMobile ? '90vw' : '40rem' }}>
           <MinimalPositionCard
             sx={{ border: 'unset', backgroundColor: 'rgba(25,36,47,1)' }}
             showUnwrapped={oneCurrencyIsWETH}
@@ -830,62 +870,115 @@ export default function RemoveLiquidity() {
           />
         </AutoColumn>
       ) : null}
-      <Box
-        sx={{
-          position: 'relative',
-          marginTop: '2rem',
-          width: '40rem',
-          maxWidth: '40rem',
-          whiteSpace: 'nowrap',
-          button: {
-            maxHeight: '3rem',
-            fontSize: '1.1rem'
-          },
-          a: {
-            maxHeight: '3rem',
-            fontSize: '1.1rem'
-          }
-        }}
-      >
-        {!account ? (
-          <ButtonLight
-            sx={{ fontSize: '1.1rem', backgroundColor: '#39E1BA', color: '#05050e', fontWeight: '600!important' }}
-            onClick={toggleWalletModal}
-          >
-            Connect Wallet
-          </ButtonLight>
-        ) : (
-          <RowBetween sx={{ gap: '0.3rem' }}>
-            <ButtonConfirmed
-              onClick={onAttemptToApprove}
-              confirmed={approval === ApprovalState.APPROVED || signatureData !== null}
-              disabled={approval !== ApprovalState.NOT_APPROVED || signatureData !== null}
-              mr="0.5rem"
-              fontWeight={500}
-              fontSize={'1.1rem'}
+      {!isMobile && (
+        <Box
+          sx={{
+            position: 'relative',
+            marginTop: '2rem',
+            width: '40rem',
+            maxWidth: '40rem',
+            whiteSpace: 'nowrap',
+            button: {
+              maxHeight: '3rem',
+              fontSize: '1.1rem'
+            },
+            a: {
+              maxHeight: '3rem',
+              fontSize: '1.1rem'
+            }
+          }}
+        >
+          {!account ? (
+            <ButtonLight
+              sx={{ fontSize: '1.1rem', backgroundColor: '#39E1BA', color: '#05050e', fontWeight: '600!important' }}
+              onClick={toggleWalletModal}
             >
-              {approval === ApprovalState.PENDING ? (
-                <Dots>Approving</Dots>
-              ) : approval === ApprovalState.APPROVED || signatureData !== null ? (
-                'Approved'
-              ) : (
-                'Approve'
-              )}
-            </ButtonConfirmed>
-            <ButtonError
-              onClick={() => {
-                setShowConfirm(true)
+              Connect Wallet
+            </ButtonLight>
+          ) : (
+            <RowBetween sx={{ gap: '0.3rem' }}>
+              <ButtonConfirmed
+                onClick={onAttemptToApprove}
+                confirmed={approval === ApprovalState.APPROVED || signatureData !== null}
+                disabled={approval !== ApprovalState.NOT_APPROVED || signatureData !== null}
+                mr="0.5rem"
+                fontWeight={500}
+                fontSize={'1.1rem'}
+              >
+                {approval === ApprovalState.PENDING ? (
+                  <Dots>Approving</Dots>
+                ) : approval === ApprovalState.APPROVED || signatureData !== null ? (
+                  'Approved'
+                ) : (
+                  'Approve'
+                )}
+              </ButtonConfirmed>
+              <ButtonError
+                onClick={() => {
+                  setShowConfirm(true)
+                }}
+                disabled={!isValid || (signatureData === null && approval !== ApprovalState.APPROVED)}
+                error={!isValid && !!parsedAmounts[Field.CURRENCY_A] && !!parsedAmounts[Field.CURRENCY_B]}
+              >
+                <Text fontSize={'1.1rem'} fontWeight={500}>
+                  {error || 'Remove'}
+                </Text>
+              </ButtonError>
+            </RowBetween>
+          )}
+        </Box>
+      )}
+      {isMobile && (
+        <MobileBottomShadowContainer>
+          {!account ? (
+            <ButtonLight
+              sx={{ fontSize: '1.1rem', backgroundColor: '#39E1BA', color: '#05050e', fontWeight: '600!important' }}
+              onClick={toggleWalletModal}
+            >
+              Connect Wallet
+            </ButtonLight>
+          ) : (
+            <RowBetween
+              sx={{
+                gap: '15%',
+                button: {
+                  maxWidth: '100%',
+                  fontSize: '1.2rem',
+                  height: '3rem!important'
+                }
               }}
-              disabled={!isValid || (signatureData === null && approval !== ApprovalState.APPROVED)}
-              error={!isValid && !!parsedAmounts[Field.CURRENCY_A] && !!parsedAmounts[Field.CURRENCY_B]}
             >
-              <Text fontSize={'1.1rem'} fontWeight={500}>
-                {error || 'Remove'}
-              </Text>
-            </ButtonError>
-          </RowBetween>
-        )}
-      </Box>
+              <ButtonConfirmed
+                onClick={onAttemptToApprove}
+                confirmed={approval === ApprovalState.APPROVED || signatureData !== null}
+                disabled={approval !== ApprovalState.NOT_APPROVED || signatureData !== null}
+                mr="0.5rem"
+                fontWeight={500}
+                fontSize={'1.1rem'}
+              >
+                {approval === ApprovalState.PENDING ? (
+                  <Dots>Approving</Dots>
+                ) : approval === ApprovalState.APPROVED || signatureData !== null ? (
+                  'Approved'
+                ) : (
+                  'Approve'
+                )}
+              </ButtonConfirmed>
+              <ButtonError
+                onClick={() => {
+                  setShowConfirm(true)
+                }}
+                disabled={!isValid || (signatureData === null && approval !== ApprovalState.APPROVED)}
+                error={!isValid && !!parsedAmounts[Field.CURRENCY_A] && !!parsedAmounts[Field.CURRENCY_B]}
+              >
+                <Text fontSize={'1.1rem'} fontWeight={500}>
+                  {error || 'Remove'}
+                </Text>
+              </ButtonError>
+            </RowBetween>
+          )}
+        </MobileBottomShadowContainer>
+      )}
     </>
   )
 }
