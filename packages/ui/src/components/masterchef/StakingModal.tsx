@@ -35,7 +35,7 @@ import { RowBetween } from '../Row'
 
 const ContentWrapper = styled(AutoColumn)`
   width: 100%;
-  padding: 1rem;
+  padding: 1.8rem;
 `
 
 interface StakingModalProps {
@@ -121,7 +121,9 @@ export default function StakingModal({ isOpen, onDismiss, pid, stakingInfo }: St
       {!attempting && !hash && (
         <ContentWrapper gap="lg">
           <RowBetween>
-            <TYPE.mediumHeader color="#FFFFFF">{t('stakeLpToken')}</TYPE.mediumHeader>
+            <TYPE.mediumHeader color="#FFFFFF" style={{ fontFamily: 'Dela Gothic One' }}>
+              {t('stakeLpToken')}
+            </TYPE.mediumHeader>
             <CloseIcon onClick={wrappedOnDismiss} color="#FFFFFF" />
           </RowBetween>
           <CurrencyInputPanel
@@ -151,11 +153,12 @@ export default function StakingModal({ isOpen, onDismiss, pid, stakingInfo }: St
               disabled={signatureData === null && approval !== ApprovalState.APPROVED}
               // error={!!&& !!parsedAmount}
               onClick={onStake}
+              fontWeight={600}
+              fontSize="1.2rem"
             >
               {t('stakeLpToken')}
             </ButtonError>
           </RowBetween>
-          <ProgressCircles steps={[approval === ApprovalState.APPROVED || signatureData !== null]} disabled={true} />
         </ContentWrapper>
       )}
       {attempting && !hash && (

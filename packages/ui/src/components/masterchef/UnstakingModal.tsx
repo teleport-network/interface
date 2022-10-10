@@ -33,7 +33,7 @@ import { RowBetween } from '../Row'
 
 const ContentWrapper = styled(AutoColumn)`
   width: 100%;
-  padding: 1rem;
+  padding: 1.8rem;
 `
 
 interface UnstakingModalProps {
@@ -121,7 +121,9 @@ export default function UnstakingModal({ isOpen, onDismiss, pid, stakingInfo }: 
       {!attempting && !hash && (
         <ContentWrapper gap="lg">
           <RowBetween>
-            <TYPE.mediumHeader color="#FFFFFF">{t('unstakeLpToken')}</TYPE.mediumHeader>
+            <TYPE.mediumHeader color="#FFFFFF" style={{ fontFamily: 'Dela Gothic One' }}>
+              {t('unstakeLpToken')}
+            </TYPE.mediumHeader>
             <CloseIcon onClick={wrappedOnDismiss} color="#FFFFFF" />
           </RowBetween>
           <FarmingWithdrawInputPanel
@@ -144,6 +146,8 @@ export default function UnstakingModal({ isOpen, onDismiss, pid, stakingInfo }: 
             <ButtonError
               // error={!!&& !!parsedAmount}
               onClick={onWithdraw}
+              fontWeight={600}
+              fontSize="1.2rem"
             >
               {t('unstakeLpToken')}
             </ButtonError>

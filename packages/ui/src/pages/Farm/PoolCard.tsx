@@ -129,7 +129,7 @@ const StakingColumn = styled.div<{ isMobile: boolean; isHideInMobile?: boolean; 
   }
   .estimated-staked-lp-value {
     font-family: 'Poppins';
-    font-size: 0.4rem;
+    font-size: 0.9rem;
     margin-top: 0.33rem;
     width: 100%;
     color: rgba(255, 255, 255, 0.8);
@@ -160,7 +160,7 @@ const MobilePoolDetailSection = styled.div`
 `
 
 const StakingColumnTitle = ({ children }: { children: React.ReactNode }) => (
-  <TYPE.gray fontSize={12} width="100%" className="stakingColTitle">
+  <TYPE.gray fontSize="0.9rem" width="100%" className="stakingColTitle">
     {children}
   </TYPE.gray>
 )
@@ -241,7 +241,7 @@ export default function PoolCard({ pid, stakingInfo }: { pid: number; stakingInf
     return (
       <StakingColumn isMobile={isMobile} isHideInMobile={isHideInMobile}>
         <StakingColumnTitle>Staked {poolInfo?.stakingAsset.isLpToken ? 'LP' : 'Token'}</StakingColumnTitle>
-        <TYPE.white fontSize={16} marginRight="1.5rem">
+        <TYPE.white fontSize="1.2rem" marginRight="1.5rem">
           {stakingInfo.stakedAmount.toSignificant(6)}
         </TYPE.white>
         {approval !== ApprovalState.NOT_APPROVED ? (
@@ -253,7 +253,7 @@ export default function PoolCard({ pid, stakingInfo }: { pid: number; stakingInf
           <ButtonPrimary
             height={28}
             width="auto"
-            fontSize={12}
+            fontSize="0.9rem"
             padding="0.166rem 0.4rem"
             borderRadius="0.133rem"
             onClick={approve}
@@ -283,14 +283,14 @@ export default function PoolCard({ pid, stakingInfo }: { pid: number; stakingInf
     return (
       <StakingColumn isMobile={isMobile} isHideInMobile={isHideInMobile} style={{ marginTop }}>
         <StakingColumnTitle>Earned Rewards</StakingColumnTitle>
-        <TYPE.white fontSize={16}>
+        <TYPE.white fontSize="1.2rem">
           {stakingInfo.pendingReward.toSignificant(6)} {rewardToken.symbol}
         </TYPE.white>
         <div className="actions">
           <ButtonPrimary
             height={28}
             width="auto"
-            fontSize={12}
+            fontSize="0.9rem"
             padding="0.166rem 0.4rem"
             borderRadius="0.133rem"
             onClick={() => setShowClaimRewardModal(true)}
@@ -331,19 +331,19 @@ export default function PoolCard({ pid, stakingInfo }: { pid: number; stakingInf
         <EarningManagement isMobile={isMobile} isHideInMobile />
         <StakingColumn isMobile={isMobile}>
           <StakingColumnTitle>APR</StakingColumnTitle>
-          <TYPE.white fontSize={16}>
+          <TYPE.white fontSize="1.2rem">
             {calculatedApr && calculatedApr !== Infinity ? calculatedApr.toFixed(2) : '--.--'}%
           </TYPE.white>
         </StakingColumn>
         <StakingColumn isMobile={isMobile}>
           <StakingColumnTitle>Liquidity TVL</StakingColumnTitle>
-          <TYPE.white fontSize={16}>
+          <TYPE.white fontSize="1.2rem">
             $ {totalValueLockedInUSD ? totalValueLockedInUSD.toSignificant(6) : '--.--'}
           </TYPE.white>
         </StakingColumn>
         <StakingColumn isMobile={isMobile} isHideInDesktop className="mobile-details-button">
           <TYPE.green01
-            fontSize={13}
+            fontSize="0.97rem"
             onClick={() => setMobileActionExpansion((prevState) => !prevState)}
             style={{ cursor: 'pointer', display: 'flex' }}
           >
