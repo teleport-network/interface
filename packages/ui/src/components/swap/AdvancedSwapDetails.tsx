@@ -1,16 +1,15 @@
 import { Trade, TradeType } from '@teleswap/sdk'
-import useThemedContext from 'hooks/useThemedContext'
-import { useEffect, useState } from 'react'
-import { Box } from 'rebass'
-import styled from 'styled-components'
-
 import LineVIcon from 'assets/images/tele/lineV.png'
 import ArrowHGreen from 'assets/svg/arrowHGreen.svg'
 import ArrowHLoneLine from 'assets/svg/arrowHLoneLine.svg'
 import arrowShowRoute from 'assets/svg/arrowShowRoute.svg'
 import TeleRouteIcon from 'assets/svg/teleRoute.svg'
 import axios from 'axios'
-import BigNumber from 'bignumber.js'
+import useThemedContext from 'hooks/useThemedContext'
+import { useState } from 'react'
+import { Box } from 'rebass'
+import styled from 'styled-components'
+
 import { Field } from '../../state/swap/actions'
 import { useUserSlippageTolerance } from '../../state/user/hooks'
 import { ExternalLink, TYPE } from '../../theme'
@@ -150,7 +149,7 @@ const RouteCellStyled = styled(Box)`
   }
 `
 const RouteAccordionStyled = styled(Box)`
-  display: inline-block;
+  display: inline-flex;
   transition: all 0.3s;
   margin-left: 0.4rem;
 `
@@ -167,7 +166,7 @@ export function AdvancedSwapDetails({ trade }: AdvancedSwapDetailsProps) {
   const [allowedSlippage] = useUserSlippageTolerance()
   // const showRoute = Boolean(trade && trade.route.path.length > 2)
   const showRoute = Boolean(trade && trade.route.path.length >= 2)
-  const routeData = trade && trade['routeData'] || null;
+  const routeData = (trade && trade['routeData']) || null
   return (
     <AutoColumn gap="0.4rem">
       {trade && (
@@ -188,7 +187,6 @@ export function AdvancedSwapDetails({ trade }: AdvancedSwapDetailsProps) {
                   onClick={() => setShowRouterDetail(!showRouterDetail)}
                   sx={{ marginLeft: '.5rem' }}
                 >
-                  {/* {'>'} */}
                   <img
                     src={arrowShowRoute}
                     alt=""
