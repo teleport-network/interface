@@ -19,7 +19,7 @@ import { useHistory, useParams } from 'react-router-dom'
 import { Box, BoxProps, Flex, Text } from 'rebass'
 import styled from 'styled-components'
 
-import { ButtonError, ButtonLight, ButtonPrimary } from '../../components/Button'
+import { ButtonError, ButtonPrimary, ConnectButtonInBody } from '../../components/Button'
 import { AutoColumn, ColumnCenter } from '../../components/Column'
 import CurrencyInputPanel from '../../components/CurrencyInputPanel'
 // import { MinimalPositionCardPart } from '../../components/PositionCard'
@@ -580,15 +580,16 @@ export default function AddLiquidity() {
               marginBottom: '0!important',
               'a,img': {
                 height: '1.5rem',
-                width: '1.5rem',
-                marginRight: '2rem'
+                width: '1.5rem'
               }
             }}
           />
           <span style={{ fontFamily: 'Poppins', fontWeight: 400, color: '#FFFFFF' }} className={'title'}>
             Add Liquidity
           </span>
-          <Settings />
+          <Box width="1.5rem" display={'flex'} justifyContent="center" sx={{ div: { margin: '0!important' } }}>
+            <Settings />
+          </Box>
         </AutoRow>
         <AutoColumn gap=".4rem">
           {/* {noLiquidity ||
@@ -833,13 +834,7 @@ export default function AddLiquidity() {
                 </AutoColumn>
               ) : !account ? (
                 <AutoColumn style={{ marginTop: '1rem' }}>
-                  <ButtonLight
-                    className="title"
-                    sx={{ backgroundColor: '#39E1BA', color: '#05050e', fontWeight: '400!important' }}
-                    onClick={toggleWalletModal}
-                  >
-                    Connect Wallet
-                  </ButtonLight>
+                  <ConnectButtonInBody />
                 </AutoColumn>
               ) : (
                 <AutoColumn style={{ marginTop: '1rem' }}>
@@ -1070,13 +1065,7 @@ export default function AddLiquidity() {
                 </AutoColumn>
               ) : !account ? (
                 <AutoColumn style={{ marginTop: '1rem' }}>
-                  <ButtonLight
-                    className="title"
-                    sx={{ backgroundColor: '#39E1BA', color: '#05050e', fontWeight: '400!important' }}
-                    onClick={toggleWalletModal}
-                  >
-                    Connect Wallet
-                  </ButtonLight>
+                  <ConnectButtonInBody />
                 </AutoColumn>
               ) : (
                 <AutoColumn style={{ marginTop: '1rem' }}>

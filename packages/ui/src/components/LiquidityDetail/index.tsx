@@ -288,11 +288,12 @@ export default function LiquidityDetail() {
                 width: '40rem',
                 display: 'flex',
                 alignItems: 'flex-start',
+                marginBottom: '2rem',
                 maxWidth: '90vw'
               }
         }
       >
-        <BackToMyLiquidity marginBottom={'unset'} height="100%" />
+        <BackToMyLiquidity height="100%" />
         {isMobile && (
           <Box display="flex" justifyContent={'center'} alignItems="center">
             <DoubleCurrencyLogoHorizontal currency0={currencyA} currency1={currencyB} size={'1.8rem'} />
@@ -861,14 +862,13 @@ export function BackToMyLiquidity({ showText = true, ...flexProps }: { showText?
   return (
     <Flex
       height={'1.8rem'}
-      marginBottom={'1rem'}
       justifyContent="center"
       alignItems={'center'}
       sx={{
         'a,img': {
           height: '0.875rem',
           width: '0.875rem',
-          marginRight: '1rem'
+          marginRight: showText ? '1rem' : 'unset'
         },
         ...(flexProps.sx ? flexProps.sx : {})
       }}
