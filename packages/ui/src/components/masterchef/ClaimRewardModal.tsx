@@ -134,6 +134,8 @@ export default function ClaimRewardModal({ isOpen, onDismiss, pid, stakingInfo }
             disabled={!!error}
             error={!!error && !!stakingInfo.stakedAmount}
             onClick={onHarvestButtonClicked}
+            fontWeight={600}
+            fontSize="1.2rem"
           >
             {error ?? t('claim')}
           </ButtonError>
