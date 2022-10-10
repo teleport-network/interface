@@ -2,9 +2,10 @@ import { TransactionResponse } from '@ethersproject/providers'
 import { Chef } from 'constants/farm/chef.enum'
 import { ChefStakingInfo } from 'hooks/farm/useChefStakingInfo'
 import useMasterChef from 'hooks/farm/useMasterChef'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
+import useUSDCPrice from 'utils/useUSDCPrice'
 
 import { useActiveWeb3React } from '../../hooks'
 import { useTransactionAdder } from '../../state/transactions/hooks'
@@ -21,6 +22,22 @@ const ContentWrapper = styled(AutoColumn)`
   width: 100%;
   padding: 1rem;
   color: white;
+`
+const RewardStats = styled.div`
+  display: flex;
+  justify-content: space-between;
+  font-family: 'Poppins';
+  font-weight: 500;
+  .column {
+    .c-title {
+      font-size: 1.05rem;
+      line-height: 1.65rem;
+      color: #cccccc;
+    }
+    .content {
+      font-size: 1.2rem;
+    }
+  }
 `
 
 interface ClaimRewardModalProps {
@@ -39,6 +56,10 @@ export default function ClaimRewardModal({ isOpen, onDismiss, pid, stakingInfo }
   const [attempting, setAttempting] = useState(false)
 
   const masterChef = useMasterChef(Chef.MINICHEF)
+
+  console.debug('claimreward::stakingInfo?.rewardToken', stakingInfo?.rewardToken)
+  const rewardTokenPrice = useUSDCPrice(stakingInfo?.rewardToken)
+  console.debug('claimreward::rewardTokenPrice', rewardTokenPrice)
 
   // track and parse user input
   const stakingCurrency = stakingInfo?.stakingToken
@@ -64,6 +85,16 @@ export default function ClaimRewardModal({ isOpen, onDismiss, pid, stakingInfo }
       })
   }
 
+  const computedPendingRewardInUSD = useMemo(() => {
+    try {
+      if (stakingInfo.pendingReward && rewardTokenPrice)
+        return rewardTokenPrice?.quote(stakingInfo.pendingReward).toSignificant(2)
+    } catch (error) {
+      console.error('error when computedPendingRewardInUSD:', error)
+    }
+    return '--.--'
+  }, [rewardTokenPrice, stakingInfo])
+
   let error: string | undefined
   if (!account) {
     error = 'Connect Wallet'
@@ -74,22 +105,31 @@ export default function ClaimRewardModal({ isOpen, onDismiss, pid, stakingInfo }
       {!attempting && !hash && (
         <ContentWrapper gap="lg">
           <RowBetween>
-            <TYPE.mediumHeader color="#FFFFFF">{t('claimRewards')}</TYPE.mediumHeader>
+            <TYPE.mediumHeader color="#FFFFFF" style={{ fontFamily: 'Dela Gothic One' }}>
+              {t('claimRewards')}
+            </TYPE.mediumHeader>
             <CloseIcon onClick={wrappedOndismiss} color="#FFFFFF" />
           </RowBetween>
-          {stakingInfo.pendingReward && (
-            <AutoColumn justify="center" gap="md">
-              <TYPE.white fontWeight={600} fontSize={36}>
-                {<FormattedCurrencyAmount currencyAmount={stakingInfo.pendingReward} />}
-              </TYPE.white>
-              <TYPE.white>
-                {t('unclaimed')} {stakingInfo.rewardToken.symbol}
-              </TYPE.white>
-            </AutoColumn>
-          )}
-          {/* <TYPE.subHeader style={{ textAlign: 'center' }}>
-            Unused sub header, we will block this. Enable this when we need to do so.
-          </TYPE.subHeader> */}
+          <RewardStats>
+            <div className="column">
+              <div className="c-title">Token</div>
+              <div className="content">{stakingInfo.rewardToken.symbol}</div>
+            </div>
+            <div className="column">
+              <div className="c-title">Value</div>
+              <div className="content">$ {computedPendingRewardInUSD}</div>
+            </div>
+            <div className="column">
+              <div className="c-title">Amount</div>
+              <div className="content">
+                {stakingInfo.pendingReward ? (
+                  <FormattedCurrencyAmount currencyAmount={stakingInfo.pendingReward} />
+                ) : (
+                  '--.--'
+                )}
+              </div>
+            </div>
+          </RewardStats>
           <ButtonError
             disabled={!!error}
             error={!!error && !!stakingInfo.stakedAmount}
