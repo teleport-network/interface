@@ -22,7 +22,6 @@ import { ButtonConfirmed, ButtonError } from '../Button'
 import { AutoColumn } from '../Column'
 import CurrencyInputPanel from '../CurrencyInputPanel'
 import Modal from '../Modal'
-import ProgressCircles from '../ProgressSteps'
 import { RowBetween } from '../Row'
 // const HypotheticalRewardRate = styled.div<{ dim: boolean }>`
 //   display: flex;
