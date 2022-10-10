@@ -1,11 +1,10 @@
 import { BigNumber } from '@ethersproject/bignumber';
 import { Protocol } from '@teleswap/router-sdk';
-import { Fraction, Percent } from "@teleswap/sdk/src";
-import { ONE, ZERO } from "@teleswap/sdk/src/constants";
+import { Fraction, ONE, Percent, ZERO } from '@teleswap/sdk';
 import { Token, TradeType } from '@uniswap/sdk-core';
 import { Pool } from '@uniswap/v3-sdk';
 import _ from 'lodash';
-import invariant from "tiny-invariant";
+import invariant from 'tiny-invariant';
 
 import { IV2PoolProvider } from '../../../providers/v2/pool-provider';
 import { IV3PoolProvider } from '../../../providers/v3/pool-provider';
@@ -139,29 +138,33 @@ export class V2RouteWithValidQuote implements IV2RouteWithValidQuote {
 
     this.poolAddresses = _.map(
       route.pairs,
-      (p) => v2PoolProvider.getPoolAddress(p.token0, p.token1, p.stable).poolAddress
+      (p) =>
+        v2PoolProvider.getPoolAddress(p.token0, p.token1, p.stable).poolAddress
     );
 
     this.tokenPath = this.route.path;
   }
 
   public minimumAmountOut(slippageTolerance: Percent): CurrencyAmount {
-    invariant(!slippageTolerance.lessThan(ZERO), 'SLIPPAGE_TOLERANCE')
+    invariant(!slippageTolerance.lessThan(ZERO), 'SLIPPAGE_TOLERANCE');
     if (this.tradeType === TradeType.EXACT_OUTPUT) {
-      return this.quote
+      return this.quote;
     } else {
       const slippageAdjustedAmountOut = new Fraction(ONE)
         .add(new Fraction(slippageTolerance.numerator, slippageTolerance.denominator))
         .invert()
-        .multiply(this.quote.numerator).quotient
-      return CurrencyAmount.fromRawAmount(this.quote.currency, slippageAdjustedAmountOut)
+        .multiply(this.quote.numerator).quotient;
+      return CurrencyAmount.fromRawAmount(
+        this.quote.currency,
+        slippageAdjustedAmountOut
+      );
     }
   }
 
   public maximumAmountIn(slippageTolerance: Percent): CurrencyAmount {
-    invariant(!slippageTolerance.lessThan(ZERO), 'SLIPPAGE_TOLERANCE')
+    invariant(!slippageTolerance.lessThan(ZERO), 'SLIPPAGE_TOLERANCE');
     if (this.tradeType === TradeType.EXACT_INPUT) {
-      return this.amount
+      return this.amount;
     } else {
       const slippageAdjustedAmountIn = new Fraction(ONE)
         .add(new Fraction(slippageTolerance.numerator, slippageTolerance.denominator))
@@ -369,7 +372,8 @@ export class MixedRouteWithValidQuote implements IMixedRouteWithValidQuote {
     this.poolAddresses = _.map(route.pools, (p) => {
       return p instanceof Pool
         ? v3PoolProvider.getPoolAddress(p.token0, p.token1, p.fee).poolAddress
-        : v2PoolProvider.getPoolAddress(p.token0, p.token1, p.stable).poolAddress;
+        : v2PoolProvider.getPoolAddress(p.token0, p.token1, p.stable)
+            .poolAddress;
     });
 
     this.tokenPath = this.route.path;
