@@ -542,7 +542,7 @@ export function LiquidityCard({
   useEffect(() => {
     if (ethPrice) {
       ;(async () => {
-        const pairAddress = Pair.getAddress(pair.token0, pair.token1).toLowerCase()
+        const pairAddress = Pair.getAddress(pair.token0, pair.token1, pairModeStable).toLowerCase()
         try {
           const {
             data: {
@@ -611,8 +611,9 @@ export function LiquidityCard({
         >
           {!currency0 || !currency1 ? <Dots>Loading</Dots> : `${currency0.symbol}/${currency1.symbol}`}
         </Box>
-        <Box>{userPoolBalance ? userPoolBalance.toSignificant(4) : '-'}</Box>
+        <Box>{userPoolBalance ? userPoolBalance.toFixed(4) : '-'}</Box>
         <Box>
+          $&nbsp;
           {fullInfoPair && userHoldingPercentage && userHoldingPercentage !== '-'
             ? new Bn(fullInfoPair.trackedReserveETH)
                 .multipliedBy(ethPrice)
@@ -620,7 +621,6 @@ export function LiquidityCard({
                 .decimalPlaces(4, Bn.ROUND_HALF_UP)
                 .toString()
             : '-'}
-          &nbsp;$
         </Box>
         {/* <td>xx</td> */}
         <Box style={{ display: 'flex', justifyContent: 'space-between', justifySelf: 'end' }}>
@@ -710,8 +710,9 @@ export function LiquidityCard({
         <MobileYourLiquidityCardColumnHead>Amount</MobileYourLiquidityCardColumnHead>
         <MobileYourLiquidityCardColumnHead>Value</MobileYourLiquidityCardColumnHead>
         <MobileYourLiquidityCardColumnHead>Unclaimed Earnings</MobileYourLiquidityCardColumnHead>
-        <Box>{userPoolBalance ? userPoolBalance.toSignificant(4) : '-'}</Box>
+        <Box>{userPoolBalance ? userPoolBalance.toFixed(4) : '-'}</Box>
         <Box>
+          $&nbsp;
           {fullInfoPair && userHoldingPercentage && userHoldingPercentage !== '-'
             ? new Bn(fullInfoPair.trackedReserveETH)
                 .multipliedBy(ethPrice)
@@ -719,9 +720,8 @@ export function LiquidityCard({
                 .decimalPlaces(4, Bn.ROUND_HALF_UP)
                 .toString()
             : '-'}
-          &nbsp;$
         </Box>
-        <Box>{unclaimedAmount ? unclaimedAmount.toSignificant(4) : '-'}</Box>
+        <Box>{unclaimedAmount ? unclaimedAmount.toFixed(4) : '-'}</Box>
       </>
     )
   }
