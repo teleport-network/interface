@@ -1,9 +1,9 @@
-import styled from 'styled-components'
-import { useWeb3React } from '@web3-react/core';
+import { useWeb3React } from '@web3-react/core'
+import { getChainInfo } from 'constants/chainInfo'
 import { SupportedChainId } from 'constants/chains'
 import { FALLBACK_URLS, RPC_URLS } from 'constants/networks'
-import { getChainInfo } from 'constants/chainInfo';
-import { useCallback, useState } from 'react';
+import { useState } from 'react'
+import styled from 'styled-components'
 
 const NetworkStyled = styled.div`
   position: relative;
@@ -36,7 +36,6 @@ const NetBodyStyle = styled.div`
   width: 200px;
 `
 const NetBodyRowStyle = styled.div`
-
   &:hover {
     color: red;
   }
@@ -62,26 +61,28 @@ const NETWORK_SELECTOR_CHAINS = [
   SupportedChainId.MAINNET,
   SupportedChainId.ROPSTEN,
   SupportedChainId.RINKEBY,
-  SupportedChainId.OPTIMISM_GOERLI,
+  SupportedChainId.OPTIMISM_GOERLI
 ]
 
 export default function Network() {
-  const { connector, chainId } = useWeb3React();
+  const { connector, chainId } = useWeb3React()
   const [showNetSelect, setShowNetSelect] = useState(false)
   const info = getChainInfo(chainId)
 
   const switchNet = (chainIdNumber) => {
-    (async () => {
+    ;(async () => {
       if (connector) {
-        let chainIdHex = (Number(chainIdNumber)).toString(16)
-        let chainId = `0x${chainIdHex}`
-        let provider = await connector.getProvider()
-        if (!chainIdHex || !provider) { return }
+        const chainIdHex = Number(chainIdNumber).toString(16)
+        const chainId = `0x${chainIdHex}`
+        const provider = await connector.getProvider()
+        if (!chainIdHex || !provider) {
+          return
+        }
         try {
           await provider.request({
             method: 'wallet_switchEthereumChain',
-            params: [{ chainId }],
-          });
+            params: [{ chainId }]
+          })
         } catch (error) {
           const info = getChainInfo(chainIdNumber)
           const addChainParameter = {
@@ -89,39 +90,71 @@ export default function Network() {
             chainName: info.label,
             rpcUrls: [getRpcUrl(chainIdNumber)],
             nativeCurrency: info.nativeCurrency,
-            blockExplorerUrls: [info.explorer],
+            blockExplorerUrls: [info.explorer]
           }
           await provider.request({
             method: 'wallet_addEthereumChain',
-            params: [addChainParameter],
-          });
+            params: [addChainParameter]
+          })
         }
-
       }
     })()
   }
   return (
     <NetworkStyled onMouseEnter={() => setShowNetSelect(true)} onMouseLeave={() => setShowNetSelect(false)}>
-      <NetHeadStyle >
-        {info ? <>
-          <img className="tokenIcon" src={info.logoUrl} alt="" />
-          <span>{info.label}</span>
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="NetworkSelector__StyledChevronDown-sc-w04zhs-16 fxCAMp"><polyline points="6 9 12 15 18 9"></polyline></svg>
-        </> : <>
-          <span>Switch Network</span>
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="NetworkSelector__StyledChevronDown-sc-w04zhs-16 fxCAMp"><polyline points="6 9 12 15 18 9"></polyline></svg>
-        </>
-        }
+      <NetHeadStyle>
+        {info ? (
+          <>
+            <img className="tokenIcon" src={info.logoUrl} alt="" />
+            <span>{info.label}</span>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              className="NetworkSelector__StyledChevronDown-sc-w04zhs-16 fxCAMp"
+            >
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </>
+        ) : (
+          <>
+            <span>Switch Network</span>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              className="NetworkSelector__StyledChevronDown-sc-w04zhs-16 fxCAMp"
+            >
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </>
+        )}
       </NetHeadStyle>
-      {showNetSelect && <NetBodyStyle>
-        <div>Select a network</div>
-        {NETWORK_SELECTOR_CHAINS.map((chainIdNumber) => {
-          let info = getChainInfo(chainIdNumber)
-          return (<NetBodyRowStyle key={chainIdNumber} onClick={() => switchNet(chainIdNumber)}>
-            {info.label}
-          </NetBodyRowStyle>)
-        })}
-      </NetBodyStyle>}
+      {showNetSelect && (
+        <NetBodyStyle>
+          <div>Select a network</div>
+          {NETWORK_SELECTOR_CHAINS.map((chainIdNumber) => {
+            const info = getChainInfo(chainIdNumber)
+            return (
+              <NetBodyRowStyle key={chainIdNumber} onClick={() => switchNet(chainIdNumber)}>
+                {info.label}
+              </NetBodyRowStyle>
+            )
+          })}
+        </NetBodyStyle>
+      )}
     </NetworkStyled>
   )
 }

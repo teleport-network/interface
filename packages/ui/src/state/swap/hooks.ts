@@ -1,5 +1,6 @@
 import { parseUnits } from '@ethersproject/units'
 import { Currency, CurrencyAmount, ETHER, JSBI, Token, TokenAmount, Trade } from '@teleswap/sdk'
+import BigNumber from 'bignumber.js'
 import { ParsedQs } from 'qs'
 import { useCallback, useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
@@ -16,8 +17,6 @@ import { useUserSlippageTolerance } from '../user/hooks'
 import { useCurrencyBalances } from '../wallet/hooks'
 import { Field, replaceSwapState, selectCurrency, setRecipient, switchCurrencies, typeInput } from './actions'
 import { SwapState } from './reducer'
-import BigNumber from 'bignumber.js'
-import axios from 'axios'
 
 export function useSwapState(): AppState['swap'] {
   return useSelector<AppState, AppState['swap']>((state) => state.swap)
@@ -192,20 +191,26 @@ export function useDerivedSwapInfo(): {
     inputError = 'Insufficient ' + amountIn.currency.symbol + ' balance'
   }
 
-  // api route 
+  // api route
   const [routeData, setRouteData] = useState({})
 
-  const inputName = currencies && currencies[Field.INPUT]?.name || '';
-  const outputName = currencies && currencies[Field.OUTPUT]?.name || '';
+  const inputName = (currencies && currencies[Field.INPUT]?.name) || ''
+  const outputName = (currencies && currencies[Field.OUTPUT]?.name) || ''
   useEffect(() => {
-    (async () => {
+    ;(async () => {
       try {
-        if (currencies[Field.INPUT] && currencies[Field.INPUT]?.hasOwnProperty('address') && currencies[Field.OUTPUT] && currencies[Field.OUTPUT]?.hasOwnProperty('address') && currencies[Field.OUTPUT]?.hasOwnProperty('decimals')) {
-          let inputItem = currencies[Field.INPUT]
+        if (
+          currencies[Field.INPUT] &&
+          currencies[Field.INPUT]?.hasOwnProperty('address') &&
+          currencies[Field.OUTPUT] &&
+          currencies[Field.OUTPUT]?.hasOwnProperty('address') &&
+          currencies[Field.OUTPUT]?.hasOwnProperty('decimals')
+        ) {
+          const inputItem = currencies[Field.INPUT]
           if (!inputItem || !inputItem['address'] || !inputItem['chainId']) {
             throw new Error(`Invalid`)
           }
-          let outputItem = currencies[Field.OUTPUT]
+          const outputItem = currencies[Field.OUTPUT]
           if (!outputItem || !outputItem['address'] || !outputItem['chainId']) {
             throw new Error(`Invalid`)
           }
@@ -214,15 +219,15 @@ export function useDerivedSwapInfo(): {
           const params = {
             tokenInAddress: inputItem['address'],
             tokenInChainId: inputItem['chainId'],
-            tokenOutAddress: outputItem["address"],
-            tokenOutChainId: outputItem["chainId"],
+            tokenOutAddress: outputItem['address'],
+            tokenOutChainId: outputItem['chainId'],
             amount,
             type: isExactIn ? 'exactIn' : 'exactOut',
             protocols: 'v2'
           }
-          let volidatas = Object.keys(params).find((key) => {
+          /*  let volidatas = Object.keys(params).find((key) => {
             return !!params[key] == false
-          })
+          }) */
           const data = JSON.stringify(params)
           const url = 'https://teleport-routing.qa.davionlabs.com/quote'
           const config = {
@@ -234,10 +239,70 @@ export function useDerivedSwapInfo(): {
             data
           }
           // let response = await axios(config)
-          let response: any = {}
-          response['data'] = {"blockNumber":"1812566","amount":"1000000000000000000","amountDecimals":"1","quote":"99989999999786560901","quoteDecimals":"99.989999999786560901","quoteGasAdjusted":"99989999999672744170","quoteGasAdjustedDecimals":"99.98999999967274417","gasUseEstimateQuote":"113816730","gasUseEstimateQuoteDecimals":"0.00000000011381673","gasUseEstimate":"135000","gasUseEstimateUSD":"0.00000000011381673","gasPriceWei":"1","route":[[{"type":"v2-pool","address":"0xa60306D462cb8a64CF1652Ee9c41E12E47D384c4","tokenIn":{"chainId":420,"decimals":"18","address":"0x53B1c6025E3f9B149304Cf1B39ee7c577d76c6Ca","symbol":"USDC"},"tokenOut":{"chainId":420,"decimals":"18","address":"0x5986C8FfADCA9cee5C28A85cC3d4F335aab5Dc90","symbol":"USDT"},"reserve0":{"token":{"chainId":420,"decimals":"18","address":"0x53B1c6025E3f9B149304Cf1B39ee7c577d76c6Ca","symbol":"USDC"},"quotient":"10060670000000000000000000"},"reserve1":{"token":{"chainId":420,"decimals":"18","address":"0x5986C8FfADCA9cee5C28A85cC3d4F335aab5Dc90","symbol":"USDT"},"quotient":"10060670000000000000000000"},"amountIn":"1000000000000000000","amountOut":"1000000000000000000","stable":true}]],"routeString":"[V2] 100.00% = USDC -- [0xa60306D462cb8a64CF1652Ee9c41E12E47D384c4] --> USDT","percents":[100],"quoteId":""}
+          const response: any = {}
+          response['data'] = {
+            blockNumber: '1812566',
+            amount: '1000000000000000000',
+            amountDecimals: '1',
+            quote: '99989999999786560901',
+            quoteDecimals: '99.989999999786560901',
+            quoteGasAdjusted: '99989999999672744170',
+            quoteGasAdjustedDecimals: '99.98999999967274417',
+            gasUseEstimateQuote: '113816730',
+            gasUseEstimateQuoteDecimals: '0.00000000011381673',
+            gasUseEstimate: '135000',
+            gasUseEstimateUSD: '0.00000000011381673',
+            gasPriceWei: '1',
+            route: [
+              [
+                {
+                  type: 'v2-pool',
+                  address: '0xa60306D462cb8a64CF1652Ee9c41E12E47D384c4',
+                  tokenIn: {
+                    chainId: 420,
+                    decimals: '18',
+                    address: '0x53B1c6025E3f9B149304Cf1B39ee7c577d76c6Ca',
+                    symbol: 'USDC'
+                  },
+                  tokenOut: {
+                    chainId: 420,
+                    decimals: '18',
+                    address: '0x5986C8FfADCA9cee5C28A85cC3d4F335aab5Dc90',
+                    symbol: 'USDT'
+                  },
+                  reserve0: {
+                    token: {
+                      chainId: 420,
+                      decimals: '18',
+                      address: '0x53B1c6025E3f9B149304Cf1B39ee7c577d76c6Ca',
+                      symbol: 'USDC'
+                    },
+                    quotient: '10060670000000000000000000'
+                  },
+                  reserve1: {
+                    token: {
+                      chainId: 420,
+                      decimals: '18',
+                      address: '0x5986C8FfADCA9cee5C28A85cC3d4F335aab5Dc90',
+                      symbol: 'USDT'
+                    },
+                    quotient: '10060670000000000000000000'
+                  },
+                  amountIn: '1000000000000000000',
+                  amountOut: '1000000000000000000',
+                  stable: true
+                }
+              ]
+            ],
+            routeString: '[V2] 100.00% = USDC -- [0xa60306D462cb8a64CF1652Ee9c41E12E47D384c4] --> USDT',
+            percents: [100],
+            quoteId: ''
+          }
           if (response.data && response.data.hasOwnProperty('quoteDecimals')) {
-            const parsedOutAmount = tryParseAmount(response.data.quoteDecimals, (isExactIn ? outputCurrency : inputCurrency) ?? undefined)
+            const parsedOutAmount = tryParseAmount(
+              response.data.quoteDecimals,
+              (isExactIn ? outputCurrency : inputCurrency) ?? undefined
+            )
             response.data['parsedOutAmount'] = parsedOutAmount
             setRouteData(response.data)
           }
@@ -246,8 +311,6 @@ export function useDerivedSwapInfo(): {
         console.log('useDerivedSwapInfo error', error)
       }
     })()
-    return () => {
-    }
   }, [typedValue, inputName, outputName, isExactIn])
 
   return {
