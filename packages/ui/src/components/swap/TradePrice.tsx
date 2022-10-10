@@ -1,6 +1,6 @@
 import { Price } from '@teleswap/sdk'
+import SwapSwichPriceUnit from 'assets/svg/swap-swich-price-unit.svg'
 import useThemedContext from 'hooks/useThemedContext'
-import { Repeat } from 'react-feather'
 import { Text } from 'rebass'
 
 import { StyledBalanceMaxMini } from './styleds'
@@ -32,7 +32,7 @@ export default function TradePrice({ price, showInverted, setShowInverted }: Tra
         <>
           {formattedPrice ?? '-'} {label}
           <StyledBalanceMaxMini onClick={() => setShowInverted(!showInverted)}>
-            <Repeat size={14} />
+            <img src={SwapSwichPriceUnit} alt="swap-swich-price-unit" style={{ height: '1.5rem', width: '1.5rem' }} />
           </StyledBalanceMaxMini>
         </>
       ) : (

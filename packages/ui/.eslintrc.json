@@ -58,6 +58,7 @@
     "sort-imports": "off",
     "no-restricted-modules": "warn",
     "no-restricted-imports": "off",
+    "react/no-unknown-property": "warn",
     "object-shorthand": [
       "error",
       "always"

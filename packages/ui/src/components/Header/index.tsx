@@ -4,7 +4,6 @@
 // } from '@teleswap/sdk'
 import TeleLogo from 'assets/images/tele/logo.svg'
 import TextLogo from 'assets/svg/textLogo.svg'
-import { ENABLED_NETWORK_LABELS } from 'constants/index'
 import useThemedContext from 'hooks/useThemedContext'
 import React, { useLayoutEffect, useRef, useState } from 'react'
 // import { darken } from 'polished'
@@ -548,9 +547,7 @@ export default function Header() {
               }
             }}
           >
-            {
-              <Network></Network>
-            }
+            {<Network></Network>}
             {/* <HideSmall>
               {chainId && ENABLED_NETWORK_LABELS[chainId] && (
                 <NetworkCard className="secondary-title" title={ENABLED_NETWORK_LABELS[chainId]}>

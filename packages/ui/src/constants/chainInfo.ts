@@ -7,7 +7,7 @@ import { OPTIMISM_LIST } from './lists'
 
 export enum NetworkType {
   L1,
-  L2,
+  L2
 }
 
 interface BaseChainInfo {
@@ -54,7 +54,7 @@ const CHAIN_INFO: any = {
     infoLink: 'https://info.uniswap.org/#/',
     label: 'Ethereum',
     logoUrl: ethereumLogoUrl,
-    nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
+    nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 }
   },
   [SupportedChainId.RINKEBY]: {
     networkType: NetworkType.L1,
@@ -63,7 +63,7 @@ const CHAIN_INFO: any = {
     infoLink: 'https://info.uniswap.org/#/',
     label: 'Rinkeby',
     logoUrl: ethereumLogoUrl,
-    nativeCurrency: { name: 'Rinkeby Ether', symbol: 'rETH', decimals: 18 },
+    nativeCurrency: { name: 'Rinkeby Ether', symbol: 'rETH', decimals: 18 }
   },
   [SupportedChainId.ROPSTEN]: {
     networkType: NetworkType.L1,
@@ -72,7 +72,7 @@ const CHAIN_INFO: any = {
     infoLink: 'https://info.uniswap.org/#/',
     label: 'Ropsten',
     logoUrl: ethereumLogoUrl,
-    nativeCurrency: { name: 'Ropsten Ether', symbol: 'ropETH', decimals: 18 },
+    nativeCurrency: { name: 'Ropsten Ether', symbol: 'ropETH', decimals: 18 }
   },
   [SupportedChainId.KOVAN]: {
     networkType: NetworkType.L1,
@@ -81,7 +81,7 @@ const CHAIN_INFO: any = {
     infoLink: 'https://info.uniswap.org/#/',
     label: 'Kovan',
     logoUrl: ethereumLogoUrl,
-    nativeCurrency: { name: 'Kovan Ether', symbol: 'kovETH', decimals: 18 },
+    nativeCurrency: { name: 'Kovan Ether', symbol: 'kovETH', decimals: 18 }
   },
   [SupportedChainId.GOERLI]: {
     networkType: NetworkType.L1,
@@ -90,7 +90,7 @@ const CHAIN_INFO: any = {
     infoLink: 'https://info.uniswap.org/#/',
     label: 'Görli',
     logoUrl: ethereumLogoUrl,
-    nativeCurrency: { name: 'Görli Ether', symbol: 'görETH', decimals: 18 },
+    nativeCurrency: { name: 'Görli Ether', symbol: 'görETH', decimals: 18 }
   },
   [SupportedChainId.OPTIMISM_GOERLI]: {
     networkType: NetworkType.L2,
@@ -104,7 +104,7 @@ const CHAIN_INFO: any = {
     logoUrl: optimismLogoUrl,
     statusPage: 'https://optimism.io/status',
     helpCenterUrl: 'https://help.uniswap.org/en/collections/3137778-uniswap-on-optimistic-ethereum-oξ',
-    nativeCurrency: { name: 'Optimism Goerli Ether', symbol: 'görOpETH', decimals: 18 },
+    nativeCurrency: { name: 'Optimism Goerli Ether', symbol: 'görOpETH', decimals: 18 }
   }
 }
 
