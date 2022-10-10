@@ -34,6 +34,7 @@ import Modal from '../Modal'
 // import Menu from '../Menu'
 import Row, { RowFixed } from '../Row'
 import Web3Status from '../Web3Status'
+import Network from './Network'
 import UniBalanceContent from './UniBalanceContent'
 
 const HeaderFrame = styled.div`
@@ -547,13 +548,16 @@ export default function Header() {
               }
             }}
           >
-            <HideSmall>
+            {
+              <Network></Network>
+            }
+            {/* <HideSmall>
               {chainId && ENABLED_NETWORK_LABELS[chainId] && (
                 <NetworkCard className="secondary-title" title={ENABLED_NETWORK_LABELS[chainId]}>
                   {ENABLED_NETWORK_LABELS[chainId]}
                 </NetworkCard>
               )}
-            </HideSmall>
+            </HideSmall> */}
             <AccountElement
               className="secondary-title"
               active={!!account}
@@ -566,7 +570,7 @@ export default function Header() {
             >
               {account && userEthBalance ? (
                 <BalanceText style={{ flexShrink: 0, color: theme.common2 }} pl="0.75rem" pr="0.5rem" fontWeight={500}>
-                  {userEthBalance?.toSignificant(4)} TELE
+                  {userEthBalance?.toSignificant(4)}
                 </BalanceText>
               ) : null}
               <Web3Status />
