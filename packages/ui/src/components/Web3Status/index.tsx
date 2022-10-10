@@ -231,11 +231,11 @@ function Web3StatusInner() {
           fontFamily: 'Poppins',
           fontStyle: 'normal',
           fontWeight: '600!important',
-          lineHeight: '32px',
+          lineHeight: '2.5rem',
           alignItems: 'flex-end',
           display: 'flex',
           color: '#000000',
-          padding: '0 1rem',
+          padding: '0 1.5rem!important',
           borderRadius: '0.8rem!important',
           height: '2.5rem'
         }}

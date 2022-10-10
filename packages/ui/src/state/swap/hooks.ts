@@ -158,7 +158,7 @@ export function useDerivedSwapInfo(): {
   }
 
   if (!parsedAmount) {
-    inputError = inputError ?? 'Enter an amount'
+    inputError = inputError ?? 'Enter Amount'
   }
 
   if (!currencies[Field.INPUT] || !currencies[Field.OUTPUT]) {

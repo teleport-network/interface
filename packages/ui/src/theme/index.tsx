@@ -165,10 +165,10 @@ export const TYPE = {
     return <TextWrapper fontWeight={400} fontSize={16} color={'text1'} {...props} />
   },
   largeHeader(props: TextProps) {
-    return <TextWrapper fontWeight={600} fontSize={24} {...props} />
+    return <TextWrapper fontWeight={600} fontSize="1.8rem" {...props} />
   },
   mediumHeader(props: TextProps) {
-    return <TextWrapper fontWeight={500} fontSize={20} {...props} />
+    return <TextWrapper fontWeight={500} fontSize="1.5rem" {...props} />
   },
   subHeader(props: TextProps) {
     return <TextWrapper fontWeight={400} fontSize={14} {...props} />
@@ -213,7 +213,7 @@ html, input, textarea, button {
 
 @font-face {
   font-family: 'Poppins';
-  src: url('../assets/fonts/font-poppins-regular.ttf');
+  src: url('/fonts/font-poppins-regular.ttf');
 }
 html,
 body {

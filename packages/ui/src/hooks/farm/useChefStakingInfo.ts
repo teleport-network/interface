@@ -90,7 +90,7 @@ export function useChefStakingInfo(): (ChefStakingInfo | undefined)[] {
       parsedData,
       rewardToken,
       stakedAmount: new TokenAmount(stakingToken, position.amount.toBigInt()),
-      pendingReward: new TokenAmount(stakingToken, position.pendingSushi.toBigInt()),
+      pendingReward: new TokenAmount(rewardToken, position.pendingSushi.toBigInt()),
       rewardDebt: CurrencyAmount.fromRawAmount(rewardToken, position.rewardDebt.toBigInt())
     }
   })

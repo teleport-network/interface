@@ -767,10 +767,10 @@ function TopPairRow({ v2Pair, index, ethPrice }: { v2Pair: any; index: number; e
       </Box>
       {!isMobile && <Box key={`${v2Pair.id}-3`}>{v2Pair.stable ? 'Stable' : 'Volatile'}</Box>}
       <Box key={`${v2Pair.id}-3`}>
+        $&nbsp;
         {ethPrice
           ? new Bn(v2Pair.trackedReserveETH).multipliedBy(ethPrice).decimalPlaces(4, Bn.ROUND_HALF_UP).toFixed(4)
           : '-'}
-        &nbsp; $
       </Box>
       <Box
         key={`${v2Pair.id}-4`}

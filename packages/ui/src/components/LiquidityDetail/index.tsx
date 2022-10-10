@@ -1,6 +1,7 @@
 import { Fraction, JSBI, Pair } from '@teleswap/sdk'
 import GoBack from 'assets/svg/goBack.svg'
-import BoBackBolder from 'assets/svg/goBackBolder.svg'
+import GoBackBolder from 'assets/svg/goBackBolder.svg'
+import GoBackMobile from 'assets/svg/goBackMobile.svg'
 import Bn from 'bignumber.js'
 import { ButtonPrimary } from 'components/Button'
 import CurrencyLogo from 'components/CurrencyLogo'
@@ -10,6 +11,7 @@ import { useTotalSupply } from 'data/TotalSupply'
 import gql from 'graphql-tag'
 import { useActiveWeb3React } from 'hooks'
 import { useCurrency } from 'hooks/Tokens'
+import { MobileBottomShadowContainer } from 'pages/AddLiquidity'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { isMobile } from 'react-device-detect'
 import { useDispatch } from 'react-redux'
@@ -143,7 +145,7 @@ export default function LiquidityDetail() {
     console.warn('not implemented')
   }, [])
 
-  const modalHeader = useCallback(() => {
+  /*   const modalHeader = useCallback(() => {
     return (
       <Flex>
         <Box
@@ -192,7 +194,7 @@ export default function LiquidityDetail() {
         </ButtonPrimary>
       </Flex>
     )
-  }, [claim, currencyA, currencyB, parsedAmounts])
+  }, [claim, currencyA, currencyB, parsedAmounts]) */
 
   const [ethPrice, setEthPrice] = useState<Bn>()
 
@@ -273,9 +275,45 @@ export default function LiquidityDetail() {
 
   return (
     <>
-      <Flex width="40rem" alignItems={'flex-start'} maxWidth="90vw">
-        <BackToMyLiquidity />
-      </Flex>
+      <Box
+        sx={
+          isMobile
+            ? {
+                display: 'grid',
+                gridTemplateColumns: '1fr 4fr 1fr',
+                alignItems: 'center',
+                marginBottom: '2rem'
+              }
+            : {
+                width: '40rem',
+                display: 'flex',
+                alignItems: 'flex-start',
+                marginBottom: '2rem',
+                maxWidth: '90vw'
+              }
+        }
+      >
+        <BackToMyLiquidity height="100%" />
+        {isMobile && (
+          <Box display="flex" justifyContent={'center'} alignItems="center">
+            <DoubleCurrencyLogoHorizontal currency0={currencyA} currency1={currencyB} size={'1.8rem'} />
+            <Text
+              sx={{
+                fontFamily: 'Dela Gothic One',
+                fontStyle: 'normal',
+                fontWeight: '400',
+                fontSize: '1rem',
+                lineHeight: '1.5rem',
+                color: '#FFFFFF',
+                whiteSpace: 'nowrap',
+                textOverflow: 'ellipsis'
+              }}
+            >
+              {currencyA?.symbol?.toUpperCase()}/{currencyB?.symbol?.toUpperCase()}
+            </Text>
+          </Box>
+        )}
+      </Box>
       {/*   <TransactionConfirmationModal
         isOpen={showConfirm}
         onDismiss={handleDismissConfirmation}
@@ -306,74 +344,95 @@ export default function LiquidityDetail() {
           overflow: 'hidden auto'
         }}
       >
-        <Flex justifyContent={'space-between'} marginBottom="1rem">
-          <Flex
-            sx={{
-              gap: '0.5rem',
-              alignItems: isMobile ? 'flex-start' : 'center',
-              justifyContent: isMobile ? 'space-evenly' : 'center',
-              flexDirection: isMobile ? 'column' : 'row'
-            }}
-          >
-            <DoubleCurrencyLogoHorizontal
-              currency0={currencyA}
-              currency1={currencyB}
-              size={isMobile ? '2rem' : '2.2rem'}
-            />
-            <Text
+        {!isMobile && (
+          <Flex justifyContent={'space-between'} marginBottom="1rem">
+            <Flex
               sx={{
-                fontFamily: 'Poppins',
-                fontStyle: 'normal',
-                fontWeight: '400',
-                fontSize: '2rem',
-                alignItems: 'flex-end',
-                color: '#FFFFFF',
-                whiteSpace: 'nowrap',
-                textOverflow: 'ellipsis'
+                gap: '0.5rem',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexDirection: 'row'
               }}
             >
-              {currencyA?.symbol?.toUpperCase()}-{currencyB?.symbol?.toUpperCase()}
-            </Text>
-            <Box
-              className="text-small"
-              alignItems="flex-end"
-              sx={{
-                height: '2rem',
-                display: 'flex',
-                alignItems: 'flex-end',
-                fontFamily: 'Poppins',
-                fontStyle: 'normal',
-                color: '#FFFFFF',
-                whiteSpace: 'nowrap',
-                textOverflow: 'ellipsis'
-              }}
-            >
-              {fullInfoPair ? (fullInfoPair.stable ? 'Stable' : 'Volatile') : ''}
-            </Box>
-            {/* commented because of merge conflict - By Frank 0929 PR44 */}
+              <DoubleCurrencyLogoHorizontal currency0={currencyA} currency1={currencyB} size={'2.2rem'} />
+              <Text
+                sx={{
+                  fontFamily: 'Poppins',
+                  fontStyle: 'normal',
+                  fontWeight: '400',
+                  fontSize: '2rem',
+                  alignItems: 'flex-end',
+                  color: '#FFFFFF',
+                  whiteSpace: 'nowrap',
+                  textOverflow: 'ellipsis'
+                }}
+              >
+                {currencyA?.symbol?.toUpperCase()}-{currencyB?.symbol?.toUpperCase()}
+              </Text>
+              <Box
+                className="text-small"
+                alignItems="flex-end"
+                sx={{
+                  height: '2rem',
+                  display: 'flex',
+                  alignItems: 'flex-end',
+                  fontFamily: 'Poppins',
+                  fontStyle: 'normal',
+                  color: '#FFFFFF',
+                  whiteSpace: 'nowrap',
+                  textOverflow: 'ellipsis'
+                }}
+              >
+                {fullInfoPair ? (fullInfoPair.stable ? 'Stable' : 'Volatile') : ''}
+              </Box>
+              {/* commented because of merge conflict - By Frank 0929 PR44 */}
+            </Flex>
+            <Flex sx={{ flexDirection: isMobile ? 'column' : 'row', gap: '0.8rem', a: { height: '1.5rem' } }}>
+              <StyledLink as={Link} to={`/add/${currencyId(currencyA!)}/${currencyId(currencyB!)}/${pairModeStable}`}>
+                Increase
+              </StyledLink>
+              <StyledLink
+                as={Link}
+                to={`/remove/${currencyId(currencyA!)}/${currencyId(currencyB!)}/${pairModeStable}`}
+              >
+                Remove
+              </StyledLink>
+            </Flex>
           </Flex>
-          <Flex sx={{ flexDirection: isMobile ? 'column' : 'row', gap: '0.8rem', a: { height: '1.5rem' } }}>
-            <StyledLink as={Link} to={`/add/${currencyId(currencyA!)}/${currencyId(currencyB!)}/${pairModeStable}`}>
-              Increase
-            </StyledLink>
-            <StyledLink as={Link} to={`/remove/${currencyId(currencyA!)}/${currencyId(currencyB!)}/${pairModeStable}`}>
-              Remove
-            </StyledLink>
-          </Flex>
-        </Flex>
+        )}
         <BorderVerticalContainer>
-          <Text className="secondary-title">Total Value</Text>
-          <Text className="title">
-            $&nbsp;
-            {userHoldingPercentage !== '-' &&
-              fullInfoPair &&
-              ethPrice &&
-              new Bn(userHoldingPercentage.toSignificant(18))
-                .multipliedBy(fullInfoPair.trackedReserveETH)
-                .multipliedBy(ethPrice)
-                .decimalPlaces(4, Bn.ROUND_HALF_UP)
-                .toString()}
-          </Text>
+          {!isMobile && (
+            <>
+              <Text className="secondary-title">Total Value</Text>
+              <Text className="title">
+                $&nbsp;
+                {userHoldingPercentage !== '-' &&
+                  fullInfoPair &&
+                  ethPrice &&
+                  new Bn(userHoldingPercentage.toSignificant(18))
+                    .multipliedBy(fullInfoPair.trackedReserveETH)
+                    .multipliedBy(ethPrice)
+                    .decimalPlaces(4, Bn.ROUND_HALF_UP)
+                    .toString()}
+              </Text>
+            </>
+          )}
+          {isMobile && (
+            <Flex justifyContent={'space-between'}>
+              <Text className="secondary-title">Total Value</Text>
+              <Text className="title">
+                $&nbsp;
+                {userHoldingPercentage !== '-' &&
+                  fullInfoPair &&
+                  ethPrice &&
+                  new Bn(userHoldingPercentage.toSignificant(18))
+                    .multipliedBy(fullInfoPair.trackedReserveETH)
+                    .multipliedBy(ethPrice)
+                    .decimalPlaces(4, Bn.ROUND_HALF_UP)
+                    .toString()}
+              </Text>
+            </Flex>
+          )}
           <Box
             sx={{
               width: '100%',
@@ -382,117 +441,227 @@ export default function LiquidityDetail() {
               margin: '0.5rem 0'
             }}
           ></Box>
-          <Box
-            className="text-emphasize"
-            sx={{
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr 1fr 1fr',
-              gridTemplateRows: 'repeat(3, 1fr)',
-              gridRowGap: '1rem',
-              gridAutoFlow: 'row',
-              fontFamily: 'Poppins',
-              fontStyle: 'normal',
-              fontWeight: '500',
-              color: '#FFFFFF',
-              ...(isMobile && { gridColumnGap: '1rem' })
-            }}
-          >
-            <HeaderText>Token</HeaderText>
-            <HeaderText>Value</HeaderText>
-            <HeaderText>Amount</HeaderText>
-            <HeaderText sx={{ justifySelf: 'end' }}>Percent</HeaderText>
-            <Flex sx={{ gap: '0.5rem' }} alignItems="center">
-              <CurrencyLogo currency={currencyA} size={isMobile ? '1.1rem' : '1rem'} />
-              <Text
+          {isMobile ? (
+            <Box
+              className="text-emphasize"
+              sx={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr 1fr 1fr',
+                gridTemplateRows: '1fr 2fr 1fr 2fr',
+                gridRowGap: '1rem',
+                gridAutoFlow: 'row',
+                fontFamily: 'Poppins',
+                fontStyle: 'normal',
+                fontWeight: '500',
+                color: '#FFFFFF',
+                gridColumnGap: '1rem'
+              }}
+            >
+              <Box
+                sx={{
+                  gridRow: '1 / 3',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center'
+                }}
+              >
+                <CurrencyLogo currency={currencyA} size={'2.5rem'} />
+              </Box>
+              <HeaderText>Value</HeaderText>
+              <HeaderText>Amount</HeaderText>
+              <HeaderText sx={{ justifySelf: 'end' }}>Percent</HeaderText>
+              <Box
                 sx={{
                   whiteSpace: 'nowrap',
                   overflow: 'hidden',
                   textOverflow: 'ellipsis'
                 }}
               >
-                {currencyA?.symbol?.toUpperCase()}
-              </Text>
-            </Flex>
-            <Box
-              sx={{
-                whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis'
-              }}
-            >
-              {userHoldingPercentage !== '-' &&
-                fullInfoPair &&
-                ethPrice &&
-                new Bn(userHoldingPercentage.toSignificant(18))
-                  .multipliedBy(fullInfoPair.trackedReserveETH)
-                  .multipliedBy(ethPrice)
-                  .dividedBy(2)
-                  .decimalPlaces(4, Bn.ROUND_HALF_UP)
-                  .toString()}
-              &nbsp;$
-            </Box>
-            {/* <Box>{parsedAmounts[Field.CURRENCY_A]?.toSignificant(12)}</Box> */}
-            <Box
-              sx={{
-                whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis'
-              }}
-            >
-              {userToken0AmountInPool?.toSignificant(12)}
-            </Box>
-            <Box sx={{ justifySelf: 'end' }}>
-              {userHoldingPercentage instanceof Fraction
-                ? +userHoldingPercentage.toSignificant(4) * 100
-                : userHoldingPercentage}
-              %
-            </Box>
-            <Flex sx={{ gap: '0.5rem' }} alignItems="center">
-              <CurrencyLogo currency={currencyB} size="1rem" />
-              <Text
+                {userHoldingPercentage !== '-' &&
+                  fullInfoPair &&
+                  ethPrice &&
+                  new Bn(userHoldingPercentage.toSignificant(18))
+                    .multipliedBy(fullInfoPair.trackedReserveETH)
+                    .multipliedBy(ethPrice)
+                    .dividedBy(2)
+                    .decimalPlaces(4, Bn.ROUND_HALF_UP)
+                    .toString()}
+                &nbsp;$
+              </Box>
+              <Box
                 sx={{
                   whiteSpace: 'nowrap',
                   overflow: 'hidden',
                   textOverflow: 'ellipsis'
                 }}
               >
-                {currencyB?.symbol?.toUpperCase()}
-              </Text>
-            </Flex>
+                {userToken0AmountInPool?.toSignificant(12)}
+              </Box>
+              <Box sx={{ justifySelf: 'end' }}>
+                {userHoldingPercentage instanceof Fraction
+                  ? +userHoldingPercentage.toSignificant(4) * 100
+                  : userHoldingPercentage}
+                %
+              </Box>
+              <Box
+                sx={{
+                  gridRow: '3 / 5',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center'
+                }}
+              >
+                <CurrencyLogo currency={currencyB} size={'2.5rem'} />
+              </Box>
+              <HeaderText>Value</HeaderText>
+              <HeaderText>Amount</HeaderText>
+              <HeaderText sx={{ justifySelf: 'end' }}>Percent</HeaderText>
+              <Box
+                sx={{
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis'
+                }}
+              >
+                {userHoldingPercentage !== '-' &&
+                  fullInfoPair &&
+                  ethPrice &&
+                  new Bn(userHoldingPercentage.toSignificant(18))
+                    .multipliedBy(fullInfoPair.trackedReserveETH)
+                    .multipliedBy(ethPrice)
+                    .dividedBy(2)
+                    .decimalPlaces(4, Bn.ROUND_HALF_UP)
+                    .toString()}
+                &nbsp;$
+              </Box>
+              <Box
+                sx={{
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis'
+                }}
+              >
+                {userToken1AmountInPool?.toSignificant(12)}
+              </Box>
+              <Box sx={{ justifySelf: 'end' }}>
+                {userHoldingPercentage instanceof Fraction
+                  ? +userHoldingPercentage.toSignificant(4) * 100
+                  : userHoldingPercentage}
+                %
+              </Box>
+            </Box>
+          ) : (
             <Box
+              className="text-emphasize"
               sx={{
-                whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis'
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr 1fr 1fr',
+                gridTemplateRows: 'repeat(3, 1fr)',
+                gridRowGap: '1rem',
+                gridAutoFlow: 'row',
+                fontFamily: 'Poppins',
+                fontStyle: 'normal',
+                fontWeight: '500',
+                color: '#FFFFFF'
               }}
             >
-              {userHoldingPercentage !== '-' &&
-                fullInfoPair &&
-                ethPrice &&
-                new Bn(userHoldingPercentage.toSignificant(18))
-                  .multipliedBy(fullInfoPair.trackedReserveETH)
-                  .multipliedBy(ethPrice)
-                  .dividedBy(2)
-                  .decimalPlaces(4, Bn.ROUND_HALF_UP)
-                  .toString()}
-              &nbsp;$
+              <HeaderText>Token</HeaderText>
+              <HeaderText>Value</HeaderText>
+              <HeaderText>Amount</HeaderText>
+              <HeaderText sx={{ justifySelf: 'end' }}>Percent</HeaderText>
+              <Flex sx={{ gap: '0.5rem' }} alignItems="center">
+                <CurrencyLogo currency={currencyA} size={'1rem'} />
+                <Text
+                  sx={{
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis'
+                  }}
+                >
+                  {currencyA?.symbol?.toUpperCase()}
+                </Text>
+              </Flex>
+              <Box
+                sx={{
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis'
+                }}
+              >
+                {userHoldingPercentage !== '-' &&
+                  fullInfoPair &&
+                  ethPrice &&
+                  new Bn(userHoldingPercentage.toSignificant(18))
+                    .multipliedBy(fullInfoPair.trackedReserveETH)
+                    .multipliedBy(ethPrice)
+                    .dividedBy(2)
+                    .decimalPlaces(4, Bn.ROUND_HALF_UP)
+                    .toString()}
+                &nbsp;$
+              </Box>
+              {/* <Box>{parsedAmounts[Field.CURRENCY_A]?.toSignificant(12)}</Box> */}
+              <Box
+                sx={{
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis'
+                }}
+              >
+                {userToken0AmountInPool?.toSignificant(12)}
+              </Box>
+              <Box sx={{ justifySelf: 'end' }}>
+                {userHoldingPercentage instanceof Fraction
+                  ? +userHoldingPercentage.toSignificant(4) * 100
+                  : userHoldingPercentage}
+                %
+              </Box>
+              <Flex sx={{ gap: '0.5rem' }} alignItems="center">
+                <CurrencyLogo currency={currencyB} size="1rem" />
+                <Text
+                  sx={{
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis'
+                  }}
+                >
+                  {currencyB?.symbol?.toUpperCase()}
+                </Text>
+              </Flex>
+              <Box
+                sx={{
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis'
+                }}
+              >
+                {userHoldingPercentage !== '-' &&
+                  fullInfoPair &&
+                  ethPrice &&
+                  new Bn(userHoldingPercentage.toSignificant(18))
+                    .multipliedBy(fullInfoPair.trackedReserveETH)
+                    .multipliedBy(ethPrice)
+                    .dividedBy(2)
+                    .decimalPlaces(4, Bn.ROUND_HALF_UP)
+                    .toString()}
+                &nbsp;$
+              </Box>
+              <Box
+                sx={{
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis'
+                }}
+              >
+                {userToken1AmountInPool?.toSignificant(12)}
+              </Box>
+              <Box sx={{ justifySelf: 'end' }}>
+                {userHoldingPercentage instanceof Fraction
+                  ? +userHoldingPercentage.toFixed(4) * 100
+                  : userHoldingPercentage}
+                %
+              </Box>
             </Box>
-            <Box
-              sx={{
-                whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis'
-              }}
-            >
-              {userToken1AmountInPool?.toSignificant(12)}
-            </Box>
-            <Box sx={{ justifySelf: 'end' }}>
-              {userHoldingPercentage instanceof Fraction
-                ? +userHoldingPercentage.toFixed(4) * 100
-                : userHoldingPercentage}
-              %
-            </Box>
-          </Box>
+          )}
           {/* <BorderVerticalContainer>
           <Flex justifyContent={'space-between'}>
             <Text
@@ -556,56 +725,132 @@ export default function LiquidityDetail() {
             <Box>{parsedAmounts[Field.CURRENCY_B]?.toSignificant(12)}</Box>
           </Box>
         </BorderVerticalContainer> */}
+          {!isMobile && (
+            <Box
+              sx={{
+                width: '100%',
+                borderTop: '1px solid rgba(255,255,255,0.2)',
+                height: '0',
+                margin: '0.5rem 0'
+              }}
+            ></Box>
+          )}
+          {!isMobile && (
+            <Flex justifyContent={'space-between'}>
+              <Text
+                className="secondary-title"
+                sx={{
+                  fontFamily: 'Poppins',
+                  fontStyle: 'normal',
+                  fontWeight: '500',
+                  lineHeight: '28px',
+                  color: '#FFFFFF'
+                }}
+              >
+                Price
+              </Text>
+              <Flex flexDirection={'column'} textAlign="right">
+                <Text
+                  className="text"
+                  sx={{
+                    fontFamily: 'Poppins',
+                    fontStyle: 'normal',
+                    fontWeight: '400',
+                    lineHeight: '24px',
+                    color: 'white'
+                  }}
+                >
+                  {token0Deposited?.divide(token1Deposited).toSignificant(4)}
+                </Text>
+                <Text
+                  className="text-detail"
+                  sx={{
+                    fontFamily: 'Poppins',
+                    fontStyle: 'normal',
+                    fontWeight: '200',
+                    lineHeight: '18px',
+                    color: '#999999'
+                  }}
+                >
+                  {currencyA?.symbol?.toUpperCase()} per {currencyB?.symbol?.toUpperCase()}
+                </Text>
+              </Flex>
+            </Flex>
+          )}
+        </BorderVerticalContainer>
+        {isMobile && (
+          <BorderVerticalContainer>
+            <Flex justifyContent={'space-between'}>
+              <Text
+                className="secondary-title"
+                sx={{
+                  fontFamily: 'Poppins',
+                  fontStyle: 'normal',
+                  fontWeight: '500',
+                  lineHeight: '28px',
+                  color: '#FFFFFF'
+                }}
+              >
+                Price
+              </Text>
+              <Flex flexDirection={'column'} textAlign="right">
+                <Text
+                  className="text"
+                  sx={{
+                    fontFamily: 'Poppins',
+                    fontStyle: 'normal',
+                    fontWeight: '400',
+                    lineHeight: '24px',
+                    color: 'white'
+                  }}
+                >
+                  {token0Deposited?.divide(token1Deposited).toSignificant(4)}
+                </Text>
+                <Text
+                  className="text-detail"
+                  sx={{
+                    fontFamily: 'Poppins',
+                    fontStyle: 'normal',
+                    fontWeight: '200',
+                    lineHeight: '18px',
+                    color: '#999999'
+                  }}
+                >
+                  {currencyA?.symbol?.toUpperCase()} per {currencyB?.symbol?.toUpperCase()}
+                </Text>
+              </Flex>
+            </Flex>
+          </BorderVerticalContainer>
+        )}
+      </Flex>
+      {isMobile && (
+        <MobileBottomShadowContainer>
           <Box
             sx={{
-              width: '100%',
-              borderTop: '1px solid rgba(255,255,255,0.2)',
-              height: '0',
-              margin: '0.5rem 0'
+              width: 'calc(100% - 2rem)',
+              position: 'absolute',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              display: 'flex',
+              gap: '15%',
+              a: {
+                width: '100%',
+                maxWidth: '100%',
+                fontSize: '1.2rem',
+                height: '3rem!important',
+                borderRadius: '1rem !important'
+              }
             }}
-          ></Box>
-          <Flex justifyContent={'space-between'}>
-            <Text
-              className="secondary-title"
-              sx={{
-                fontFamily: 'Poppins',
-                fontStyle: 'normal',
-                fontWeight: '500',
-                lineHeight: '28px',
-                color: '#FFFFFF'
-              }}
-            >
-              Price
-            </Text>
-            <Flex flexDirection={'column'} textAlign="right">
-              <Text
-                className="text"
-                sx={{
-                  fontFamily: 'Poppins',
-                  fontStyle: 'normal',
-                  fontWeight: '400',
-                  lineHeight: '24px',
-                  color: 'white'
-                }}
-              >
-                {token0Deposited?.divide(token1Deposited).toSignificant(4)}
-              </Text>
-              <Text
-                className="text-detail"
-                sx={{
-                  fontFamily: 'Poppins',
-                  fontStyle: 'normal',
-                  fontWeight: '200',
-                  lineHeight: '18px',
-                  color: '#999999'
-                }}
-              >
-                {currencyA?.symbol?.toUpperCase()} per {currencyB?.symbol?.toUpperCase()}
-              </Text>
-            </Flex>
-          </Flex>
-        </BorderVerticalContainer>
-      </Flex>
+          >
+            <StyledLink as={Link} to={`/add/${currencyId(currencyA!)}/${currencyId(currencyB!)}/${pairModeStable}`}>
+              Increase
+            </StyledLink>
+            <StyledLink as={Link} to={`/remove/${currencyId(currencyA!)}/${currencyId(currencyB!)}/${pairModeStable}`}>
+              Remove
+            </StyledLink>
+          </Box>
+        </MobileBottomShadowContainer>
+      )}
     </>
   )
 }
@@ -617,15 +862,20 @@ export function BackToMyLiquidity({ showText = true, ...flexProps }: { showText?
   return (
     <Flex
       height={'1.8rem'}
-      marginBottom={'1rem'}
+      justifyContent="center"
+      alignItems={'center'}
       sx={{
         'a,img': {
           height: '0.875rem',
           width: '0.875rem',
-          marginRight: '1rem'
-        }
+          marginRight: showText ? '1rem' : 'unset'
+        },
+        ...(flexProps.sx ? flexProps.sx : {})
       }}
-      {...flexProps}
+      {...(() => {
+        delete flexProps['sx']
+        return flexProps
+      })()}
     >
       <Link
         to="/liquidity"
@@ -634,7 +884,7 @@ export function BackToMyLiquidity({ showText = true, ...flexProps }: { showText?
         }}
       >
         <img
-          src={showText ? BoBackBolder : GoBack}
+          src={isMobile ? GoBackMobile : showText ? GoBackBolder : GoBack}
           alt="left-arrow"
           style={{
             display: 'flex',
@@ -645,16 +895,30 @@ export function BackToMyLiquidity({ showText = true, ...flexProps }: { showText?
       {showText && (
         <Text
           className="text-small"
-          sx={{
-            fontFamily: 'Poppins',
-            fontStyle: 'normal',
-            fontWeight: '200',
-            lineHeight: '1rem',
-            height: '1rem',
-            color: '#FFFFFF'
-          }}
+          sx={
+            isMobile
+              ? {
+                  fontFamily: 'Poppins',
+                  fontStyle: 'normal',
+                  fontWeight: '400',
+                  fontSize: '1rem',
+                  lineHeight: '1.5rem',
+                  alignItems: 'flex-end',
+                  display: 'flex',
+                  color: ' rgba(255, 255, 255, 0.4)',
+                  transform: 'translateX(-1rem)'
+                }
+              : {
+                  fontFamily: 'Poppins',
+                  fontStyle: 'normal',
+                  fontWeight: '200',
+                  lineHeight: '1rem',
+                  height: '1rem',
+                  color: '#FFFFFF'
+                }
+          }
         >
-          Back to My Liquidity
+          {isMobile ? 'Back' : 'Back to My Liquidity'}
         </Text>
       )}
     </Flex>
