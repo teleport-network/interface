@@ -165,59 +165,9 @@ export function AdvancedSwapDetails({ trade }: AdvancedSwapDetailsProps) {
   const theme = useThemedContext()
   const [showRouterDetail, setShowRouterDetail] = useState(false)
   const [allowedSlippage] = useUserSlippageTolerance()
-  const [routeData, setRouteData]: any = useState(null)
   // const showRoute = Boolean(trade && trade.route.path.length > 2)
   const showRoute = Boolean(trade && trade.route.path.length >= 2)
-  const tradeTemp: any = trade || { route: {} }
-  const inputName = tradeTemp?.inputAmount?.currency?.name || ''
-  const outputName = tradeTemp?.outputAmount?.currency?.name || ''
-  const amountString = tradeTemp?.inputAmount?.toExact() || tradeTemp?.inputAmount?.toSignificant(6) || ''
-  useEffect(() => {
-    ;(async () => {
-      try {
-        if (
-          !tradeTemp ||
-          !tradeTemp.hasOwnProperty('inputAmount') ||
-          !tradeTemp.hasOwnProperty('route') ||
-          !inputName ||
-          !outputName
-        ) {
-          return
-        }
-        const decimal = tradeTemp?.inputAmount?.token?.decimals
-        const amount = new BigNumber(amountString).shiftedBy(decimal).toNumber()
-        const params = {
-          tokenInAddress: tradeTemp?.route.input?.address,
-          tokenInChainId: tradeTemp?.route.input?.chainId,
-          tokenOutAddress: tradeTemp?.route.output?.address,
-          tokenOutChainId: tradeTemp?.route.output?.chainId,
-          amount,
-          type: 'exactIn',
-          protocols: 'v2'
-        }
-        const data = JSON.stringify(params)
-        const url = 'https://teleport-routing.qa.davionlabs.com/quote'
-        const config = {
-          method: 'post',
-          url,
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          data
-        }
-        axios(config)
-          .then(function (response) {
-            setRouteData(response.data)
-          })
-          .catch(function (error) {
-            console.log(error)
-          })
-      } catch (error) {
-        console.log('AdvancedSwapDetails error', error)
-      }
-    })()
-  }, [inputName, outputName, amountString])
-
+  const routeData = trade && trade['routeData'] || null;
   return (
     <AutoColumn gap="0.4rem">
       {trade && (

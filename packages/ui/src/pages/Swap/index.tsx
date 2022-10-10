@@ -95,8 +95,10 @@ export default function Swap({ history }: RouteComponentProps) {
 
   // swap state
   const { independentField, typedValue, recipient } = useSwapState()
-  const { v2Trade, currencyBalances, parsedAmount, currencies, inputError: swapInputError } = useDerivedSwapInfo()
-
+  const { v2Trade, currencyBalances, parsedAmount, currencies, inputError: swapInputError, routeData } = useDerivedSwapInfo()
+  if (routeData && v2Trade) {
+    v2Trade['routeData'] = routeData
+  }
   const {
     wrapType,
     execute: onWrap,
@@ -114,16 +116,24 @@ export default function Swap({ history }: RouteComponentProps) {
   const betterTradeLinkV2: Version | undefined =
     /* toggledVersion === Version.v1 && isTradeBetter(v1Trade, v2Trade) ?  */ Version.v2 /* : undefined */
 
+  // const parsedAmounts = showWrap
+  //   ? {
+  //     [Field.INPUT]: parsedAmount,
+  //     [Field.OUTPUT]: parsedAmount
+  //   }
+  //   : {
+  //     [Field.INPUT]: independentField === Field.INPUT ? parsedAmount : trade?.inputAmount,
+  //     [Field.OUTPUT]: independentField === Field.OUTPUT ? parsedAmount : trade?.outputAmount
+  //   }
   const parsedAmounts = showWrap
     ? {
-        [Field.INPUT]: parsedAmount,
-        [Field.OUTPUT]: parsedAmount
-      }
+      [Field.INPUT]: parsedAmount,
+      [Field.OUTPUT]: parsedAmount
+    }
     : {
-        [Field.INPUT]: independentField === Field.INPUT ? parsedAmount : trade?.inputAmount,
-        [Field.OUTPUT]: independentField === Field.OUTPUT ? parsedAmount : trade?.outputAmount
-      }
-
+      [Field.INPUT]: independentField === Field.INPUT ? parsedAmount : routeData?.parsedOutAmount,
+      [Field.OUTPUT]: independentField === Field.OUTPUT ? parsedAmount : routeData?.parsedOutAmount
+    }
   const { onSwitchTokens, onCurrencySelection, onUserInput, onChangeRecipient } = useSwapActionHandlers()
   const isValid = !swapInputError
   const dependentField: Field = independentField === Field.INPUT ? Field.OUTPUT : Field.INPUT
