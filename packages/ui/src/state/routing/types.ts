@@ -1,4 +1,5 @@
 import { MixedRouteSDK, Trade } from '@teleswap/router-sdk'
+import { Fraction, Percent } from '@teleswap/sdk'
 import { Route as V2Route } from '@teleswap/v2-sdk'
 import { Currency, CurrencyAmount, Token, TradeType } from '@uniswap/sdk-core'
 import { Route as V3Route } from '@uniswap/v3-sdk'
@@ -47,6 +48,7 @@ export type V2PoolInRoute = {
   // not used in the interface
   // avoid returning it from the client-side smart-order-router
   address?: string
+  stable: boolean
 }
 
 export interface GetQuoteResult {
@@ -67,10 +69,10 @@ export interface GetQuoteResult {
   route: Array<(V3PoolInRoute | V2PoolInRoute)[]>
   percents: Array<number>
   routeString: string
-  priceImpactWithoutFee: string
-  realizedLPFee: string
-  minOut: string
-  maxIn: string
+  priceImpactWithoutFee: Percent
+  realizedLPFee: Fraction
+  minOut: CurrencyAmount<any>
+  maxIn: CurrencyAmount<any>
 }
 
 export class InterfaceTrade<

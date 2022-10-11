@@ -28,14 +28,13 @@ export function transformSwapRouteToGetQuoteResult(
 ): GetQuoteResult {
   const routeResponse: Array<(V3PoolInRoute | V2PoolInRoute)[]> = []
 
-  let _realizedLPFee = JSBI.BigInt(0)
+  let _realizedLPFee = new Fraction(ZERO)
   let _priceImpactWithoutFee: Percent = new Fraction(ZERO)
 
   const percents: number[] = []
 
-  console.log('debug joy', '-------', amount.denominator.toString(), quote.denominator.toString())
-  let maxInput = new Fraction(ZERO, amount.denominator)
-  let minOut = new Fraction(ZERO, quote.denominator)
+  let maxIn = CurrencyAmount.fromRawAmount(amount.currency, ZERO)
+  let minOut = CurrencyAmount.fromRawAmount(quote.currency, ZERO)
 
   for (const subRoute of route) {
     const { amount, quote, tokenPath, percent } = subRoute
@@ -47,8 +46,8 @@ export function transformSwapRouteToGetQuoteResult(
       50
     )
 
-    maxInput = maxInput.add(slippageAdjustedAmounts[Field.INPUT])
-    minOut = minOut.add(slippageAdjustedAmounts[Field.OUTPUT])
+    maxIn = maxIn.add(CurrencyAmount.fromRawAmount(amount.currency, slippageAdjustedAmounts[Field.INPUT].quotient))
+    minOut = minOut.add(CurrencyAmount.fromRawAmount(quote.currency, slippageAdjustedAmounts[Field.OUTPUT].quotient))
 
     // subRoute.percent, subRoute.tokenPath
     const { priceImpactWithoutFee, realizedLPFee } = computeTradePriceBreakdownByRoute(
@@ -57,7 +56,7 @@ export function transformSwapRouteToGetQuoteResult(
     _priceImpactWithoutFee = _priceImpactWithoutFee.add(
       priceImpactWithoutFee.multiply(subRoute.percent.toString()).divide(JSBI.BigInt(100))
     )
-    _realizedLPFee = JSBI.add(_realizedLPFee, realizedLPFee)
+    _realizedLPFee = _realizedLPFee.add(realizedLPFee)
     const pools = subRoute.protocol === Protocol.V2 ? subRoute.route.pairs : subRoute.route.pools
     const curRoute: (V3PoolInRoute | V2PoolInRoute)[] = []
     for (let i = 0; i < pools.length; i++) {
@@ -134,7 +133,8 @@ export function transformSwapRouteToGetQuoteResult(
             quotient: reserve1.quotient.toString()
           },
           amountIn: edgeAmountIn! ?? undefined,
-          amountOut: edgeAmountOut! ?? undefined
+          amountOut: edgeAmountOut! ?? undefined,
+          stable: nextPool.stable
         })
       }
     }
@@ -158,10 +158,10 @@ export function transformSwapRouteToGetQuoteResult(
     gasPriceWei: gasPriceWei.toString(),
     route: routeResponse,
     routeString: routeAmountsToString(route),
-    priceImpactWithoutFee: _priceImpactWithoutFee.toSignificant(4).toString(),
-    realizedLPFee: _realizedLPFee.toString(),
-    maxIn: maxInput.toSignificant(4),
-    minOut: minOut.toSignificant(4),
+    priceImpactWithoutFee: _priceImpactWithoutFee,
+    realizedLPFee: _realizedLPFee,
+    maxIn,
+    minOut,
     percents
   }
 
