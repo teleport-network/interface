@@ -217,9 +217,17 @@ export function CurrencySearch({
               <CurrencyList
                 height={height}
                 showETH={showETH}
-                currencies={DEFAULT_TOKENS.concat(
-                  filteredInactiveTokens ? filteredSortedTokens.concat(filteredInactiveTokens) : filteredSortedTokens
-                )}
+                currencies={
+                  searchQuery
+                    ? filteredInactiveTokens
+                      ? filteredSortedTokens.concat(filteredInactiveTokens)
+                      : filteredSortedTokens
+                    : DEFAULT_TOKENS.concat(
+                        filteredInactiveTokens
+                          ? filteredSortedTokens.concat(filteredInactiveTokens)
+                          : filteredSortedTokens
+                      )
+                }
                 breakIndex={
                   inactiveTokens && inactiveTokens.length && filteredSortedTokens && filteredSortedTokens.length
                     ? filteredSortedTokens.length
