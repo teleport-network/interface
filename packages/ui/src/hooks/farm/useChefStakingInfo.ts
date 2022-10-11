@@ -49,22 +49,23 @@ export function useChefStakingInfo(): (ChefStakingInfo | undefined)[] {
   const stakingTokens = useMemo(() => {
     return poolInfos.map((poolInfo, idx) => {
       const poolPreset: FarmingPool | undefined = poolPresets[idx]
+      if (!poolPreset) return undefined
       return new Token(
         chainId || 420,
         poolInfo.lpToken,
-        poolPreset?.stakingAsset.decimal || 18,
-        poolPreset?.stakingAsset.symbol,
-        poolPreset?.stakingAsset.name
+        poolPreset.stakingAsset.decimal || 18,
+        !poolPreset.stakingAsset.isLpToken ? poolPreset?.stakingAsset.symbol : `${poolPreset.stakingAsset.name} LP`,
+        poolPreset.stakingAsset.name
       )
     })
   }, [chainId, poolInfos, poolPresets])
 
-  const stakingPairAsset: [Token | undefined, Token | undefined, boolean | undefined][] = poolPresets.map(
-    ({ stakingAsset, isHidden }) => {
-      if (!stakingAsset.isLpToken || isHidden) return [undefined, undefined, undefined]
-      else return [stakingAsset.tokenA, stakingAsset.tokenB, stakingAsset.isStable] as [Token, Token, boolean]
-    }
-  )
+  const stakingPairAsset: [Token | undefined, Token | undefined, boolean | undefined][] = poolPresets.map((preset) => {
+    if (!preset) return [undefined, undefined, undefined]
+    const { stakingAsset, isHidden } = preset
+    if (!stakingAsset.isLpToken || isHidden) return [undefined, undefined, undefined]
+    else return [stakingAsset.tokenA, stakingAsset.tokenB, stakingAsset.isStable] as [Token, Token, boolean]
+  })
   const pairs = usePairs(stakingPairAsset)
   const tvls = useTokenBalances(mchefContract?.address, stakingTokens)
 
@@ -73,8 +74,8 @@ export function useChefStakingInfo(): (ChefStakingInfo | undefined)[] {
     if (!poolPreset) return undefined
 
     const pool = poolPreset
-    const stakingToken = stakingTokens[idx]
-    const tvl = tvls[stakingToken.address]
+    const stakingToken = stakingTokens[idx] as Token
+    const tvl = stakingToken ? tvls[stakingToken.address] : undefined
     const position = positions[idx]
     const parsedData = {
       pendingReward: parsedPendingRewardTokenAmount(position, rewardToken),
