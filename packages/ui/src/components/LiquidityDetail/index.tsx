@@ -14,11 +14,9 @@ import { useCurrency } from 'hooks/Tokens'
 import { MobileBottomShadowContainer } from 'pages/AddLiquidity'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { isMobile } from 'react-device-detect'
-import { useDispatch } from 'react-redux'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useHistory, useParams } from 'react-router-dom'
 import { Box, Flex, FlexProps, Text } from 'rebass'
-import { AppDispatch } from 'state'
-import { Field, resetMintState } from 'state/mint/actions'
+import { Field } from 'state/mint/actions'
 import { useTokenBalance } from 'state/wallet/hooks'
 import styled from 'styled-components'
 import { client } from 'utils/apolloClient'
@@ -388,15 +386,22 @@ export default function LiquidityDetail() {
               {/* commented because of merge conflict - By Frank 0929 PR44 */}
             </Flex>
             <Flex sx={{ flexDirection: isMobile ? 'column' : 'row', gap: '0.8rem', a: { height: '1.5rem' } }}>
-              <StyledLink as={Link} to={`/add/${currencyId(currencyA!)}/${currencyId(currencyB!)}/${pairModeStable}`}>
-                Increase
-              </StyledLink>
-              <StyledLink
-                as={Link}
-                to={`/remove/${currencyId(currencyA!)}/${currencyId(currencyB!)}/${pairModeStable}`}
-              >
-                Remove
-              </StyledLink>
+              {currencyA && currencyB && (
+                <>
+                  <StyledLink
+                    as={Link}
+                    to={`/add/${currencyId(currencyA!)}/${currencyId(currencyB!)}/${pairModeStable}`}
+                  >
+                    Increase
+                  </StyledLink>
+                  <StyledLink
+                    as={Link}
+                    to={`/remove/${currencyId(currencyA!)}/${currencyId(currencyB!)}/${pairModeStable}`}
+                  >
+                    Remove
+                  </StyledLink>
+                </>
+              )}
             </Flex>
           </Flex>
         )}
@@ -842,12 +847,21 @@ export default function LiquidityDetail() {
               }
             }}
           >
-            <StyledLink as={Link} to={`/add/${currencyId(currencyA!)}/${currencyId(currencyB!)}/${pairModeStable}`}>
-              Increase
-            </StyledLink>
-            <StyledLink as={Link} to={`/remove/${currencyId(currencyA!)}/${currencyId(currencyB!)}/${pairModeStable}`}>
-              Remove
-            </StyledLink>
+            {currencyA && currencyB && (
+              <>
+                (
+                <StyledLink as={Link} to={`/add/${currencyId(currencyA!)}/${currencyId(currencyB!)}/${pairModeStable}`}>
+                  Increase
+                </StyledLink>
+                <StyledLink
+                  as={Link}
+                  to={`/remove/${currencyId(currencyA!)}/${currencyId(currencyB!)}/${pairModeStable}`}
+                >
+                  Remove
+                </StyledLink>
+                )
+              </>
+            )}
           </Box>
         </MobileBottomShadowContainer>
       )}
@@ -857,7 +871,8 @@ export default function LiquidityDetail() {
 
 export function BackToMyLiquidity({ showText = true, ...flexProps }: { showText?: boolean } & FlexProps) {
   // reset states on back
-  const dispatch = useDispatch<AppDispatch>()
+  // const dispatch = useDispatch<AppDispatch>()
+  const history = useHistory()
 
   return (
     <Flex
@@ -880,7 +895,8 @@ export function BackToMyLiquidity({ showText = true, ...flexProps }: { showText?
       <Link
         to="/liquidity"
         onClick={() => {
-          dispatch(resetMintState())
+          // dispatch(resetMintState())
+          history.goBack()
         }}
       >
         <img
