@@ -150,14 +150,14 @@ export function useSushiContract(withSignerIfPossible = true): Contract | null {
   return useContract(chainId ? SUSHI_ADDRESS[chainId] : undefined, SUSHI_ABI, withSignerIfPossible)
 }
 
-export function useGaugeContract(gaugeType: GaugeType, gaugeAddress: string, withSignerIfPossible?: boolean) {
+export function useGaugeContract(gaugeType: GaugeType, gaugeAddress: string, withSignerIfPossible = true) {
   const theGaugeABI =
     gaugeType === GaugeType.ADMIN ? AdminGaugeABI : gaugeType === GaugeType.STABLE ? StableGaugeABI : VariableGaugeABI
   const gaugeContract = useContract(gaugeAddress, theGaugeABI, withSignerIfPossible)
   return [gaugeContract, gaugeType] as const
 }
 
-export function useGaugeProxyContract(gaugeType: GaugeType, withSignerIfPossible?: boolean) {
+export function useGaugeProxyContract(gaugeType: GaugeType, withSignerIfPossible = true) {
   const { chainId } = useActiveWeb3React()
   const theGaugeProxyABI =
     gaugeType === GaugeType.ADMIN
@@ -179,11 +179,11 @@ export function useGaugeProxyContract(gaugeType: GaugeType, withSignerIfPossible
   return [gaugeProxyContract, gaugeType] as const
 }
 
-export function useBribeContract(address: string, withSignerIfPossible?: boolean): Contract | null {
+export function useBribeContract(address: string, withSignerIfPossible = true): Contract | null {
   return useContract(address, BribeABI, withSignerIfPossible)
 }
 
-export function useBribeFactoryContract(withSignerIfPossible?: boolean): Contract | null {
+export function useBribeFactoryContract(withSignerIfPossible = true): Contract | null {
   const { chainId } = useActiveWeb3React()
   return useContract(chainId ? BRIBE_FACTORY_ADDRESS[chainId] : undefined, BribeFactoryABI, withSignerIfPossible)
 }
