@@ -347,7 +347,7 @@ describe('Router02', function () {
 
                 // add liquidity
                 await addLiquidity(ans, ans.tt, ans.weth, expandTo18Decimals(1), expandTo18Decimals(18), stable, 0)
-                let route = [ans.tt.address,ans.weth.address,  stable]
+                let route = [ans.tt.address, ans.weth.address, stable]
 
                 let amountIn = expandTo18Decimals(1)
                 //approve
@@ -373,13 +373,12 @@ describe('Router02', function () {
 
                 // add liquidity
                 await addLiquidity(ans, ans.tt, ans.weth, expandTo18Decimals(1), expandTo18Decimals(18), stable, 0)
-                let route = [ans.tt.address,ans.weth.address,  stable]
+                let route = [ans.tt.address, ans.weth.address, stable]
 
 
-                let amountOut = ethers.utils.parseUnits("1","ether"), amountInMax = amountOut.mul(BigNumber.from(2))
+                let amountOut = ethers.utils.parseUnits("1", "ether"), amountInMax = amountOut.mul(BigNumber.from(2))
                 // approve
                 await ans.tt.approve(ans.router.address, amountInMax)
-
 
 
                 let args = [
@@ -398,7 +397,6 @@ describe('Router02', function () {
             for (let i = 0; i < 2; i++) {
                 let stable = i === 0
                 const ans = await loadFixture(deployContracts);
-
 
 
                 // swapExactTokensForTokens
@@ -439,7 +437,7 @@ describe('Router02', function () {
                 await ans.usdt.approve(ans.router.address, tokenAmt)
 
 
-                let amountOut = ethers.utils.parseUnits("1",15), amountInMax = tokenAmt
+                let amountOut = ethers.utils.parseUnits("1", 15), amountInMax = tokenAmt
 
                 let args = [
                     amountOut,
@@ -572,6 +570,59 @@ describe('Router02', function () {
             }
 
         })
+        it("multicall", async () => {
+
+
+            // the difference of using multicall between this testcase and FE code
+            // is the FE code's swap amount get from router-sdk
+
+            let ans = await loadFixture(deployContracts)
+            // usdt->usdc  usdc->weth
+            // 10     ?     ?     ?
+            // addLiquidity for usdt-usdc
+            let usdtAmt = ethers.utils.parseUnits("1000", 18)
+            let usdcAmt = usdtAmt
+            await addLiquidity(ans, ans.usdt, ans.usdc, usdtAmt, usdcAmt, true, 0)
+            // addLiquidity for usdc-weth
+            // 1300:1 -> 13000:10
+            usdcAmt = ethers.utils.parseUnits("13000", 18)
+            let wethAmt = ethers.utils.parseUnits("10", 18)
+            await addLiquidity(ans, ans.usdc, ans.weth, usdcAmt, wethAmt, false, 0)
+            // approve usdt
+            let swapUsdtAmt = wethAmt
+            await ans.usdt.transfer(ans.multicall.address, swapUsdtAmt)
+            // pack tx swap usdt for usdc
+            let routerIface = ans.router.interface
+
+            let step0 = ans.usdt.interface.encodeFunctionData("approve", [ans.router.address, swapUsdtAmt])
+
+            let step1 = routerIface.encodeFunctionData("swapExactTokensForTokens", [
+                swapUsdtAmt, 0, [[ans.usdt.address, ans.usdc.address, true]], ans.multicall.address, getDeadline()
+            ])
+
+            let step2 =  ans.usdc.interface.encodeFunctionData("approve", [
+                ans.router.address, ethers.utils.parseUnits("10000", 18)
+            ])
+
+            // pack tx swap usdc for dai
+            let step3 = routerIface.encodeFunctionData("swapExactTokensForTokens", [
+                ethers.utils.parseUnits("9",18), 0, [[ans.usdc.address, ans.weth.address, false]], ans.signer.address, getDeadline()
+            ])
+            // construct multicall tx
+            let params = [
+                [ans.usdt.address, step0],    // approve
+                [ans.router.address, step1],  // swap
+                [ans.usdc.address, step2],    //approve
+                [ans.router.address, step3]   // swap
+            ]
+
+            //
+            console.log("\nprev weth balance", await ans.weth.balanceOf(ans.signer.address))
+            // call multicall
+            await ans.multicall.aggregate(params)
+            console.log("after weth balance", await ans.weth.balanceOf(ans.signer.address))
+
+        })
 
 
     })
@@ -630,8 +681,8 @@ async function addLiquidity(ans, tokenA, tokenB, aAmount, bAmount, stable, value
     if (tokenA.address === ans.weth.address) {
         route = [tokenB.address, tokenA.address, stable]
     }
-    tokenA.approve(ans.router.address, aAmount)
-    tokenB.approve(ans.router.address, bAmount)
+    await tokenA.approve(ans.router.address, aAmount)
+    await tokenB.approve(ans.router.address, bAmount)
     //     function addLiquidity(
     //         route calldata _route,
     //         uint amountADesired,

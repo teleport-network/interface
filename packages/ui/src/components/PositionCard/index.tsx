@@ -609,7 +609,7 @@ export function LiquidityCard({
             ...(isMobile ? { maxWidth: '3.5rem' } : {})
           }}
         >
-          {!currency0 || !currency1 ? <Dots>Loading</Dots> : `${currency0.symbol}/${currency1.symbol}`}
+          {!currency0 || !currency1 ? <Dots>Loading</Dots> : `${currency0.symbol}/${currency1.symbol} LP`}
         </Box>
         <Box>{userPoolBalance ? userPoolBalance.toFixed(4) : '-'}</Box>
         <Box>
@@ -673,7 +673,7 @@ export function LiquidityCard({
               color: '#FFFFFF'
             }}
           >
-            {!currency0 || !currency1 ? <Dots>Loading</Dots> : `${currency0.symbol}/${currency1.symbol}`}
+            {!currency0 || !currency1 ? <Dots>Loading</Dots> : `${currency0.symbol}/${currency1.symbol} LP`}
           </Text>
         </Box>
         <Box
