@@ -49,7 +49,9 @@ export function useChefStakingInfo(): (ChefStakingInfo | undefined)[] {
   const stakingTokens = useMemo(() => {
     return poolInfos.map((poolInfo, idx) => {
       const poolPreset: FarmingPool | undefined = poolPresets[idx]
-      if (!poolPreset) return undefined
+      if (!poolPreset) {
+        return undefined
+      }
       return new Token(
         chainId || 420,
         poolInfo.lpToken,
@@ -65,15 +67,20 @@ export function useChefStakingInfo(): (ChefStakingInfo | undefined)[] {
       return [undefined, undefined, undefined]
     }
     const { stakingAsset, isHidden } = preset
-    if (!stakingAsset.isLpToken || isHidden) return [undefined, undefined, undefined]
-    else return [stakingAsset.tokenA, stakingAsset.tokenB, stakingAsset.isStable] as [Token, Token, boolean]
+    if (!stakingAsset.isLpToken || isHidden) {
+      return [undefined, undefined, undefined]
+    } else {
+      return [stakingAsset.tokenA, stakingAsset.tokenB, stakingAsset.isStable] as [Token, Token, boolean]
+    }
   })
   const pairs = usePairs(stakingPairAsset)
   const tvls = useTokenBalances(mchefContract?.address, stakingTokens)
 
   return poolInfos.map((info, idx) => {
     const poolPreset: FarmingPool | undefined = poolPresets[idx]
-    if (!poolPreset) return undefined
+    if (!poolPreset) {
+      return undefined
+    }
 
     const pool = poolPreset
     const stakingToken = stakingTokens[idx] as Token
