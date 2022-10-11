@@ -155,6 +155,10 @@ function CurrencyRow({
   )
 }
 
+class AddressedCurrency extends Currency {
+  public address?: string
+}
+
 export default function CurrencyList({
   height,
   currencies,
@@ -168,7 +172,7 @@ export default function CurrencyList({
   breakIndex
 }: {
   height: number
-  currencies: Currency[]
+  currencies: AddressedCurrency[]
   selectedCurrency?: Currency | null
   onCurrencySelect: (currency: Currency) => void
   otherCurrency?: Currency | null
@@ -179,7 +183,16 @@ export default function CurrencyList({
   breakIndex: number | undefined
 }) {
   const itemData: (Currency | undefined)[] = useMemo(() => {
-    const formatted: (Currency | undefined)[] = currencies
+    const addressSet = new Set()
+    const formatted: (Currency | undefined)[] = []
+    for (const currency of currencies) {
+      if (addressSet.has(currency.address)) {
+        continue
+      } else {
+        formatted.push(currency)
+        addressSet.add(currency.address)
+      }
+    }
     if (
       showETH &&
       !currencies.some((e) => {
@@ -194,7 +207,7 @@ export default function CurrencyList({
       formatted = [...formatted.slice(0, breakIndex), undefined, ...formatted.slice(breakIndex, formatted.length)]
     } */
     return formatted
-  }, [breakIndex, currencies, showETH])
+  }, [currencies, showETH])
 
   const { chainId } = useActiveWeb3React()
   const theme = useThemedContext()
@@ -264,7 +277,6 @@ export default function CurrencyList({
       selectedCurrency,
       setImportToken,
       showImportView,
-      breakIndex,
       theme.text1
     ]
   )
