@@ -39,6 +39,13 @@ task("deploy", "deploy proxy")
         //USDT
         ins.usdt = await hre.run("deployToken", {"cname": "TT", "name": "Tether USD", "symbol": "USDT"})
 
+        //Multicall deploy
+        let multicallFactory = await ethers.getContractFactory("Multicall2")
+        let multicall = await multicallFactory.deploy()
+        await multicall.deployed()
+
+        ins.multicall = multicall
+
 
         let deployed = {
             weth: ins.weth.address,
@@ -47,7 +54,8 @@ task("deploy", "deploy proxy")
             usdc: ins.usdc.address,
             usdt: ins.usdt.address,
             router: ins.router.address,
-            factory: ins.factory.address
+            factory: ins.factory.address,
+            multicall:ins.multicall.address
         }
         console.log(deployed)
         // weth=ins.weth.address
@@ -58,6 +66,8 @@ task("deploy", "deploy proxy")
         console.log(`usdt=${deployed.usdt}`)
         console.log(`router=${deployed.router}`)
         console.log(`factory=${deployed.factory}`)
+        console.log(`multicall=${deployed.multicall}`)
+
         return ins
     })
 
