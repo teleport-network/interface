@@ -57,9 +57,7 @@ export default function ClaimRewardModal({ isOpen, onDismiss, pid, stakingInfo }
 
   const masterChef = useMasterChef(Chef.MINICHEF)
 
-  console.debug('claimreward::stakingInfo?.rewardToken', stakingInfo?.rewardToken)
   const rewardTokenPrice = useUSDCPrice(stakingInfo?.rewardToken)
-  console.debug('claimreward::rewardTokenPrice', rewardTokenPrice)
 
   // track and parse user input
   const stakingCurrency = stakingInfo?.stakingToken
