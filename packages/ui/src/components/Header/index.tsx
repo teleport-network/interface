@@ -2,11 +2,12 @@
 //   ChainId
 //   // TokenAmount
 // } from '@teleswap/sdk'
+// import { darken } from 'polished'
+import { Rounding } from '@teleswap/sdk'
 import TeleLogo from 'assets/images/tele/logo.svg'
 import TextLogo from 'assets/svg/textLogo.svg'
 import useThemedContext from 'hooks/useThemedContext'
 import React, { useLayoutEffect, useRef, useState } from 'react'
-// import { darken } from 'polished'
 import { useTranslation } from 'react-i18next'
 import { NavLink, NavLinkProps } from 'react-router-dom'
 import { Box, Flex, Text } from 'rebass'
@@ -20,7 +21,7 @@ import {
   useETHBalances
   // useAggregateUniBalance
 } from '../../state/wallet/hooks'
-// import { CardNoise } from '../earn/styled'
+// import { CardNoise } fro.0m '../earn/styled'
 // import { CountUp } from 'use-count-up'
 // import { TYPE, ExternalLink } from '../../theme'
 import { YellowCard } from '../Card'
@@ -567,7 +568,7 @@ export default function Header() {
             >
               {account && userEthBalance ? (
                 <BalanceText style={{ flexShrink: 0, color: theme.common2 }} pl="0.75rem" pr="0.5rem" fontWeight={500}>
-                  {userEthBalance?.toSignificant(4)}
+                  {userEthBalance?.toSignificant(4, undefined, Rounding.ROUND_HALF_UP)}
                 </BalanceText>
               ) : null}
               <Web3Status />
