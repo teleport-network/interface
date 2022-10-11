@@ -13,6 +13,7 @@ import { abi as GOVERNANCE_ABI } from '@uniswap/governance/build/GovernorAlpha.j
 import { abi as UNI_ABI } from '@uniswap/governance/build/Uni.json'
 import { abi as STAKING_REWARDS_ABI } from '@uniswap/liquidity-staker/build/StakingRewards.json'
 import { abi as MERKLE_DISTRIBUTOR_ABI } from '@uniswap/merkle-distributor/build/MerkleDistributor.json'
+import { GaugeType } from 'constants/farm/gauge.enum'
 import { useMemo } from 'react'
 
 import {
@@ -149,39 +150,33 @@ export function useSushiContract(withSignerIfPossible = true): Contract | null {
   return useContract(chainId ? SUSHI_ADDRESS[chainId] : undefined, SUSHI_ABI, withSignerIfPossible)
 }
 
-export function useAdminGaugeContract(gaugeAddress: string, withSignerIfPossible?: boolean): Contract | null {
-  return useContract(gaugeAddress, AdminGaugeABI, withSignerIfPossible)
+export function useGaugeContract(gaugeType: GaugeType, gaugeAddress: string, withSignerIfPossible?: boolean) {
+  const theGaugeABI =
+    gaugeType === GaugeType.ADMIN ? AdminGaugeABI : gaugeType === GaugeType.STABLE ? StableGaugeABI : VariableGaugeABI
+  const gaugeContract = useContract(gaugeAddress, theGaugeABI, withSignerIfPossible)
+  return [gaugeContract, gaugeType] as const
 }
 
-export function useStableGaugeContract(gaugeAddress: string, withSignerIfPossible?: boolean): Contract | null {
-  return useContract(gaugeAddress, StableGaugeABI, withSignerIfPossible)
-}
-
-export function useVariableGaugeContract(gaugeAddress: string, withSignerIfPossible?: boolean): Contract | null {
-  return useContract(gaugeAddress, VariableGaugeABI, withSignerIfPossible)
-}
-
-export function useAdminGaugeProxyContract(withSignerIfPossible?: boolean): Contract | null {
+export function useGaugeProxyContract(gaugeType: GaugeType, withSignerIfPossible?: boolean) {
   const { chainId } = useActiveWeb3React()
-  return useContract(chainId ? ADMIN_GAUGE_PROXY_ADDRESS[chainId] : undefined, AdminGaugeProxyABI, withSignerIfPossible)
-}
-
-export function useStableGaugeProxyContract(withSignerIfPossible?: boolean): Contract | null {
-  const { chainId } = useActiveWeb3React()
-  return useContract(
-    chainId ? STABLE_GAUGE_PROXY_ADDRESS[chainId] : undefined,
-    StableGaugeProxyABI,
+  const theGaugeProxyABI =
+    gaugeType === GaugeType.ADMIN
+      ? AdminGaugeProxyABI
+      : gaugeType === GaugeType.STABLE
+      ? StableGaugeProxyABI
+      : VariableGaugeProxyABI
+  const theGaugeProxyAddressMap =
+    gaugeType === GaugeType.ADMIN
+      ? ADMIN_GAUGE_PROXY_ADDRESS
+      : gaugeType === GaugeType.STABLE
+      ? STABLE_GAUGE_PROXY_ADDRESS
+      : VARIABLE_GAUGE_PROXY_ADDRESS
+  const gaugeProxyContract = useContract(
+    chainId ? theGaugeProxyAddressMap[chainId] : undefined,
+    theGaugeProxyABI,
     withSignerIfPossible
   )
-}
-
-export function useVariableGaugeProxyContract(withSignerIfPossible?: boolean): Contract | null {
-  const { chainId } = useActiveWeb3React()
-  return useContract(
-    chainId ? VARIABLE_GAUGE_PROXY_ADDRESS[chainId] : undefined,
-    VariableGaugeProxyABI,
-    withSignerIfPossible
-  )
+  return [gaugeProxyContract, gaugeType] as const
 }
 
 export function useBribeContract(address: string, withSignerIfPossible?: boolean): Contract | null {
