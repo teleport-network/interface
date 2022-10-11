@@ -1,5 +1,13 @@
 import { Contract } from '@ethersproject/contracts'
+import AdminGaugeABI from '@teleswap/contracts/build/AdminGauge.json'
+import AdminGaugeProxyABI from '@teleswap/contracts/build/AdminGaugeProxy.json'
+import BribeABI from '@teleswap/contracts/build/Bribe.json'
+import BribeFactoryABI from '@teleswap/contracts/build/BribeFactory.json'
 import ITeleswapV2PairABI from '@teleswap/contracts/build/ITeleswapV2Pair.json'
+import StableGaugeABI from '@teleswap/contracts/build/StableGauge.json'
+import StableGaugeProxyABI from '@teleswap/contracts/build/StableGaugeProxy.json'
+import VariableGaugeABI from '@teleswap/contracts/build/VariableGauge.json'
+import VariableGaugeProxyABI from '@teleswap/contracts/build/VariableGaugeProxy.json'
 import { ChainId, WETH } from '@teleswap/sdk'
 import { abi as GOVERNANCE_ABI } from '@uniswap/governance/build/GovernorAlpha.json'
 import { abi as UNI_ABI } from '@uniswap/governance/build/Uni.json'
@@ -8,13 +16,17 @@ import { abi as MERKLE_DISTRIBUTOR_ABI } from '@uniswap/merkle-distributor/build
 import { useMemo } from 'react'
 
 import {
+  ADMIN_GAUGE_PROXY_ADDRESS,
+  BRIBE_FACTORY_ADDRESS,
   GOVERNANCE_ADDRESS,
   MASTERCHEF_ADDRESSBOOK,
   MASTERCHEFV2_ADDRESSBOOK,
   MERKLE_DISTRIBUTOR_ADDRESS,
   MINICHEF_ADDRESS,
+  STABLE_GAUGE_PROXY_ADDRESS,
   SUSHI_ADDRESS,
-  UNI
+  UNI,
+  VARIABLE_GAUGE_PROXY_ADDRESS
 } from '../constants'
 import {
   ARGENT_WALLET_DETECTOR_ABI,
@@ -135,6 +147,50 @@ export function useSocksController(): Contract | null {
 export function useSushiContract(withSignerIfPossible = true): Contract | null {
   const { chainId } = useActiveWeb3React()
   return useContract(chainId ? SUSHI_ADDRESS[chainId] : undefined, SUSHI_ABI, withSignerIfPossible)
+}
+
+export function useAdminGaugeContract(gaugeAddress: string, withSignerIfPossible?: boolean): Contract | null {
+  return useContract(gaugeAddress, AdminGaugeABI, withSignerIfPossible)
+}
+
+export function useStableGaugeContract(gaugeAddress: string, withSignerIfPossible?: boolean): Contract | null {
+  return useContract(gaugeAddress, StableGaugeABI, withSignerIfPossible)
+}
+
+export function useVariableGaugeContract(gaugeAddress: string, withSignerIfPossible?: boolean): Contract | null {
+  return useContract(gaugeAddress, VariableGaugeABI, withSignerIfPossible)
+}
+
+export function useAdminGaugeProxyContract(withSignerIfPossible?: boolean): Contract | null {
+  const { chainId } = useActiveWeb3React()
+  return useContract(chainId ? ADMIN_GAUGE_PROXY_ADDRESS[chainId] : undefined, AdminGaugeProxyABI, withSignerIfPossible)
+}
+
+export function useStableGaugeProxyContract(withSignerIfPossible?: boolean): Contract | null {
+  const { chainId } = useActiveWeb3React()
+  return useContract(
+    chainId ? STABLE_GAUGE_PROXY_ADDRESS[chainId] : undefined,
+    StableGaugeProxyABI,
+    withSignerIfPossible
+  )
+}
+
+export function useVariableGaugeProxyContract(withSignerIfPossible?: boolean): Contract | null {
+  const { chainId } = useActiveWeb3React()
+  return useContract(
+    chainId ? VARIABLE_GAUGE_PROXY_ADDRESS[chainId] : undefined,
+    VariableGaugeProxyABI,
+    withSignerIfPossible
+  )
+}
+
+export function useBribeContract(address: string, withSignerIfPossible?: boolean): Contract | null {
+  return useContract(address, BribeABI, withSignerIfPossible)
+}
+
+export function useBribeFactoryContract(withSignerIfPossible?: boolean): Contract | null {
+  const { chainId } = useActiveWeb3React()
+  return useContract(chainId ? BRIBE_FACTORY_ADDRESS[chainId] : undefined, BribeFactoryABI, withSignerIfPossible)
 }
 
 export function useMasterChefContract(withSignerIfPossible?: boolean): Contract | null {
