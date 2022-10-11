@@ -32,5 +32,6 @@ const CLIENT_PARAMS = {
 export async function route(req: QuoteArguments): Promise<{ data: GetQuoteResult; error?: unknown }> {
   const router = getRouter(req.tokenInChainId)
   const result = await getClientSideQuote(req, router, CLIENT_PARAMS)
+  result.data.reqParams = req
   return result
 }
