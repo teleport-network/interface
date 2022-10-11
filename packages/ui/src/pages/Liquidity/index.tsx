@@ -145,7 +145,7 @@ const MobileYourLiquidityCard = styled(Box)`
   grid-template-rows: 3fr 1fr 2fr;
   grid-row-gap: 0.5rem;
   grid-auto-flow: row dense;
-  grid-template-columns: 2fr 1fr 2fr;
+  grid-template-columns: 2fr 3fr 3fr;
   .mobile-pair-icon {
     grid-column: 1 / 3;
   }
