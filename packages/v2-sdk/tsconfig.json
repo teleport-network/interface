@@ -23,6 +23,7 @@
       "*": ["src/*", "node_modules/*"]
     },
     "esModuleInterop": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "isolatedModules": true
   }
 }

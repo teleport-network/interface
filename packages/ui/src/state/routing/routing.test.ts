@@ -1,5 +1,4 @@
 import { ChainId } from '@teleswap/smart-order-router'
-
 import { route } from './slice'
 
 test('routing', async () => {
@@ -14,5 +13,11 @@ test('routing', async () => {
     type: 'exactOut',
     slippageTolerance: '50'
   })
-  console.log('debug joy', result)
+  console.log(
+    'debug joy',
+    result,
+    result.data.priceImpactWithoutFee.toSignificant(4),
+    result.data.realizedLPFee.toSignificant(4)
+  )
+  console.log('debug joy', result.data.route)
 }, 100000)

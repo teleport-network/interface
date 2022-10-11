@@ -25,7 +25,7 @@ function computePriceImpact(midPrice: Fraction, inputAmount: JSBI, outputAmount:
 
 export function computeTradePriceBreakdownByRoute(route: V2RouteWithValidQuote): {
   priceImpactWithoutFee: Percent
-  realizedLPFee: JSBI
+  realizedLPFee: Fraction
 } {
   const realizedLPFee = ONE_HUNDRED_PERCENT.subtract(
     route.route.pairs.reduce<Fraction>(
@@ -45,7 +45,7 @@ export function computeTradePriceBreakdownByRoute(route: V2RouteWithValidQuote):
   ).subtract(realizedLPFee)
 
   // the amount of the input that accrues to LPs
-  const realizedLPFeeAmount = route.amount.multiply(realizedLPFee.numerator).quotient
+  const realizedLPFeeAmount = realizedLPFee.multiply(new Fraction(route.amount.numerator, route.amount.denominator))
 
   return {
     priceImpactWithoutFee: new Percent(
