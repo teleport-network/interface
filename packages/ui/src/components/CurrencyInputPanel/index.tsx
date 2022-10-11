@@ -98,7 +98,7 @@ const Container = styled.div<{ hideInput: boolean }>`
 const StyledTokenName = styled.span<{ active?: boolean }>`
   ${({ active }) => (active ? '  margin: 0 0.4rem 0 0.3rem;' : '  margin: 0 0.4rem 0 0.3rem;')}
   font-size:  ${({ active }) => (active ? '1rem' : '.85rem')};
-  font-family: 'IBM Plex Sans';
+  font-family: 'Poppins';
 `
 
 const StyledBalanceMax = styled.button`
