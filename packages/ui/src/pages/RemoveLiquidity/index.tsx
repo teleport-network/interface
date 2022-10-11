@@ -544,12 +544,14 @@ export default function RemoveLiquidity() {
                 width: '40rem',
                 display: 'flex',
                 marginBottom: '2rem',
-                alignItems: 'flex-start',
+                alignItems: 'center',
+                justifyContent: 'space-between',
                 maxWidth: '90vw'
               }
         }
       >
         <BackToMyLiquidity height="100%" />
+        {!isMobile && <Settings />}
         {isMobile && (
           <>
             <Box display="flex" justifyContent={'center'} alignItems="center">
