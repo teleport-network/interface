@@ -17,6 +17,7 @@ import { useUserSlippageTolerance } from '../user/hooks'
 import { useCurrencyBalances } from '../wallet/hooks'
 import { Field, replaceSwapState, selectCurrency, setRecipient, switchCurrencies, typeInput } from './actions'
 import { SwapState } from './reducer'
+import { route } from 'state/routing/slice'
 
 export function useSwapState(): AppState['swap'] {
   return useSelector<AppState, AppState['swap']>((state) => state.swap)
@@ -105,7 +106,7 @@ function involvesAddress(trade: Trade, checksummedAddress: string): boolean {
 }
 
 // from the current swap inputs, compute the best trade and return it.
-export function useDerivedSwapInfo(): {
+export function useDerivedSwapInfo(): any | {
   currencies: { [field in Field]?: Currency }
   currencyBalances: { [field in Field]?: CurrencyAmount }
   parsedAmount: CurrencyAmount | undefined
@@ -197,7 +198,7 @@ export function useDerivedSwapInfo(): {
   const inputName = (currencies && currencies[Field.INPUT]?.name) || ''
   const outputName = (currencies && currencies[Field.OUTPUT]?.name) || ''
   useEffect(() => {
-    ;(async () => {
+    ; (async () => {
       try {
         if (
           currencies[Field.INPUT] &&
@@ -216,94 +217,33 @@ export function useDerivedSwapInfo(): {
           }
           const decimal = isExactIn ? currencies[Field.INPUT]?.decimals : currencies[Field.OUTPUT]?.decimals
           const amount = new BigNumber(typedValue).shiftedBy(decimal!).toNumber()
-          const params = {
+          const params: any = {
             tokenInAddress: inputItem['address'],
             tokenInChainId: inputItem['chainId'],
             tokenOutAddress: outputItem['address'],
             tokenOutChainId: outputItem['chainId'],
             amount,
             type: isExactIn ? 'exactIn' : 'exactOut',
-            protocols: 'v2'
+            protocols: 'v2',
           }
-          /*  let volidatas = Object.keys(params).find((key) => {
-            return !!params[key] == false
-          }) */
-          const data = JSON.stringify(params)
-          const url = 'https://teleport-routing.qa.davionlabs.com/quote'
-          const config = {
-            method: 'post',
-            url,
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            data
-          }
-          // let response = await axios(config)
-          const response: any = {}
-          response['data'] = {
-            blockNumber: '1812566',
-            amount: '1000000000000000000',
-            amountDecimals: '1',
-            quote: '99989999999786560901',
-            quoteDecimals: '99.989999999786560901',
-            quoteGasAdjusted: '99989999999672744170',
-            quoteGasAdjustedDecimals: '99.98999999967274417',
-            gasUseEstimateQuote: '113816730',
-            gasUseEstimateQuoteDecimals: '0.00000000011381673',
-            gasUseEstimate: '135000',
-            gasUseEstimateUSD: '0.00000000011381673',
-            gasPriceWei: '1',
-            route: [
-              [
-                {
-                  type: 'v2-pool',
-                  address: '0xa60306D462cb8a64CF1652Ee9c41E12E47D384c4',
-                  tokenIn: {
-                    chainId: 420,
-                    decimals: '18',
-                    address: '0x53B1c6025E3f9B149304Cf1B39ee7c577d76c6Ca',
-                    symbol: 'USDC'
-                  },
-                  tokenOut: {
-                    chainId: 420,
-                    decimals: '18',
-                    address: '0x5986C8FfADCA9cee5C28A85cC3d4F335aab5Dc90',
-                    symbol: 'USDT'
-                  },
-                  reserve0: {
-                    token: {
-                      chainId: 420,
-                      decimals: '18',
-                      address: '0x53B1c6025E3f9B149304Cf1B39ee7c577d76c6Ca',
-                      symbol: 'USDC'
-                    },
-                    quotient: '10060670000000000000000000'
-                  },
-                  reserve1: {
-                    token: {
-                      chainId: 420,
-                      decimals: '18',
-                      address: '0x5986C8FfADCA9cee5C28A85cC3d4F335aab5Dc90',
-                      symbol: 'USDT'
-                    },
-                    quotient: '10060670000000000000000000'
-                  },
-                  amountIn: '1000000000000000000',
-                  amountOut: '1000000000000000000',
-                  stable: true
-                }
-              ]
-            ],
-            routeString: '[V2] 100.00% = USDC -- [0xa60306D462cb8a64CF1652Ee9c41E12E47D384c4] --> USDT',
-            percents: [100],
-            quoteId: ''
-          }
+          // let volidatas = Object.keys(params).find((key) => {
+          //   return !!params[key] == false
+          // })
+          params['tokenInDecimals'] = inputItem.decimals
+          params['tokenOutDecimals'] = outputItem.decimals
+          params['recipient'] = ''
+          params['slippageTolerance'] = ''
+          params['deadline'] = ''
+          let response = await route(params)
+          // let response: any = {}
+          // response.data = {"blockNumber":"1852407","amount":"1000000000000000000","amountDecimals":"1","quote":"543458644977616213","quoteDecimals":"0.543458644977616213","quoteGasAdjusted":"543458631477616213","quoteGasAdjustedDecimals":"0.543458631477616213","gasUseEstimateQuote":"13499999999","gasUseEstimateQuoteDecimals":"0.000000013499999999","gasUseEstimate":"135000","gasUseEstimateUSD":"0.000000000115316359","gasPriceWei":"1","route":[[{"type":"v2-pool","tokenIn":{"chainId":420,"decimals":18,"address":"0x70aBC17e870366C336A5DAd05061828fEff76fF5"},"tokenOut":{"chainId":420,"decimals":18,"address":"0x56c822f91C1DC40ce32Ae6109C7cc1D18eD08ECE","symbol":"USDC"},"reserve0":{"token":{"chainId":420,"decimals":18,"address":"0x56c822f91C1DC40ce32Ae6109C7cc1D18eD08ECE","symbol":"USDC"},"quotient":"92837629675000000711"},"reserve1":{"token":{"chainId":420,"decimals":18,"address":"0x70aBC17e870366C336A5DAd05061828fEff76fF5","symbol":"USDT"},"quotient":"169317922103755095452"},"amountIn":"1000000000000000000","amountOut":"543458644977616213"}]],"routeString":"[V2] 100.00% = undefined -- [0xC0Be76E51DD829C8B98B6dB9212f3512540B2EC5] --> USDC","priceImpactWithoutFee":"0.9871","realizedLPFee":"3000000000000000000000000000","maxIn":"1000000000000000000","minOut":"540800000000000000","percents":[100]}
           if (response.data && response.data.hasOwnProperty('quoteDecimals')) {
             const parsedOutAmount = tryParseAmount(
               response.data.quoteDecimals,
               (isExactIn ? outputCurrency : inputCurrency) ?? undefined
             )
             response.data['parsedOutAmount'] = parsedOutAmount
+            response.data['currencies'] = currencies
             setRouteData(response.data)
           }
         }
