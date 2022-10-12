@@ -1,7 +1,7 @@
 import { darken, lighten } from 'polished'
-import React from 'react'
 import { ChevronDown } from 'react-feather'
 import { Button as RebassButton, ButtonProps } from 'rebass/styled-components'
+import { useWalletModalToggle } from 'state/application/hooks'
 import styled from 'styled-components'
 
 import { RowBetween } from '../Row'
@@ -258,25 +258,27 @@ const ButtonConfirmedStyle = styled(Base)`
 `
 
 const ButtonErrorStyle = styled(Base)`
-  background-color: ${({ theme }) => theme.red1};
-  border: 1px solid ${({ theme }) => theme.red1};
+  // background-color: ${({ theme }) => theme.red1};
+  // border: 1px solid ${({ theme }) => theme.red1};
+  background-color: ${({ theme }) => theme.common3};
+  border: 1px solid ${({ theme }) => theme.common3};
   color: rgb(5 5 14 / 70%);
   &:focus {
-    box-shadow: 0 0 0 1pt ${({ theme }) => darken(0.05, theme.red1)};
-    background-color: ${({ theme }) => darken(0.05, theme.red1)};
+    box-shadow: 0 0 0 1pt ${({ theme }) => darken(0.05, theme.common3)};
+    background-color: ${({ theme }) => darken(0.05, theme.common3)};
   }
   &:hover {
-    background-color: ${({ theme }) => darken(0.05, theme.red1)};
+    background-color: ${({ theme }) => darken(0.05, theme.common3)};
   }
   &:active {
-    box-shadow: 0 0 0 1pt ${({ theme }) => darken(0.1, theme.red1)};
-    background-color: ${({ theme }) => darken(0.1, theme.red1)};
+    box-shadow: 0 0 0 1pt ${({ theme }) => darken(0.1, theme.common3)};
+    background-color: ${({ theme }) => darken(0.1, theme.common3)};
   }
   &:disabled {
     cursor: auto;
     box-shadow: none;
-    background-color: ${({ theme }) => theme.red1};
-    border: 1px solid ${({ theme }) => theme.red1};
+    background-color: ${({ theme }) => theme.common3};
+    border: 1px solid ${({ theme }) => theme.common3};
   }
 `
 
@@ -339,4 +341,17 @@ export function ButtonRadio({ active, ...rest }: { active?: boolean } & ButtonPr
   } else {
     return <ButtonPrimary {...rest} />
   }
+}
+
+export function ConnectButtonInBody() {
+  const toggleWalletModal = useWalletModalToggle()
+  return (
+    <ButtonLight
+      className="title"
+      sx={{ backgroundColor: '#39E1BA!important', color: '#05050e!important', fontWeight: '400!important' }}
+      onClick={toggleWalletModal}
+    >
+      Connect Wallet
+    </ButtonLight>
+  )
 }

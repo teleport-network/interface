@@ -1,7 +1,7 @@
 import bg from 'assets/svg/background-new.svg'
 import LiquidityDetail from 'components/LiquidityDetail'
 import { WrongNetworkProtector } from 'components/WrongNetworkProtector'
-import React, { Suspense } from 'react'
+import { Suspense } from 'react'
 import { isMobile } from 'react-device-detect'
 import { Route, Switch } from 'react-router-dom'
 import { Box } from 'rebass'
@@ -70,6 +70,10 @@ const BodyWrapper = styled.div<{ mobile?: boolean }>`
     padding: 1rem;
     padding-top: 4rem;
   `};
+  ${({ theme, mobile }) => theme.mediaWidth.upToExtraSmall`
+    padding-top: '2rem';
+    padding-bottom: ${mobile ? '0' : '2rem'};
+  `};
 
   z-index: 1;
 `
@@ -120,9 +124,9 @@ export default function App() {
                 strict
                 path="/liquidity"
                 component={() => (
-                  <WrongNetworkProtector>
+                  <>
                     <Liquidity />
-                  </WrongNetworkProtector>
+                  </>
                 )}
               />
               <Route
@@ -178,9 +182,9 @@ export default function App() {
                 strict
                 path="/liquidity/:currencyIdA/:currencyIdB"
                 component={() => (
-                  <WrongNetworkProtector>
+                  <>
                     <LiquidityDetail />
-                  </WrongNetworkProtector>
+                  </>
                 )}
               />
               <Route
@@ -188,9 +192,9 @@ export default function App() {
                 strict
                 path="/liquidity/:currencyIdA/:currencyIdB/:stable"
                 component={() => (
-                  <WrongNetworkProtector>
+                  <>
                     <LiquidityDetail />
-                  </WrongNetworkProtector>
+                  </>
                 )}
               />
               {/*    <Route exact strict path="/migrate/v1" component={MigrateV1} />
@@ -200,7 +204,7 @@ export default function App() {
               <Route component={RedirectPathToSwapOnly} />
             </Switch>
           </Web3ReactManager>
-          <Marginer />
+          {!isMobile && <Marginer />}
         </BodyWrapper>
       </AppWrapper>
     </Suspense>

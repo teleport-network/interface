@@ -1,10 +1,10 @@
 import inputClear from 'assets/svg/inputclear.svg'
-import React from 'react'
+import React, { useCallback, useMemo } from 'react'
 import styled from 'styled-components'
 
 import { escapeRegExp } from '../../utils'
 
-const StyledInput = styled.input<{ error?: boolean; fontSize?: string; align?: string }>`
+const StyledInput = styled.input<{ error?: boolean; fontSize?: string; align?: string; paddingRight?: string }>`
   color: ${({ error, theme }) => (error ? theme.red1 : theme.text1)};
   width: 0;
   font-family: 'Poppins';
@@ -23,7 +23,8 @@ const StyledInput = styled.input<{ error?: boolean; fontSize?: string; align?: s
   overflow: hidden;
   text-overflow: ellipsis;
   padding: 0px;
-  padding-right: 30px;
+  padding-right: 1rem;
+  ${({ paddingRight }) => paddingRight && `padding-right: ${paddingRight}`};
   -webkit-appearance: textfield;
 
   ::-webkit-search-decoration {
@@ -68,29 +69,32 @@ export const Input = React.memo(function InnerInput({
   fontSize?: string
   align?: 'right' | 'left'
 } & Omit<React.HTMLProps<HTMLInputElement>, 'ref' | 'onChange' | 'as'>) {
-  const enforcer = (nextUserInput: string) => {
+  const enforcer = useCallback((nextUserInput: string) => {
     if (nextUserInput === '' || inputRegex.test(escapeRegExp(nextUserInput))) {
       onUserInput(nextUserInput)
     }
-  }
+  }, [])
+
+  const parsedValue = useMemo(() => {
+    return `${value}`
+      .replace(/,/g, '')
+      .split('.')
+      .map((e, index) => {
+        if (index === 0) {
+          return e.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+        } else {
+          return e
+        }
+      })
+      .join('.')
+  }, [value])
   return (
     <StyledInput
       {...rest}
-      value={`${value}`
-        .replace(/,/g, '')
-        .split('.')
-        .map((e, index) => {
-          if (index === 0) {
-            console.log(e)
-            return e.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
-          } else {
-            return e
-          }
-        })
-        .join('.')}
+      value={parsedValue}
       onChange={(event) => {
         // replace commas with periods, because uniswap exclusively uses period as the decimal separator
-        enforcer(event.target.value.replace(/,/g, '.'))
+        enforcer(event.target.value.replace(/,/g, ''))
       }}
       // universal input options
       inputMode="decimal"

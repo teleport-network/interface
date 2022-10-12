@@ -1,9 +1,9 @@
 import { darken } from 'polished'
-import React from 'react'
 import { ArrowLeft } from 'react-feather'
 import { useTranslation } from 'react-i18next'
 import { useDispatch } from 'react-redux'
 import { Link as HistoryLink, NavLink } from 'react-router-dom'
+import { Box } from 'rebass'
 import { AppDispatch } from 'state'
 import { resetMintState } from 'state/mint/actions'
 import styled from 'styled-components'
@@ -50,7 +50,6 @@ const StyledNavLink = styled(NavLink).attrs({
 const ActiveText = styled.div`
   font-family: 'Dela Gothic One';
   font-weight: 400;
-  font-size: 0.8rem;
   color: #ffffff;
 `
 
@@ -79,8 +78,9 @@ export function FindPoolTabs() {
         <HistoryLink to="/liquidity">
           <StyledArrowLeft />
         </HistoryLink>
-        <ActiveText>Import Pool</ActiveText>
-        <Settings />
+        <ActiveText className="text-emphasize">Import Pool</ActiveText>
+        {/* <Settings /> */}
+        <Box width="24px" height="24px"></Box>
       </RowBetween>
     </Tabs>
   )

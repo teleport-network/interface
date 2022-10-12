@@ -1,5 +1,4 @@
-import React, { useCallback, useState } from 'react'
-import { HelpCircle as Question } from 'react-feather'
+import { useCallback, useState } from 'react'
 import styled from 'styled-components'
 
 import Tooltip from '../Tooltip'
@@ -54,7 +53,7 @@ export default function QuestionHelper({ text }: { text: string }) {
   const open = useCallback(() => setShow(true), [setShow])
   const close = useCallback(() => setShow(false), [setShow])
 
-  return (
+  return null /* (
     <span style={{ marginLeft: 4 }}>
       <Tooltip text={text} show={show}>
         <QuestionWrapper onClick={open} onMouseEnter={open} onMouseLeave={close}>
@@ -62,7 +61,7 @@ export default function QuestionHelper({ text }: { text: string }) {
         </QuestionWrapper>
       </Tooltip>
     </span>
-  )
+  ) */
 }
 
 export function LightQuestionHelper({ text }: { text: string }) {

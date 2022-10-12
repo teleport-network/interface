@@ -322,7 +322,7 @@ export default function PoolCard({ pid, stakingInfo }: { pid: number; stakingInf
             }
             style={{ cursor: 'pointer' }}
           >
-            Get {poolInfo?.stakingAsset.name}
+            Get {poolInfo?.stakingAsset.name} LP
           </TYPE.green01>
         )}
       </TopSection>

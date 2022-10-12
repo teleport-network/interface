@@ -8,7 +8,6 @@ export interface LiquidityAsset {
   decimal: 18
   isLpToken: true
   isStable: boolean
-  symbol: 'SLP' | 'VLP'
 
   tokenA: Token
   tokenB: Token
@@ -42,7 +41,7 @@ interface FarmConfig {
    * @Note
    * here is the tricky part. `pools` must be added in the seqenuce of the `poolInfo` in chef's contract
    */
-  pools: FarmingPool[]
+  pools: (FarmingPool | undefined)[]
 }
 /**
  * @deprecated
@@ -56,105 +55,19 @@ export const CHAINID_TO_FARMING_CONFIG: { [chainId in ChainId]?: FarmConfig } = 
     chefType: Chef.MINICHEF,
     chainId: ChainId.OP_GOERLI,
     pools: [
-      {
-        isHidden: true,
-        // pid 0 -- ABANDONED for changing the swap contract
-        stakingAsset: {
-          name: 'USDC-USDT',
-          decimal: 18,
-          symbol: 'SLP',
-          // if you disable a LP token pool, make sure to set `isLpToken` to `false`
-          isLpToken: false
-        }
-      },
-      {
-        isHidden: true,
-        // pid 1 -- ABANDONED for changing the swap contract
-        stakingAsset: {
-          name: 'USDC-USDT',
-          decimal: 18,
-          symbol: 'SLP',
-          isLpToken: true,
-          isStable: true,
-          tokenA: USDC,
-          tokenB: USDT
-        }
-      },
-      {
-        isHidden: true,
-        // pid 2 -- ABANDONED for changing the swap contract
-        stakingAsset: {
-          name: 'USDT-ETH (Bad Evaluation)',
-          decimal: 18,
-          symbol: 'VLP',
-          isLpToken: true,
-          isStable: false,
-          tokenA: USDT,
-          tokenB: WETH[ChainId.OP_GOERLI]
-        }
-      },
-      {
-        isHidden: true,
-        // pid 3 -- ABANDONED for changing the swap contract
-        stakingAsset: {
-          name: 'USDC-ETH',
-          decimal: 18,
-          symbol: 'VLP',
-          isLpToken: true,
-          isStable: false,
-          tokenA: USDC,
-          tokenB: WETH[ChainId.OP_GOERLI]
-        }
-      },
-      {
-        isHidden: true,
-        // pid 4 -- ABANDONED for changing the swap contract
-        stakingAsset: {
-          name: 'USDC-USDT',
-          decimal: 18,
-          symbol: 'SLP',
-          isLpToken: true,
-          isStable: true,
-          tokenA: USDC,
-          tokenB: USDT
-        }
-      },
-      {
-        isHidden: true,
-        // pid 5 -- ABANDONED for changing the swap contract
-        stakingAsset: {
-          name: 'USDC-USDT',
-          decimal: 18,
-          symbol: 'SLP',
-          isLpToken: false
-        }
-      },
-      {
-        isHidden: true,
-        // pid 6 -- ABANDONED for changing the swap contract
-        stakingAsset: {
-          name: 'USDC-SUSHI',
-          decimal: 18,
-          symbol: 'SLP',
-          isLpToken: false
-        }
-      },
-      {
-        isHidden: true,
-        // pid 7 -- ABANDONED for changing the swap contract
-        stakingAsset: {
-          name: 'USDC-ETH',
-          decimal: 18,
-          symbol: 'VLP',
-          isLpToken: false
-        }
-      },
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
       {
         // pid 8
         stakingAsset: {
           name: 'USDC-USDT',
           decimal: 18,
-          symbol: 'SLP',
           isLpToken: true,
           isStable: true,
           tokenA: USDC,
@@ -166,7 +79,6 @@ export const CHAINID_TO_FARMING_CONFIG: { [chainId in ChainId]?: FarmConfig } = 
         stakingAsset: {
           name: 'USDC-ETH',
           decimal: 18,
-          symbol: 'VLP',
           isLpToken: true,
           isStable: false,
           tokenA: USDC,
@@ -178,7 +90,6 @@ export const CHAINID_TO_FARMING_CONFIG: { [chainId in ChainId]?: FarmConfig } = 
         stakingAsset: {
           name: 'USDC-SUSHI',
           decimal: 18,
-          symbol: 'SLP',
           isLpToken: true,
           isStable: false,
           tokenA: USDC,

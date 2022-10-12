@@ -1,7 +1,7 @@
 import { AbstractConnector } from '@web3-react/abstract-connector'
 import { UnsupportedChainIdError, useWeb3React } from '@web3-react/core'
 import { darken, lighten } from 'polished'
-import React, { useMemo } from 'react'
+import { useMemo } from 'react'
 import { Activity } from 'react-feather'
 import { useTranslation } from 'react-i18next'
 import styled, { css } from 'styled-components'
@@ -231,11 +231,11 @@ function Web3StatusInner() {
           fontFamily: 'Poppins',
           fontStyle: 'normal',
           fontWeight: '600!important',
-          lineHeight: '32px',
+          lineHeight: '2.5rem',
           alignItems: 'flex-end',
           display: 'flex',
           color: '#000000',
-          padding: '0 1rem',
+          padding: '0 1.5rem!important',
           borderRadius: '0.8rem!important',
           height: '2.5rem'
         }}

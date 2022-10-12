@@ -1,6 +1,12 @@
 import { Trade, TradeType } from '@teleswap/sdk'
+import LineVIcon from 'assets/images/tele/lineV.png'
+import ArrowHGreen from 'assets/svg/arrowHGreen.svg'
+import ArrowHLoneLine from 'assets/svg/arrowHLoneLine.svg'
+import arrowShowRoute from 'assets/svg/arrowShowRoute.svg'
+import TeleRouteIcon from 'assets/svg/teleRoute.svg'
+import axios from 'axios'
 import useThemedContext from 'hooks/useThemedContext'
-import React, { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Box } from 'rebass'
 import styled from 'styled-components'
 
@@ -13,13 +19,6 @@ import QuestionHelper from '../QuestionHelper'
 import { RowBetween, RowFixed } from '../Row'
 import FormattedPriceImpact from './FormattedPriceImpact'
 import SwapRoute from './SwapRoute'
-import ArrowHGreen from 'assets/svg/arrowHGreen.svg'
-import ArrowHLoneLine from 'assets/svg/arrowHLoneLine.svg'
-import LineVIcon from 'assets/images/tele/lineV.png'
-import TeleRouteIcon from 'assets/svg/teleRoute.svg'
-import arrowShowRoute from 'assets/svg/arrowShowRoute.svg'
-import BigNumber from 'bignumber.js'
-import axios from 'axios'
 
 const InfoLink = styled(ExternalLink)`
   width: 100%;
@@ -70,7 +69,7 @@ function TradeSummary({ trade, allowedSlippage }: { trade: Trade; allowedSlippag
         <RowBetween>
           <RowFixed>
             <TYPE.black fontWeight={400} color={theme.text2}>
-              Liquidity Provider Fee
+              Network Fee
             </TYPE.black>
             <QuestionHelper text="A portion of each trade (0.30%) goes to liquidity providers as a protocol incentive." />
           </RowFixed>
@@ -150,7 +149,7 @@ const RouteCellStyled = styled(Box)`
   }
 `
 const RouteAccordionStyled = styled(Box)`
-  display: inline-block;
+  display: inline-flex;
   transition: all 0.3s;
   margin-left: 0.4rem;
 `
@@ -165,59 +164,9 @@ export function AdvancedSwapDetails({ trade }: AdvancedSwapDetailsProps) {
   const theme = useThemedContext()
   const [showRouterDetail, setShowRouterDetail] = useState(false)
   const [allowedSlippage] = useUserSlippageTolerance()
-  const [routeData, setRouteData]: any = useState(null)
   // const showRoute = Boolean(trade && trade.route.path.length > 2)
   const showRoute = Boolean(trade && trade.route.path.length >= 2)
-  const tradeTemp: any = trade || { route: {} }
-  const inputName = tradeTemp?.inputAmount?.currency?.name || ''
-  const outputName = tradeTemp?.outputAmount?.currency?.name || ''
-  const amountString = tradeTemp?.inputAmount?.toExact() || tradeTemp?.inputAmount?.toSignificant(6) || ''
-  useEffect(() => {
-    ;(async () => {
-      try {
-        if (
-          !tradeTemp ||
-          !tradeTemp.hasOwnProperty('inputAmount') ||
-          !tradeTemp.hasOwnProperty('route') ||
-          !inputName ||
-          !outputName
-        ) {
-          return
-        }
-        const decimal = tradeTemp?.inputAmount?.token?.decimals
-        const amount = new BigNumber(amountString).shiftedBy(decimal).toNumber()
-        const params = {
-          tokenInAddress: tradeTemp?.route.input?.address,
-          tokenInChainId: tradeTemp?.route.input?.chainId,
-          tokenOutAddress: tradeTemp?.route.output?.address,
-          tokenOutChainId: tradeTemp?.route.output?.chainId,
-          amount,
-          type: 'exactIn',
-          protocols: 'v2'
-        }
-        const data = JSON.stringify(params)
-        const url = 'https://teleport-routing.qa.davionlabs.com/quote'
-        const config = {
-          method: 'post',
-          url,
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          data
-        }
-        axios(config)
-          .then(function (response) {
-            setRouteData(response.data)
-          })
-          .catch(function (error) {
-            console.log(error)
-          })
-      } catch (error) {
-        console.log('AdvancedSwapDetails error', error)
-      }
-    })()
-  }, [inputName, outputName, amountString])
-
+  const routeData = (trade && trade['routeData']) || null
   return (
     <AutoColumn gap="0.4rem">
       {trade && (
@@ -238,7 +187,6 @@ export function AdvancedSwapDetails({ trade }: AdvancedSwapDetailsProps) {
                   onClick={() => setShowRouterDetail(!showRouterDetail)}
                   sx={{ marginLeft: '.5rem' }}
                 >
-                  {/* {'>'} */}
                   <img
                     src={arrowShowRoute}
                     alt=""

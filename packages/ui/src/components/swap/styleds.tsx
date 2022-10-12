@@ -1,5 +1,4 @@
 import { transparentize } from 'polished'
-import React from 'react'
 import { AlertTriangle } from 'react-feather'
 import { Text } from 'rebass'
 import styled, { css } from 'styled-components'
@@ -76,7 +75,7 @@ export const ErrorText = styled(Text)<{ severity?: 0 | 1 | 2 | 3 | 4 }>`
 export const StyledBalanceMaxMini = styled.button`
   height: 22px;
   width: 22px;
-  background-color: ${({ theme }) => theme.bg2};
+  background-color: transparent;
   border: none;
   border-radius: 50%;
   padding: 0.2rem;
@@ -89,14 +88,6 @@ export const StyledBalanceMaxMini = styled.button`
   justify-content: center;
   align-items: center;
   float: right;
-
-  :hover {
-    background-color: ${({ theme }) => theme.bg3};
-  }
-  :focus {
-    background-color: ${({ theme }) => theme.bg3};
-    outline: none;
-  }
 `
 
 export const TruncatedText = styled(Text)`

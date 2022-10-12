@@ -1,6 +1,5 @@
 import { AbstractConnector } from '@web3-react/abstract-connector'
 import { darken } from 'polished'
-import React from 'react'
 import styled from 'styled-components'
 
 import { injected } from '../../connectors'
@@ -60,6 +59,7 @@ const ErrorButton = styled.div`
 
 const LoadingWrapper = styled.div`
   ${({ theme }) => theme.flexRowNoWrap};
+  border-radius: 1rem;
   align-items: center;
   background: transparent !important;
   justify-content: center;

@@ -3,7 +3,7 @@ import Settings from 'components/Settings'
 import UnsupportedCurrencyFooter from 'components/swap/UnsupportedCurrencyFooter'
 import { useIsTransactionUnsupported } from 'hooks/Trades'
 import useThemedContext from 'hooks/useThemedContext'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ArrowDown } from 'react-feather'
 import ReactGA from 'react-ga'
 import { RouteComponentProps } from 'react-router-dom'
@@ -95,8 +95,17 @@ export default function Swap({ history }: RouteComponentProps) {
 
   // swap state
   const { independentField, typedValue, recipient } = useSwapState()
-  const { v2Trade, currencyBalances, parsedAmount, currencies, inputError: swapInputError } = useDerivedSwapInfo()
-
+  const {
+    v2Trade,
+    currencyBalances,
+    parsedAmount,
+    currencies,
+    inputError: swapInputError,
+    routeData
+  } = useDerivedSwapInfo()
+  if (routeData && v2Trade) {
+    v2Trade['routeData'] = routeData
+  }
   const {
     wrapType,
     execute: onWrap,
@@ -114,16 +123,24 @@ export default function Swap({ history }: RouteComponentProps) {
   const betterTradeLinkV2: Version | undefined =
     /* toggledVersion === Version.v1 && isTradeBetter(v1Trade, v2Trade) ?  */ Version.v2 /* : undefined */
 
+  // const parsedAmounts = showWrap
+  //   ? {
+  //     [Field.INPUT]: parsedAmount,
+  //     [Field.OUTPUT]: parsedAmount
+  //   }
+  //   : {
+  //     [Field.INPUT]: independentField === Field.INPUT ? parsedAmount : trade?.inputAmount,
+  //     [Field.OUTPUT]: independentField === Field.OUTPUT ? parsedAmount : trade?.outputAmount
+  //   }
   const parsedAmounts = showWrap
     ? {
         [Field.INPUT]: parsedAmount,
         [Field.OUTPUT]: parsedAmount
       }
     : {
-        [Field.INPUT]: independentField === Field.INPUT ? parsedAmount : trade?.inputAmount,
-        [Field.OUTPUT]: independentField === Field.OUTPUT ? parsedAmount : trade?.outputAmount
+        [Field.INPUT]: independentField === Field.INPUT ? parsedAmount : routeData?.parsedOutAmount,
+        [Field.OUTPUT]: independentField === Field.OUTPUT ? parsedAmount : routeData?.parsedOutAmount
       }
-
   const { onSwitchTokens, onCurrencySelection, onUserInput, onChangeRecipient } = useSwapActionHandlers()
   const isValid = !swapInputError
   const dependentField: Field = independentField === Field.INPUT ? Field.OUTPUT : Field.INPUT
@@ -405,11 +422,6 @@ export default function Swap({ history }: RouteComponentProps) {
               </AutoRow>
             </AutoColumn>
             <CurrencyInputPanel
-              sx={{
-                'input::-webkit-search-cancel-button': {
-                  right: '-33px'
-                }
-              }}
               value={formattedAmounts[Field.OUTPUT]}
               onUserInput={handleTypeOutput}
               label={independentField === Field.INPUT && !showWrap && trade ? 'To (estimated)' : 'To'}
@@ -455,7 +467,7 @@ export default function Swap({ history }: RouteComponentProps) {
                   )}
                   {allowedSlippage !== INITIAL_ALLOWED_SLIPPAGE && (
                     <RowBetween align="center">
-                      <ClickableText className="text-detail" onClick={toggleSettings}>
+                      <ClickableText className="text-detail" sx={{ color: '#FFF' }} onClick={toggleSettings}>
                         Slippage Tolerance
                       </ClickableText>
                       <ClickableText className="text-detail" onClick={toggleSettings}>

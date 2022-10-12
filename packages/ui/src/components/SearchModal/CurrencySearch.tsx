@@ -4,7 +4,7 @@ import { useOnClickOutside } from 'hooks/useOnClickOutside'
 import { usePresetTokens } from 'hooks/usePresetTokens'
 import useThemedContext from 'hooks/useThemedContext'
 import useToggle from 'hooks/useToggle'
-import React, { KeyboardEvent, RefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { KeyboardEvent, RefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 // import { Edit } from 'react-feather'
 import ReactGA from 'react-ga'
 import { useTranslation } from 'react-i18next'
@@ -217,9 +217,17 @@ export function CurrencySearch({
               <CurrencyList
                 height={height}
                 showETH={showETH}
-                currencies={DEFAULT_TOKENS.concat(
-                  filteredInactiveTokens ? filteredSortedTokens.concat(filteredInactiveTokens) : filteredSortedTokens
-                )}
+                currencies={
+                  searchQuery
+                    ? filteredInactiveTokens
+                      ? filteredSortedTokens.concat(filteredInactiveTokens)
+                      : filteredSortedTokens
+                    : DEFAULT_TOKENS.concat(
+                        filteredInactiveTokens
+                          ? filteredSortedTokens.concat(filteredInactiveTokens)
+                          : filteredSortedTokens
+                      )
+                }
                 breakIndex={
                   inactiveTokens && inactiveTokens.length && filteredSortedTokens && filteredSortedTokens.length
                     ? filteredSortedTokens.length

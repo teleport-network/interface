@@ -20,8 +20,8 @@ import {
   ADMIN_GAUGE_PROXY_ADDRESS,
   BRIBE_FACTORY_ADDRESS,
   GOVERNANCE_ADDRESS,
-  MASTERCHEF_ADDRESSBOOK,
   MASTERCHEFV2_ADDRESSBOOK,
+  MASTERCHEF_ADDRESSBOOK,
   MERKLE_DISTRIBUTOR_ADDRESS,
   MINICHEF_ADDRESS,
   STABLE_GAUGE_PROXY_ADDRESS,
@@ -37,8 +37,8 @@ import ENS_PUBLIC_RESOLVER_ABI from '../constants/abis/ens-public-resolver.json'
 import ENS_ABI from '../constants/abis/ens-registrar.json'
 import { ERC20_BYTES32_ABI } from '../constants/abis/erc20'
 import ERC20_ABI from '../constants/abis/erc20.json'
-import MASTERCHEF_ABI from '../constants/abis/masterchef.json'
 import MASTERCHEF_V2_ABI from '../constants/abis/masterchef-v2.json'
+import MASTERCHEF_ABI from '../constants/abis/masterchef.json'
 import { MIGRATOR_ABI, MIGRATOR_ADDRESS } from '../constants/abis/migrator'
 import MINICHEF_ABI from '../constants/abis/minichef-v2.json'
 import SUSHI_ABI from '../constants/abis/sushi.json'

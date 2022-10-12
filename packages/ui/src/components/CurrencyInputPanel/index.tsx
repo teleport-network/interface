@@ -3,7 +3,7 @@ import { ReactComponent as ArrowDown } from 'assets/svg/arrowdown.svg'
 import { ReactComponent as TobeSelected } from 'assets/svg/tobeSelected.svg'
 import DoubleCurrencyLogo from 'components/DoubleLogo'
 import { darken } from 'polished'
-import React, { useCallback, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Box, BoxProps } from 'rebass'
 import styled from 'styled-components'
@@ -98,7 +98,7 @@ const Container = styled.div<{ hideInput: boolean }>`
 const StyledTokenName = styled.span<{ active?: boolean }>`
   ${({ active }) => (active ? '  margin: 0 0.4rem 0 0.3rem;' : '  margin: 0 0.4rem 0 0.3rem;')}
   font-size:  ${({ active }) => (active ? '1rem' : '.85rem')};
-  font-family: 'IBM Plex Sans';
+  font-family: 'Poppins';
 `
 
 const StyledBalanceMax = styled.button`
