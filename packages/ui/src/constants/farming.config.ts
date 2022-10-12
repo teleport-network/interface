@@ -1,5 +1,5 @@
-import { ChainId, Token, WETH } from '@teleswap/sdk'
-import { UNI, USDC, USDT } from 'constants/index'
+import { ChainId, Token } from '@teleswap/sdk'
+import { SHARING_PAIRS } from 'constants/index'
 
 import { Chef } from './farm/chef.enum'
 
@@ -48,48 +48,6 @@ export const CHAINID_TO_FARMING_CONFIG: { [chainId in ChainId]?: FarmConfig } = 
   [ChainId.OP_GOERLI]: {
     chefType: Chef.MINICHEF,
     chainId: ChainId.OP_GOERLI,
-    pools: [
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      {
-        // pid 8
-        stakingAsset: {
-          name: 'USDC-USDT',
-          decimal: 18,
-          isLpToken: true,
-          isStable: true,
-          tokenA: USDC,
-          tokenB: USDT
-        }
-      },
-      {
-        // pid 9
-        stakingAsset: {
-          name: 'USDC-ETH',
-          decimal: 18,
-          isLpToken: true,
-          isStable: false,
-          tokenA: USDC,
-          tokenB: WETH[420]
-        }
-      },
-      {
-        // pid 10
-        stakingAsset: {
-          name: 'USDC-SUSHI',
-          decimal: 18,
-          isLpToken: true,
-          isStable: false,
-          tokenA: USDC,
-          tokenB: UNI[420]
-        }
-      }
-    ]
+    pools: [undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, ...SHARING_PAIRS]
   }
 }

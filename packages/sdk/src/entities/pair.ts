@@ -1,26 +1,25 @@
+import { getCreate2Address } from '@ethersproject/address'
+import { keccak256, pack } from '@ethersproject/solidity'
+import JSBI from 'jsbi'
+import invariant from 'tiny-invariant'
 import { Price } from './fractions/price'
 import { TokenAmount } from './fractions/tokenAmount'
-import invariant from 'tiny-invariant'
-import JSBI from 'jsbi'
-import { pack, keccak256 } from '@ethersproject/solidity'
-import { getCreate2Address } from '@ethersproject/address'
 
 import {
   BigintIsh,
+  ChainId,
+  CONTRACT_ADDRESS,
+  FIVE,
   // FACTORY_ADDRESS,
   INIT_CODE_HASH,
   MINIMUM_LIQUIDITY,
-  ZERO,
   ONE,
-  FIVE,
-  _997,
+  ZERO,
   _1000,
-  ChainId,
-  CONTRACT_ADDRESS,
-  PERIPHERY_NAME,
+  _997,
 } from '../constants'
-import { sqrt, parseBigintIsh } from '../utils'
-import { InsufficientReservesError, InsufficientInputAmountError } from '../errors'
+import { InsufficientInputAmountError, InsufficientReservesError } from '../errors'
+import { parseBigintIsh, sqrt } from '../utils'
 import { Token } from './token'
 
 let PAIR_ADDRESS_CACHE: { [token0Address: string]: { [token1Address: string]: { [stable: string]: string } } } = {}
@@ -32,7 +31,11 @@ export class Pair {
   public static getAddress(tokenA: Token, tokenB: Token, stable: boolean = false): string {
     const tokens = tokenA.sortsBefore(tokenB) ? [tokenA, tokenB] : [tokenB, tokenA] // does safety checks
 
-    if (PAIR_ADDRESS_CACHE?.[tokens[0].address]?.[tokens[1].address]?.[String(stable)] === undefined) {
+    if (
+      PAIR_ADDRESS_CACHE?.[tokens[0].address]?.[tokens[1].address]?.[String(stable)] === undefined &&
+      CONTRACT_ADDRESS[tokens[0].chainId] !== undefined &&
+      CONTRACT_ADDRESS[tokens[0].chainId]?.FACTORY
+    ) {
       PAIR_ADDRESS_CACHE = {
         ...PAIR_ADDRESS_CACHE,
         [tokens[0].address]: {
@@ -40,7 +43,7 @@ export class Pair {
           [tokens[1].address]: {
             ...PAIR_ADDRESS_CACHE?.[tokens[0].address]?.[tokens[1].address],
             [String(stable)]: getCreate2Address(
-              CONTRACT_ADDRESS[tokens[0].chainId]?.periphery[PERIPHERY_NAME.FACTORY]!,
+              CONTRACT_ADDRESS[tokens[0].chainId]!.FACTORY,
               keccak256(
                 ['bytes'],
                 [pack(['address', 'address', 'bool'], [tokens[0].address, tokens[1].address, stable])]
