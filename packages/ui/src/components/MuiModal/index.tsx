@@ -2,6 +2,7 @@ import Fade from '@mui/material/Fade'
 import Modal from '@mui/material/Modal'
 import { transparentize } from 'polished'
 import React, { useCallback } from 'react'
+import { isMobile } from 'react-device-detect'
 import { Flex } from 'rebass'
 import styled, { css } from 'styled-components'
 
@@ -148,6 +149,16 @@ export default function MuiModal({
               maxWidth={maxWidth}
               maxHeight={maxHeight}
               minWidth={minWidth}
+              sx={
+                isMobile && {
+                  width: '100vw',
+                  height: '100vh',
+                  position: 'absolute',
+                  bottom: 0,
+                  flexDirection: 'column',
+                  justifyContent: 'flex-end'
+                }
+              }
             >
               {title && (
                 <Flex height="40px" width="100%" justifyContent="flex-end">
@@ -165,7 +176,9 @@ export default function MuiModal({
                   {/* <CircledCloseIcon onClick={() => setIsOpen && setIsOpen(false)} /> */}
                 </Flex>
               )}
-              <ModalContentWrapper>{children}</ModalContentWrapper>
+              <ModalContentWrapper sx={isMobile ? { backgroundColor: '#000000!important' } : {}}>
+                {children}
+              </ModalContentWrapper>
             </StyledModalContent>
           </StyledModalOverlay>
         </Fade>

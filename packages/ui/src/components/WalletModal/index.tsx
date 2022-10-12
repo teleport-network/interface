@@ -42,9 +42,13 @@ const Wrapper = styled.div`
   margin: 0;
   padding: 1rem;
   width: 100%;
-  * {
-    background: #19242f !important;
-  }
+  ${() =>
+    !isMobile &&
+    `
+    * {
+      background: #19242f;
+    }
+  `}
 `
 
 const HeaderRow = styled.div`

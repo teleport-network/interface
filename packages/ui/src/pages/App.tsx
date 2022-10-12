@@ -71,7 +71,7 @@ const BodyWrapper = styled.div<{ mobile?: boolean }>`
     padding-top: 4rem;
   `};
   ${({ theme, mobile }) => theme.mediaWidth.upToExtraSmall`
-    padding-top: '2rem';
+    padding-top: 2rem;
     padding-bottom: ${mobile ? '0' : '2rem'};
   `};
 
