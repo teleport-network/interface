@@ -1,5 +1,6 @@
-import { CurrencyAmount, Fraction, JSBI, Percent, TokenAmount, Trade } from '@teleswap/sdk'
+import { CurrencyAmount, Fraction, JSBI, Percent, TokenAmount, Trade, ZERO } from '@teleswap/sdk'
 import { V2RouteWithValidQuote } from '@teleswap/smart-order-router'
+import { TradeType } from '@uniswap/sdk-core'
 
 import {
   ALLOWED_PRICE_IMPACT_HIGH,
@@ -19,7 +20,10 @@ const INPUT_FRACTION_AFTER_STABLE_FEE = ONE_HUNDRED_PERCENT.subtract(BASE_FEE_ST
 function computePriceImpact(midPrice: Fraction, inputAmount: JSBI, outputAmount: JSBI): Percent {
   const exactQuote = midPrice.multiply(inputAmount)
   // calculate slippage := (exactQuote - outputAmount) / exactQuote
-  const slippage = exactQuote.subtract(outputAmount).divide(exactQuote)
+  let slippage = exactQuote.subtract(outputAmount).divide(exactQuote)
+  if (slippage.lessThan(ZERO)) {
+    slippage = slippage.multiply(BigInt(-1))
+  }
   return new Percent(slippage.numerator, slippage.denominator)
 }
 
@@ -40,12 +44,28 @@ export function computeTradePriceBreakdownByRoute(route: V2RouteWithValidQuote):
   // remove lp fees from price impact
   const priceImpactWithoutFeeFraction = computePriceImpact(
     new Fraction(route.route.midPrice.numerator, route.route.midPrice.denominator),
-    route.amount.numerator,
-    route.quote.numerator
+    route.tradeType == TradeType.EXACT_INPUT ? route.amount.numerator : route.quote.quotient,
+    route.tradeType == TradeType.EXACT_INPUT ? route.quote.numerator : route.amount.quotient
   ).subtract(realizedLPFee)
+
+  console.log(
+    'params',
+    route.tradeType.toString(),
+    route.route.midPrice.toSignificant(4),
+    route.amount.toSignificant(4),
+    route.quote.toSignificant(4)
+  )
+
+  console.log(
+    'priceImpactWithoutFeeFraction',
+    priceImpactWithoutFeeFraction.denominator.toString(),
+    priceImpactWithoutFeeFraction.toSignificant(4)
+  )
 
   // the amount of the input that accrues to LPs
   const realizedLPFeeAmount = realizedLPFee.multiply(new Fraction(route.amount.numerator, route.amount.denominator))
+
+  console.log('realizedLPFeeAmount', realizedLPFeeAmount.toSignificant(4), realizedLPFeeAmount.denominator.toString())
 
   return {
     priceImpactWithoutFee: new Percent(
