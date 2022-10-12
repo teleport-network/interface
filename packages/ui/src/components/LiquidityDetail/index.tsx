@@ -849,7 +849,6 @@ export default function LiquidityDetail() {
           >
             {currencyA && currencyB && (
               <>
-                (
                 <StyledLink as={Link} to={`/add/${currencyId(currencyA!)}/${currencyId(currencyB!)}/${pairModeStable}`}>
                   Increase
                 </StyledLink>
@@ -859,7 +858,6 @@ export default function LiquidityDetail() {
                 >
                   Remove
                 </StyledLink>
-                )
               </>
             )}
           </Box>

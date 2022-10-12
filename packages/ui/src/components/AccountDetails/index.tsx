@@ -5,6 +5,7 @@ import { useDispatch } from 'react-redux'
 import styled from 'styled-components'
 
 import ExternalLinkIconSvg from 'assets/svg/external-link.svg'
+import { isMobile } from 'react-device-detect'
 import { Box } from 'rebass'
 import CoinbaseWalletIcon from '../../assets/images/coinbaseWalletIcon.svg'
 import FortmaticIcon from '../../assets/images/fortmaticIcon.png'
@@ -78,7 +79,7 @@ const AccountGroupingRow = styled.div`
 `
 
 const AccountSection = styled.div`
-  background-color: ${({ theme }) => theme.bg1};
+  background-color: ${({ theme }) => (isMobile ? 'unset' : theme.bg1)};
   padding: 0rem 1rem;
   ${({ theme }) => theme.mediaWidth.upToMedium`padding: 0rem 1rem 1.5rem 1rem;`};
 `
