@@ -21,7 +21,6 @@ import { useTokenBalance } from 'state/wallet/hooks'
 import styled from 'styled-components'
 import { client } from 'utils/apolloClient'
 import { currencyId } from 'utils/currencyId'
-import { wrappedCurrency } from 'utils/wrappedCurrency'
 
 import { useDerivedMintInfo, useMintActionHandlers } from '../../state/mint/hooks'
 
@@ -52,28 +51,12 @@ const StyledLink = styled(ButtonPrimary)`
 export default function LiquidityDetail() {
   const { currencyIdA, currencyIdB, stable } = useParams<{ currencyIdA: string; currencyIdB: string; stable: string }>()
   const [currencyA, currencyB] = [useCurrency(currencyIdA) ?? undefined, useCurrency(currencyIdB) ?? undefined]
-  const { account, chainId, library } = useActiveWeb3React()
-  const {
-    dependentField,
-    currencies,
-    pair,
-    pairState,
-    currencyBalances,
-    parsedAmounts,
-    price,
-    noLiquidity,
-    liquidityMinted,
-    poolTokenPercentage,
-    error
-  } = useDerivedMintInfo(
+  const { account } = useActiveWeb3React()
+  const pairModeStable = stable?.toLowerCase() === 'true' ? true : false
+  const { currencies, pair, parsedAmounts, noLiquidity } = useDerivedMintInfo(
     currencyA ?? undefined,
     currencyB ?? undefined,
-    `${stable}`.toLowerCase() === 'true' ? true : `${stable}`.toLowerCase() === 'false' ? false : undefined
-  )
-  const pairModeStable = stable?.toLowerCase() === 'true' ? true : false
-  const [tokenA, tokenB] = useMemo(
-    () => [wrappedCurrency(currencyA, chainId), wrappedCurrency(currencyB, chainId)],
-    [currencyA, currencyB, chainId]
+    pairModeStable
   )
   const userPoolBalance = useTokenBalance(account ?? undefined, pair?.liquidityToken)
 
@@ -84,7 +67,7 @@ export default function LiquidityDetail() {
       return userPoolBalance?.divide(totalPoolTokens!)
     }
     return '-'
-  }, [pair?.liquidityToken, totalPoolTokens, userPoolBalance])
+  }, [totalPoolTokens, userPoolBalance])
 
   const userToken0AmountInPool = useMemo(() => {
     if (userHoldingPercentage instanceof Fraction) {
@@ -203,7 +186,7 @@ export default function LiquidityDetail() {
       if (!pair || !pair.token0 || !pair.token1 || ethPrice || fullInfoPair) {
         return
       }
-      const pairAddress = Pair.getAddress(pair.token0, pair.token1).toLowerCase()
+      const pairAddress = Pair.getAddress(pair.token0, pair.token1, pairModeStable).toLowerCase()
       const [
         {
           data: {
@@ -269,7 +252,7 @@ export default function LiquidityDetail() {
       setFullInfoPair(fullPair)
       setEthPrice(new Bn(ep))
     })()
-  }, [ethPrice, fullInfoPair, pair])
+  }, [ethPrice, fullInfoPair, pair, pairModeStable])
 
   return (
     <>
