@@ -53,6 +53,7 @@ export default function LiquidityDetail() {
   const { currencyIdA, currencyIdB, stable } = useParams<{ currencyIdA: string; currencyIdB: string; stable: string }>()
   const [currencyA, currencyB] = [useCurrency(currencyIdA) ?? undefined, useCurrency(currencyIdB) ?? undefined]
   const { account, chainId, library } = useActiveWeb3React()
+  const pairModeStable = stable?.toLowerCase() === 'true' ? true : false
   const {
     dependentField,
     currencies,
@@ -65,12 +66,7 @@ export default function LiquidityDetail() {
     liquidityMinted,
     poolTokenPercentage,
     error
-  } = useDerivedMintInfo(
-    currencyA ?? undefined,
-    currencyB ?? undefined,
-    `${stable}`.toLowerCase() === 'true' ? true : `${stable}`.toLowerCase() === 'false' ? false : undefined
-  )
-  const pairModeStable = stable?.toLowerCase() === 'true' ? true : false
+  } = useDerivedMintInfo(currencyA ?? undefined, currencyB ?? undefined, pairModeStable)
   const [tokenA, tokenB] = useMemo(
     () => [wrappedCurrency(currencyA, chainId), wrappedCurrency(currencyB, chainId)],
     [currencyA, currencyB, chainId]
@@ -203,7 +199,7 @@ export default function LiquidityDetail() {
       if (!pair || !pair.token0 || !pair.token1 || ethPrice || fullInfoPair) {
         return
       }
-      const pairAddress = Pair.getAddress(pair.token0, pair.token1).toLowerCase()
+      const pairAddress = Pair.getAddress(pair.token0, pair.token1, pairModeStable).toLowerCase()
       const [
         {
           data: {
