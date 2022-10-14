@@ -17,7 +17,6 @@ interface ITeleswapV2Router01 {
     function factory() external pure returns (address);
     function WETH() external pure returns (address);
 
-    function initialize(address _factory, address _WETH) external;
 
 
     function addLiquidity(

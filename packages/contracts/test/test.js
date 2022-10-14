@@ -451,7 +451,7 @@ describe('Router02', function () {
 
             }
         })
-        it("swapExactTokensForETH1", async () => {
+        it("swapExactTokensForETH", async () => {
             // function swapExactTokensForETH(uint amountIn, uint amountOutMin, route[] calldata routes, address to, uint deadline)
             for (let i = 0; i < 2; i++) {
                 let stable = i === 0
@@ -590,36 +590,31 @@ describe('Router02', function () {
             await addLiquidity(ans, ans.usdc, ans.weth, usdcAmt, wethAmt, false, 0)
             // approve usdt
             let swapUsdtAmt = wethAmt
-            await ans.usdt.transfer(ans.multicall.address, swapUsdtAmt)
+            await ans.usdt.approve(ans.router.address, swapUsdtAmt)
+            // approve usdc
+            await ans.usdc.approve(ans.router.address, ethers.utils.parseUnits("10000", 18))
             // pack tx swap usdt for usdc
             let routerIface = ans.router.interface
 
-            let step0 = ans.usdt.interface.encodeFunctionData("approve", [ans.router.address, swapUsdtAmt])
 
             let step1 = routerIface.encodeFunctionData("swapExactTokensForTokens", [
-                swapUsdtAmt, 0, [[ans.usdt.address, ans.usdc.address, true]], ans.multicall.address, getDeadline()
+                swapUsdtAmt, 0, [[ans.usdt.address, ans.usdc.address, true]], ans.signer.address, getDeadline()
             ])
 
-            let step2 =  ans.usdc.interface.encodeFunctionData("approve", [
-                ans.router.address, ethers.utils.parseUnits("10000", 18)
-            ])
 
             // pack tx swap usdc for dai
-            let step3 = routerIface.encodeFunctionData("swapExactTokensForTokens", [
-                ethers.utils.parseUnits("9",18), 0, [[ans.usdc.address, ans.weth.address, false]], ans.signer.address, getDeadline()
+            let step2 = routerIface.encodeFunctionData("swapExactTokensForTokens", [
+                ethers.utils.parseUnits("9", 18), 0, [[ans.usdc.address, ans.weth.address, false]], ans.signer.address, getDeadline()
             ])
             // construct multicall tx
             let params = [
-                [ans.usdt.address, step0],    // approve
-                [ans.router.address, step1],  // swap
-                [ans.usdc.address, step2],    //approve
-                [ans.router.address, step3]   // swap
+                step1, step2
             ]
 
             //
             console.log("\nprev weth balance", await ans.weth.balanceOf(ans.signer.address))
             // call multicall
-            await ans.multicall.aggregate(params)
+            await ans.router.multicall(getDeadline(),params)
             console.log("after weth balance", await ans.weth.balanceOf(ans.signer.address))
 
         })
