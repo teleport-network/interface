@@ -2,6 +2,7 @@ import { Token, TokenAmount } from '@teleswap/sdk'
 import { ReactComponent as AddIcon } from 'assets/svg/action/add.svg'
 import { ReactComponent as ArrowDown } from 'assets/svg/action/arrowDown.svg'
 import { ReactComponent as ArrowUp } from 'assets/svg/action/arrowUp.svg'
+import { ReactComponent as QuestionIcon } from 'assets/svg/action/question.svg'
 import { ReactComponent as RemoveIcon } from 'assets/svg/minus.svg'
 import { ButtonPrimary } from 'components/Button'
 // import { BIG_INT_SECONDS_IN_WEEK } from '../../constants'
@@ -312,6 +313,16 @@ export default function PoolCard({ pid, stakingInfo }: { pid: number; stakingInf
     )
   }
 
+  const MultiplierStatus = ({ isHideInMobile }: { isHideInMobile?: boolean }) => (
+    <StakingColumn isMobile={isMobile} isHideInMobile={isHideInMobile} style={{ maxWidth: '5rem' }}>
+      <TYPE.gray fontSize="0.9rem" width="100%" className="stakingColTitle" display="flex" alignItems="center">
+        <span>Multiplier</span>
+        <QuestionIcon style={{ marginLeft: '0.3rem' }} />
+      </TYPE.gray>
+      <TYPE.white fontSize="1.2rem">1X</TYPE.white>
+    </StakingColumn>
+  )
+
   return (
     <Wrapper showBackground={isStaking} bgColor={backgroundColor}>
       <TopSection>
@@ -339,7 +350,7 @@ export default function PoolCard({ pid, stakingInfo }: { pid: number; stakingInf
       <StatContainer>
         <StakeManagementPanel isMobile={isMobile} isHideInMobile />
         <EarningManagement isMobile={isMobile} isHideInMobile />
-        <StakingColumn isMobile={isMobile}>
+        <StakingColumn isMobile={isMobile} style={{ maxWidth: '6rem' }}>
           <StakingColumnTitle>APR</StakingColumnTitle>
           <TYPE.white fontSize="1.2rem">
             {calculatedApr && calculatedApr !== Infinity ? calculatedApr.toFixed(2) : '--.--'}%
@@ -351,6 +362,7 @@ export default function PoolCard({ pid, stakingInfo }: { pid: number; stakingInf
             $ {totalValueLockedInUSD ? totalValueLockedInUSD.toSignificant(6) : '--.--'}
           </TYPE.white>
         </StakingColumn>
+        <MultiplierStatus isHideInMobile />
         <StakingColumn isMobile={isMobile} isHideInDesktop className="mobile-details-button">
           <TYPE.green01
             fontSize="0.97rem"
@@ -367,6 +379,7 @@ export default function PoolCard({ pid, stakingInfo }: { pid: number; stakingInf
         <MobilePoolDetailSection>
           <StakeManagementPanel isMobile />
           <EarningManagement isMobile marginTop="1.28rem" />
+          <MultiplierStatus />
         </MobilePoolDetailSection>
       )}
       {/* {isStaking && (
