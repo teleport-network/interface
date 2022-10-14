@@ -67,9 +67,10 @@ export default function UnstakingModal({ isOpen, onDismiss, pid, stakingInfo }: 
   const stakingCurrency = stakingInfo?.stakingToken
 
   /** changes needed since it's withdraw  */
-  const userInputWithdrawAmount = stakingCurrency
-    ? new TokenAmount(stakingCurrency, utils.parseUnits(typedValue, stakingCurrency.decimals).toString())
-    : undefined
+  const userInputWithdrawAmount =
+    stakingCurrency && typedValue
+      ? new TokenAmount(stakingCurrency, utils.parseUnits(typedValue, stakingCurrency.decimals).toString())
+      : undefined
   const userStakedAmount = stakingCurrency
     ? new TokenAmount(stakingCurrency, positions[pid].amount.toString())
     : undefined
@@ -81,6 +82,10 @@ export default function UnstakingModal({ isOpen, onDismiss, pid, stakingInfo }: 
     /**
      * do some checks
      */
+    if (!userInputWithdrawAmount) {
+      alert('Please your withdraw amount to continue')
+      return
+    }
     if (userInputWithdrawAmount?.greaterThan(userStakedAmount || JSBI.BigInt(0))) {
       alert('You do not have enough staked token')
       return
@@ -103,7 +108,6 @@ export default function UnstakingModal({ isOpen, onDismiss, pid, stakingInfo }: 
   // wrapped onUserInput to clear signatures
   const onUserInput = useCallback((typedValue: string) => {
     // setSignatureData(null)
-    if (!typedValue) return
     setTypedValue(typedValue)
   }, [])
 
