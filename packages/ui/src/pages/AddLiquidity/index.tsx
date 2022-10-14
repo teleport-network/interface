@@ -410,7 +410,7 @@ export default function AddLiquidity() {
         <BorderVerticalContainer>
           <Flex justifyContent={'space-between'}>
             <Text
-              className="text-emphasize"
+              className="secondary-title"
               sx={{
                 fontFamily: 'Poppins',
                 fontStyle: 'normal',
@@ -439,7 +439,7 @@ export default function AddLiquidity() {
         <BorderVerticalContainer>
           <Flex justifyContent={'space-between'}>
             <Text
-              className="text-emphasize"
+              className="secondary-title"
               sx={{
                 fontFamily: 'Poppins',
                 fontStyle: 'normal',
@@ -480,7 +480,7 @@ export default function AddLiquidity() {
         </BorderVerticalContainer>
         <ButtonPrimary style={{ margin: '20px 0 0 0', color: 'black' }} onClick={onAdd}>
           <Text
-            className="text-emphasize"
+            className="secondary-title"
             sx={{
               fontFamily: 'Poppins',
               fontStyle: 'normal',
@@ -540,59 +540,60 @@ export default function AddLiquidity() {
   const addIsUnsupported = useIsTransactionUnsupported(currencies?.CURRENCY_A, currencies?.CURRENCY_B)
   return (
     <>
-      {/* <Flex alignItems={'flex-start'} width="21rem">
+      <Box sx={{ ...(isMobile ? { width: '100%', height: 'calc(100% - 15rem)', overflow: 'hidden auto' } : {}) }}>
+        {/* <Flex alignItems={'flex-start'} width="21rem">
       </Flex> */}
-      <AppBody
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'stretch',
-          padding: '1.8rem',
-          width: '30rem'
-          // maxWidth: '420px',
-          // maxHeight: '638px',
-          // height: 'fit-content',
-        }}
-      >
-        <TransactionConfirmationModal
-          isOpen={showConfirm}
-          onDismiss={handleDismissConfirmation}
-          attemptingTxn={attemptingTxn}
-          hash={txHash}
-          content={() => (
-            <ConfirmationModalContent
-              // title={noLiquidity ? 'You are creating a pool' : 'You will receive'}
-              title={'Add Liquidity'}
-              onDismiss={handleDismissConfirmation}
-              topContent={modalHeader}
-              bottomContent={undefined}
-            />
-          )}
-          pendingText={pendingText}
-          currencyToAdd={pair?.liquidityToken}
-        />
-        <AutoRow justify="space-between" style={{ marginBottom: '.9rem' }}>
-          <BackToMyLiquidity
-            showText={false}
-            sx={{
-              alignItems: 'center',
-              width: 'fit-content',
-              marginBottom: '0!important',
-              'a,img': {
-                height: '1.5rem',
-                width: '1.5rem'
-              }
-            }}
+        <AppBody
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'stretch',
+            padding: isMobile ? '1.1rem' : '1.8rem',
+            width: '30rem'
+            // maxWidth: '420px',
+            // maxHeight: '638px',
+            // height: 'fit-content',
+          }}
+        >
+          <TransactionConfirmationModal
+            isOpen={showConfirm}
+            onDismiss={handleDismissConfirmation}
+            attemptingTxn={attemptingTxn}
+            hash={txHash}
+            content={() => (
+              <ConfirmationModalContent
+                // title={noLiquidity ? 'You are creating a pool' : 'You will receive'}
+                title={'Add Liquidity'}
+                onDismiss={handleDismissConfirmation}
+                topContent={modalHeader}
+                bottomContent={undefined}
+              />
+            )}
+            pendingText={pendingText}
+            currencyToAdd={pair?.liquidityToken}
           />
-          <span style={{ fontFamily: 'Poppins', fontWeight: 400, color: '#FFFFFF' }} className={'title'}>
-            Add Liquidity
-          </span>
-          <Box width="1.5rem" display={'flex'} justifyContent="center" sx={{ div: { margin: '0!important' } }}>
-            <Settings />
-          </Box>
-        </AutoRow>
-        <AutoColumn gap=".4rem">
-          {/* {noLiquidity ||
+          <AutoRow justify="space-between" style={{ marginBottom: '.9rem' }}>
+            <BackToMyLiquidity
+              showText={false}
+              sx={{
+                alignItems: 'center',
+                width: 'fit-content',
+                marginBottom: '0!important',
+                'a,img': {
+                  height: '1.5rem',
+                  width: '1.5rem'
+                }
+              }}
+            />
+            <span style={{ fontFamily: 'Poppins', fontWeight: 400, color: '#FFFFFF' }} className={'title'}>
+              Add Liquidity
+            </span>
+            <Box width="1.5rem" display={'flex'} justifyContent="center" sx={{ div: { margin: '0!important' } }}>
+              <Settings />
+            </Box>
+          </AutoRow>
+          <AutoColumn gap=".4rem">
+            {/* {noLiquidity ||
               (isCreate ? (
                 <ColumnCenter>
                   <BlueCard>
@@ -622,57 +623,57 @@ export default function AddLiquidity() {
                   </BlueCard>
                 </ColumnCenter>
               ))} */}
-          <CurrencyInputPanel
-            value={formattedAmounts[Field.CURRENCY_A]}
-            onUserInput={onFieldAInput}
-            onMax={() => {
-              if (maxAmounts[Field.CURRENCY_A] && maxAmounts[Field.CURRENCY_A]?.toExact() !== '0')
-                onFieldAInput(maxAmounts[Field.CURRENCY_A]?.toExact() ?? '')
-            }}
-            onCurrencySelect={handleCurrencyASelect}
-            showMaxButton={!atMaxAmounts[Field.CURRENCY_A]}
-            currency={currencies[Field.CURRENCY_A]}
-            id="add-liquidity-input-tokena"
-            sx={{
-              '& input': {
-                color: 'white'
-              }
-            }}
-            showCommonBases
-          />
-          <ColumnCenter style={{ position: 'relative' }}>
-            {/* <Plus size="16" color={theme.text2} /> */}
-            <img
-              src={LiquidityPlusIcon}
-              alt={'add-icon'}
-              style={{
-                zIndex: 2,
-                position: 'absolute',
-                transform: 'translateY(-50%)',
-                width: '2.5rem',
-                height: '2.5rem'
+            <CurrencyInputPanel
+              value={formattedAmounts[Field.CURRENCY_A]}
+              onUserInput={onFieldAInput}
+              onMax={() => {
+                if (maxAmounts[Field.CURRENCY_A] && maxAmounts[Field.CURRENCY_A]?.toExact() !== '0')
+                  onFieldAInput(maxAmounts[Field.CURRENCY_A]?.toExact() ?? '')
               }}
+              onCurrencySelect={handleCurrencyASelect}
+              showMaxButton={!atMaxAmounts[Field.CURRENCY_A]}
+              currency={currencies[Field.CURRENCY_A]}
+              id="add-liquidity-input-tokena"
+              sx={{
+                '& input': {
+                  color: 'white'
+                }
+              }}
+              showCommonBases
             />
-          </ColumnCenter>
-          <CurrencyInputPanel
-            value={formattedAmounts[Field.CURRENCY_B]}
-            onUserInput={onFieldBInput}
-            onCurrencySelect={handleCurrencyBSelect}
-            onMax={() => {
-              if (maxAmounts[Field.CURRENCY_B] && maxAmounts[Field.CURRENCY_B]?.toExact() !== '0')
-                onFieldBInput(maxAmounts[Field.CURRENCY_B]?.toExact() ?? '')
-            }}
-            showMaxButton={!atMaxAmounts[Field.CURRENCY_B]}
-            currency={currencies[Field.CURRENCY_B]}
-            id="add-liquidity-input-tokenb"
-            sx={{
-              '& input': {
-                color: 'white'
-              }
-            }}
-            showCommonBases
-          />
-          {/*   {currencies[Field.CURRENCY_A] && currencies[Field.CURRENCY_B] && pairState !== PairState.INVALID && (
+            <ColumnCenter style={{ position: 'relative' }}>
+              {/* <Plus size="16" color={theme.text2} /> */}
+              <img
+                src={LiquidityPlusIcon}
+                alt={'add-icon'}
+                style={{
+                  zIndex: 2,
+                  position: 'absolute',
+                  transform: 'translateY(-50%)',
+                  width: '2.5rem',
+                  height: '2.5rem'
+                }}
+              />
+            </ColumnCenter>
+            <CurrencyInputPanel
+              value={formattedAmounts[Field.CURRENCY_B]}
+              onUserInput={onFieldBInput}
+              onCurrencySelect={handleCurrencyBSelect}
+              onMax={() => {
+                if (maxAmounts[Field.CURRENCY_B] && maxAmounts[Field.CURRENCY_B]?.toExact() !== '0')
+                  onFieldBInput(maxAmounts[Field.CURRENCY_B]?.toExact() ?? '')
+              }}
+              showMaxButton={!atMaxAmounts[Field.CURRENCY_B]}
+              currency={currencies[Field.CURRENCY_B]}
+              id="add-liquidity-input-tokenb"
+              sx={{
+                '& input': {
+                  color: 'white'
+                }
+              }}
+              showCommonBases
+            />
+            {/*   {currencies[Field.CURRENCY_A] && currencies[Field.CURRENCY_B] && pairState !== PairState.INVALID && (
             <>
               <LightCard padding="0px" borderRadius={'20px'}>
                 <RowBetween padding="1rem">
@@ -691,106 +692,106 @@ export default function AddLiquidity() {
               </LightCard>
             </>
           )} */}
-        </AutoColumn>
-        {!isMobile && (
-          <>
-            <Box sx={{ marginTop: '1.5rem' }}>
-              <Box sx={{ fontWeight: 400, marginBottom: '.5rem' }} className={'secondary-title'}>
-                Pair Mode
+          </AutoColumn>
+          {!isMobile && (
+            <>
+              <Box sx={{ marginTop: '1.5rem' }}>
+                <Box sx={{ fontWeight: 400, marginBottom: '.5rem' }} className={'secondary-title'}>
+                  Pair Mode
+                </Box>
+                <Box sx={{ display: 'flex', fontWeight: 100, /* fontSize: '.5rem', */ alignItems: 'center' }}>
+                  <Flex alignItems={'center'} sx={{ flex: 1 }} onClick={() => setPairModeStable(false)}>
+                    <CustomizedRadio type="radio" name="pairMode" id="Volatile" checked={!pairModeStable} />
+                    <label
+                      className={'text-small'}
+                      style={{ margin: '0 0 0 .7rem', fontWeight: !pairModeStable ? '400' : '200' }}
+                      htmlFor="Volatile"
+                    >
+                      Volatile
+                    </label>
+                    <QuestionHelper text="Volatile mode, using non-stable currency algorithm curve, mainly designed for uncorrelated pools, like WETH+USDC or OP+WETH." />
+                  </Flex>
+                  <Flex alignItems={'center'} sx={{ flex: 1 }} onClick={() => setPairModeStable(true)}>
+                    <CustomizedRadio type="radio" name="pairMode" id="Stable" checked={pairModeStable} />
+                    <label
+                      htmlFor="Stable"
+                      className={'text-small'}
+                      style={{ margin: '0 0 0 .7rem', fontWeight: pairModeStable ? '400' : '200' }}
+                    >
+                      Stable
+                    </label>
+                    <QuestionHelper text="Stable mode, using stable token algorithm curve, mainly designed for 1:1 or approximately equivalent trading pairs, like USDC+DAI or WETH+sETH." />
+                  </Flex>
+                </Box>
               </Box>
-              <Box sx={{ display: 'flex', fontWeight: 100, /* fontSize: '.5rem', */ alignItems: 'center' }}>
-                <Flex alignItems={'center'} sx={{ flex: 1 }} onClick={() => setPairModeStable(false)}>
-                  <CustomizedRadio type="radio" name="pairMode" id="Volatile" checked={!pairModeStable} />
-                  <label
-                    className={'text-small'}
-                    style={{ margin: '0 0 0 .7rem', fontWeight: !pairModeStable ? '400' : '200' }}
-                    htmlFor="Volatile"
-                  >
-                    Volatile
-                  </label>
-                  <QuestionHelper text="Volatile mode, using non-stable currency algorithm curve, mainly designed for uncorrelated pools, like WETH+USDC or OP+WETH." />
-                </Flex>
-                <Flex alignItems={'center'} sx={{ flex: 1 }} onClick={() => setPairModeStable(true)}>
-                  <CustomizedRadio type="radio" name="pairMode" id="Stable" checked={pairModeStable} />
-                  <label
-                    htmlFor="Stable"
-                    className={'text-small'}
-                    style={{ margin: '0 0 0 .7rem', fontWeight: pairModeStable ? '400' : '200' }}
-                  >
-                    Stable
-                  </label>
-                  <QuestionHelper text="Stable mode, using stable token algorithm curve, mainly designed for 1:1 or approximately equivalent trading pairs, like USDC+DAI or WETH+sETH." />
-                </Flex>
+              <Box
+                sx={{ width: '100%', borderTop: '1px solid rgba(255,255,255,0.2)', height: '0', margin: '1rem 0' }}
+              ></Box>
+              <Box
+                sx={{
+                  marginBottom: '.4rem',
+                  fontFamily: 'Poppins',
+                  fontStyle: 'normal',
+                  fontWeight: 400,
+                  lineHeight: '28px'
+                }}
+                className={'secondary-title'}
+              >
+                Pair Liquidity Info
               </Box>
-            </Box>
-            <Box
-              sx={{ width: '100%', borderTop: '1px solid rgba(255,255,255,0.2)', height: '0', margin: '1rem 0' }}
-            ></Box>
-            <Box
-              sx={{
-                marginBottom: '.4rem',
-                fontFamily: 'Poppins',
-                fontStyle: 'normal',
-                fontWeight: 400,
-                lineHeight: '28px'
-              }}
-              className={'secondary-title'}
-            >
-              Pair Liquidity Info
-            </Box>
-            <Flex width={'100%'} justifyContent="space-between">
-              <Flex flex={1} flexDirection={'column'}>
-                <Text
-                  sx={{
-                    fontFamily: 'Poppins',
-                    fontStyle: 'normal',
-                    fontWeight: 200,
-                    lineHeight: '18px'
-                  }}
-                  className={'text'}
-                >
-                  {pair ? new bn(pair?.reserve0.toFixed(18)).decimalPlaces(4, bn.ROUND_HALF_UP).toString() : '0'}
-                </Text>
-                <Text
-                  sx={{
-                    fontFamily: 'Poppins',
-                    fontStyle: 'normal',
-                    fontWeight: 200,
-                    lineHeight: '18px',
-                    color: 'rgba(255, 255, 255, 0.6)'
-                  }}
-                  className={'text-detail'}
-                >
-                  {pair ? pair?.token0.symbol?.toUpperCase() : '--'}
-                </Text>
+              <Flex width={'100%'} justifyContent="space-between">
+                <Flex flex={1} flexDirection={'column'}>
+                  <Text
+                    sx={{
+                      fontFamily: 'Poppins',
+                      fontStyle: 'normal',
+                      fontWeight: 200,
+                      lineHeight: '18px'
+                    }}
+                    className={'text'}
+                  >
+                    {pair ? new bn(pair?.reserve0.toFixed(18)).decimalPlaces(4, bn.ROUND_HALF_UP).toString() : '0'}
+                  </Text>
+                  <Text
+                    sx={{
+                      fontFamily: 'Poppins',
+                      fontStyle: 'normal',
+                      fontWeight: 200,
+                      lineHeight: '18px',
+                      color: 'rgba(255, 255, 255, 0.6)'
+                    }}
+                    className={'text-detail'}
+                  >
+                    {pair ? pair?.token0.symbol?.toUpperCase() : '--'}
+                  </Text>
+                </Flex>
+                <Flex flex={1} flexDirection={'column'}>
+                  <Text
+                    sx={{
+                      fontFamily: 'Poppins',
+                      fontStyle: 'normal',
+                      fontWeight: 400,
+                      lineHeight: '18px'
+                    }}
+                    className={'text'}
+                  >
+                    {pair ? new bn(pair?.reserve1.toFixed(18)).decimalPlaces(4, bn.ROUND_HALF_UP).toString() : '0'}
+                  </Text>
+                  <Text
+                    sx={{
+                      fontFamily: 'Poppins',
+                      fontStyle: 'normal',
+                      fontWeight: 200,
+                      lineHeight: '18px',
+                      color: 'rgba(255, 255, 255, 0.6)'
+                    }}
+                    className={'text-detail'}
+                  >
+                    {pair ? pair?.token1.symbol?.toUpperCase() : '--'}
+                  </Text>
+                </Flex>
               </Flex>
-              <Flex flex={1} flexDirection={'column'}>
-                <Text
-                  sx={{
-                    fontFamily: 'Poppins',
-                    fontStyle: 'normal',
-                    fontWeight: 400,
-                    lineHeight: '18px'
-                  }}
-                  className={'text'}
-                >
-                  {pair ? new bn(pair?.reserve1.toFixed(18)).decimalPlaces(4, bn.ROUND_HALF_UP).toString() : '0'}
-                </Text>
-                <Text
-                  sx={{
-                    fontFamily: 'Poppins',
-                    fontStyle: 'normal',
-                    fontWeight: 200,
-                    lineHeight: '18px',
-                    color: 'rgba(255, 255, 255, 0.6)'
-                  }}
-                  className={'text-detail'}
-                >
-                  {pair ? pair?.token1.symbol?.toUpperCase() : '--'}
-                </Text>
-              </Flex>
-            </Flex>
-            {/*  <Box sx={{ width: '100%', borderTop: '1px solid rgba(255,255,255,0.2)', height: '0', margin: '.9rem 0' }}></Box>
+              {/*  <Box sx={{ width: '100%', borderTop: '1px solid rgba(255,255,255,0.2)', height: '0', margin: '.9rem 0' }}></Box>
         {!addIsUnsupported ? (
           pair && !noLiquidity && pairState !== PairState.INVALID ? (
             <AutoColumn style={{ marginTop: '1rem' }}>
@@ -818,86 +819,88 @@ export default function AddLiquidity() {
           the pool. And earnings will be claimed while removing your liquidity.
         </Text>
         <Box sx={{ width: '100%', borderTop: '1px solid rgba(255,255,255,0.2)', height: '0' }}></Box> */}
-            <Box
-              sx={{
-                'button,a': {
-                  maxHeight: '3.5rem',
-                  fontWeight: 400
-                }
-              }}
-            >
-              {addIsUnsupported ? (
-                <AutoColumn style={{ marginTop: '1rem' }}>
-                  <ButtonPrimary className="title" sx={{ fontWeight: '400!important' }} disabled={true}>
-                    <TYPE.main mb="4px">Unsupported Asset</TYPE.main>
-                  </ButtonPrimary>
-                </AutoColumn>
-              ) : !account ? (
-                <AutoColumn style={{ marginTop: '1rem' }}>
-                  <ConnectButtonInBody />
-                </AutoColumn>
-              ) : (
-                <AutoColumn style={{ marginTop: '1rem' }}>
-                  {(approvalA === ApprovalState.NOT_APPROVED ||
-                    approvalA === ApprovalState.PENDING ||
-                    approvalB === ApprovalState.NOT_APPROVED ||
-                    approvalB === ApprovalState.PENDING) &&
-                    isValid && (
-                      <RowBetween>
-                        {approvalA !== ApprovalState.APPROVED && (
-                          <ButtonPrimary
-                            className="title"
-                            style={{
-                              marginBottom: '0.5rem',
-                              fontWeight: '400!important'
-                            }}
-                            onClick={approveACallback}
-                            disabled={approvalA === ApprovalState.PENDING}
-                            width={approvalB !== ApprovalState.APPROVED ? '48%' : '100%'}
-                          >
-                            {approvalA === ApprovalState.PENDING ? (
-                              <Dots>Approving {currencies[Field.CURRENCY_A]?.symbol}</Dots>
-                            ) : (
-                              'Approve ' + currencies[Field.CURRENCY_A]?.symbol
-                            )}
-                          </ButtonPrimary>
-                        )}
-                        {approvalB !== ApprovalState.APPROVED && (
-                          <ButtonPrimary
-                            className="title"
-                            style={{
-                              marginBottom: '0.5rem',
-                              fontWeight: '400!important'
-                            }}
-                            onClick={approveBCallback}
-                            disabled={approvalB === ApprovalState.PENDING}
-                            width={approvalA !== ApprovalState.APPROVED ? '48%' : '100%'}
-                          >
-                            {approvalB === ApprovalState.PENDING ? (
-                              <Dots>Approving {currencies[Field.CURRENCY_B]?.symbol}</Dots>
-                            ) : (
-                              'Approve ' + currencies[Field.CURRENCY_B]?.symbol
-                            )}
-                          </ButtonPrimary>
-                        )}
-                      </RowBetween>
-                    )}
-                  <ButtonError
-                    className="title"
-                    sx={{ border: 'unset!important', fontWeight: '400!important' }}
-                    onClick={() => {
-                      expertMode ? onAdd() : setShowConfirm(true)
-                    }}
-                    disabled={!isValid || approvalA !== ApprovalState.APPROVED || approvalB !== ApprovalState.APPROVED}
-                    error={
-                      !!error || (!isValid && !!parsedAmounts[Field.CURRENCY_A] && !!parsedAmounts[Field.CURRENCY_B])
-                    }
-                  >
-                    <Text fontWeight={500}>{error ?? 'Supply'}</Text>
-                  </ButtonError>
-                </AutoColumn>
-              )}
-              {/* {!addIsUnsupported ? (
+              <Box
+                sx={{
+                  'button,a': {
+                    maxHeight: '3.5rem',
+                    fontWeight: 400
+                  }
+                }}
+              >
+                {addIsUnsupported ? (
+                  <AutoColumn style={{ marginTop: '1rem' }}>
+                    <ButtonPrimary className="secondary-title" sx={{ fontWeight: '400!important' }} disabled={true}>
+                      <TYPE.main mb="4px">Unsupported Asset</TYPE.main>
+                    </ButtonPrimary>
+                  </AutoColumn>
+                ) : !account ? (
+                  <AutoColumn style={{ marginTop: '1rem' }}>
+                    <ConnectButtonInBody />
+                  </AutoColumn>
+                ) : (
+                  <AutoColumn style={{ marginTop: '1rem' }}>
+                    {(approvalA === ApprovalState.NOT_APPROVED ||
+                      approvalA === ApprovalState.PENDING ||
+                      approvalB === ApprovalState.NOT_APPROVED ||
+                      approvalB === ApprovalState.PENDING) &&
+                      isValid && (
+                        <RowBetween>
+                          {approvalA !== ApprovalState.APPROVED && (
+                            <ButtonPrimary
+                              className="secondary-title"
+                              style={{
+                                marginBottom: '0.5rem',
+                                fontWeight: '400!important'
+                              }}
+                              onClick={approveACallback}
+                              disabled={approvalA === ApprovalState.PENDING}
+                              width={approvalB !== ApprovalState.APPROVED ? '48%' : '100%'}
+                            >
+                              {approvalA === ApprovalState.PENDING ? (
+                                <Dots>Approving {currencies[Field.CURRENCY_A]?.symbol}</Dots>
+                              ) : (
+                                'Approve ' + currencies[Field.CURRENCY_A]?.symbol
+                              )}
+                            </ButtonPrimary>
+                          )}
+                          {approvalB !== ApprovalState.APPROVED && (
+                            <ButtonPrimary
+                              className="secondary-title"
+                              style={{
+                                marginBottom: '0.5rem',
+                                fontWeight: '400!important'
+                              }}
+                              onClick={approveBCallback}
+                              disabled={approvalB === ApprovalState.PENDING}
+                              width={approvalA !== ApprovalState.APPROVED ? '48%' : '100%'}
+                            >
+                              {approvalB === ApprovalState.PENDING ? (
+                                <Dots>Approving {currencies[Field.CURRENCY_B]?.symbol}</Dots>
+                              ) : (
+                                'Approve ' + currencies[Field.CURRENCY_B]?.symbol
+                              )}
+                            </ButtonPrimary>
+                          )}
+                        </RowBetween>
+                      )}
+                    <ButtonError
+                      className="secondary-title"
+                      sx={{ border: 'unset!important', fontWeight: '400!important' }}
+                      onClick={() => {
+                        expertMode ? onAdd() : setShowConfirm(true)
+                      }}
+                      disabled={
+                        !isValid || approvalA !== ApprovalState.APPROVED || approvalB !== ApprovalState.APPROVED
+                      }
+                      error={
+                        !!error || (!isValid && !!parsedAmounts[Field.CURRENCY_A] && !!parsedAmounts[Field.CURRENCY_B])
+                      }
+                    >
+                      <Text fontWeight={500}>{error ?? 'Supply'}</Text>
+                    </ButtonError>
+                  </AutoColumn>
+                )}
+                {/* {!addIsUnsupported ? (
           pair && !noLiquidity && pairState !== PairState.INVALID ? (
             <AutoColumn style={{ minWidth: '20rem', width: '100%', maxWidth: '420px', marginTop: '1rem' }}>
               <MinimalPositionCard showUnwrapped={oneCurrencyIsWETH} pair={pair} />
@@ -909,110 +912,111 @@ export default function AddLiquidity() {
               currencies={[currencies.CURRENCY_A, currencies.CURRENCY_B]}
             />
           )} */}
-            </Box>
-          </>
-        )}
-      </AppBody>
-      {isMobile && (
-        <>
-          <Box width="100%" marginBottom={'1rem'}>
-            <Box sx={{ marginTop: '1.5rem' }}>
-              <Box sx={{ fontWeight: 400, marginBottom: '.5rem' }} className={'secondary-title'}>
-                Pair Mode
               </Box>
-              <Box sx={{ display: 'flex', fontWeight: 100, fontSize: '.5rem', alignItems: 'center' }}>
-                <Flex alignItems={'center'} sx={{ flex: 1 }} onClick={() => setPairModeStable(false)}>
-                  <CustomizedRadio type="radio" name="pairMode" id="Volatile" checked={!pairModeStable} />
-                  <label
-                    className={'text-small'}
-                    style={{ margin: '0 0 0 .7rem', fontWeight: !pairModeStable ? '400' : '200' }}
-                    htmlFor="Volatile"
-                  >
-                    Volatile
-                  </label>
-                  <QuestionHelper text="Volatile mode, using non-stable currency algorithm curve, mainly designed for uncorrelated pools, like WETH+USDC or OP+WETH." />
-                </Flex>
-                <Flex alignItems={'center'} sx={{ flex: 1 }} onClick={() => setPairModeStable(true)}>
-                  <CustomizedRadio type="radio" name="pairMode" id="Stable" checked={pairModeStable} />
-                  <label
-                    htmlFor="Stable"
-                    className={'text-small'}
-                    style={{ margin: '0 0 0 .7rem', fontWeight: pairModeStable ? '400' : '200' }}
-                  >
-                    Stable
-                  </label>
-                  <QuestionHelper text="Stable mode, using stable token algorithm curve, mainly designed for 1:1 or approximately equivalent trading pairs, like USDC+DAI or WETH+sETH." />
-                </Flex>
-              </Box>
-            </Box>
-            <Box
-              sx={{ width: '100%', borderTop: '1px solid rgba(255,255,255,0.2)', height: '0', margin: '1rem 0' }}
-            ></Box>
-            <Box
-              sx={{
-                marginBottom: '.4rem',
-                fontFamily: 'Poppins',
-                fontStyle: 'normal',
-                fontWeight: 400,
-                lineHeight: '28px'
-              }}
-              className={'secondary-title'}
-            >
-              Pair Liquidity Info
-            </Box>
-            <Flex width={'100%'} justifyContent="space-between">
-              <Flex flex={1} flexDirection={'column'}>
-                <Text
+            </>
+          )}
+        </AppBody>
+        {isMobile && (
+          <>
+            <Box sx={{ width: '100%', marginBottom: '1rem' }}>
+              <Box>
+                <Box sx={{ marginTop: '1.5rem' }}>
+                  <Box sx={{ fontWeight: 400, marginBottom: '.5rem' }} className={'secondary-title'}>
+                    Pair Mode
+                  </Box>
+                  <Box sx={{ display: 'flex', fontWeight: 100, fontSize: '.5rem', alignItems: 'center' }}>
+                    <Flex alignItems={'center'} sx={{ flex: 1 }} onClick={() => setPairModeStable(false)}>
+                      <CustomizedRadio type="radio" name="pairMode" id="Volatile" checked={!pairModeStable} />
+                      <label
+                        className={'text-small'}
+                        style={{ margin: '0 0 0 .7rem', fontWeight: !pairModeStable ? '400' : '200' }}
+                        htmlFor="Volatile"
+                      >
+                        Volatile
+                      </label>
+                      <QuestionHelper text="Volatile mode, using non-stable currency algorithm curve, mainly designed for uncorrelated pools, like WETH+USDC or OP+WETH." />
+                    </Flex>
+                    <Flex alignItems={'center'} sx={{ flex: 1 }} onClick={() => setPairModeStable(true)}>
+                      <CustomizedRadio type="radio" name="pairMode" id="Stable" checked={pairModeStable} />
+                      <label
+                        htmlFor="Stable"
+                        className={'text-small'}
+                        style={{ margin: '0 0 0 .7rem', fontWeight: pairModeStable ? '400' : '200' }}
+                      >
+                        Stable
+                      </label>
+                      <QuestionHelper text="Stable mode, using stable token algorithm curve, mainly designed for 1:1 or approximately equivalent trading pairs, like USDC+DAI or WETH+sETH." />
+                    </Flex>
+                  </Box>
+                </Box>
+                <Box
+                  sx={{ width: '100%', borderTop: '1px solid rgba(255,255,255,0.2)', height: '0', margin: '1rem 0' }}
+                ></Box>
+                <Box
                   sx={{
-                    fontFamily: 'Poppins',
-                    fontStyle: 'normal',
-                    fontWeight: 200,
-                    lineHeight: '18px'
-                  }}
-                  className={'text'}
-                >
-                  {pair ? new bn(pair?.reserve0.toFixed(18)).decimalPlaces(4, bn.ROUND_HALF_UP).toString() : '0'}
-                </Text>
-                <Text
-                  sx={{
-                    fontFamily: 'Poppins',
-                    fontStyle: 'normal',
-                    fontWeight: 200,
-                    lineHeight: '18px',
-                    color: 'rgba(255, 255, 255, 0.6)'
-                  }}
-                  className={'text-detail'}
-                >
-                  {pair ? pair?.token0.symbol?.toUpperCase() : '--'}
-                </Text>
-              </Flex>
-              <Flex flex={1} flexDirection={'column'}>
-                <Text
-                  sx={{
+                    marginBottom: '.4rem',
                     fontFamily: 'Poppins',
                     fontStyle: 'normal',
                     fontWeight: 400,
-                    lineHeight: '18px'
+                    lineHeight: '28px'
                   }}
-                  className={'text'}
+                  className={'secondary-title'}
                 >
-                  {pair ? new bn(pair?.reserve1.toFixed(18)).decimalPlaces(4, bn.ROUND_HALF_UP).toString() : '0'}
-                </Text>
-                <Text
-                  sx={{
-                    fontFamily: 'Poppins',
-                    fontStyle: 'normal',
-                    fontWeight: 200,
-                    lineHeight: '18px',
-                    color: 'rgba(255, 255, 255, 0.6)'
-                  }}
-                  className={'text-detail'}
-                >
-                  {pair ? pair?.token1.symbol?.toUpperCase() : '--'}
-                </Text>
-              </Flex>
-            </Flex>
-            {/*  <Box sx={{ width: '100%', borderTop: '1px solid rgba(255,255,255,0.2)', height: '0', margin: '.9rem 0' }}></Box>
+                  Pair Liquidity Info
+                </Box>
+                <Flex width={'100%'} justifyContent="space-between">
+                  <Flex flex={1} flexDirection={'column'}>
+                    <Text
+                      sx={{
+                        fontFamily: 'Poppins',
+                        fontStyle: 'normal',
+                        fontWeight: 200,
+                        lineHeight: '18px'
+                      }}
+                      className={'text'}
+                    >
+                      {pair ? new bn(pair?.reserve0.toFixed(18)).decimalPlaces(4, bn.ROUND_HALF_UP).toString() : '0'}
+                    </Text>
+                    <Text
+                      sx={{
+                        fontFamily: 'Poppins',
+                        fontStyle: 'normal',
+                        fontWeight: 200,
+                        lineHeight: '18px',
+                        color: 'rgba(255, 255, 255, 0.6)'
+                      }}
+                      className={'text-detail'}
+                    >
+                      {pair ? pair?.token0.symbol?.toUpperCase() : '--'}
+                    </Text>
+                  </Flex>
+                  <Flex flex={1} flexDirection={'column'}>
+                    <Text
+                      sx={{
+                        fontFamily: 'Poppins',
+                        fontStyle: 'normal',
+                        fontWeight: 400,
+                        lineHeight: '18px'
+                      }}
+                      className={'text'}
+                    >
+                      {pair ? new bn(pair?.reserve1.toFixed(18)).decimalPlaces(4, bn.ROUND_HALF_UP).toString() : '0'}
+                    </Text>
+                    <Text
+                      sx={{
+                        fontFamily: 'Poppins',
+                        fontStyle: 'normal',
+                        fontWeight: 200,
+                        lineHeight: '18px',
+                        color: 'rgba(255, 255, 255, 0.6)'
+                      }}
+                      className={'text-detail'}
+                    >
+                      {pair ? pair?.token1.symbol?.toUpperCase() : '--'}
+                    </Text>
+                  </Flex>
+                </Flex>
+                {/*  <Box sx={{ width: '100%', borderTop: '1px solid rgba(255,255,255,0.2)', height: '0', margin: '.9rem 0' }}></Box>
         {!addIsUnsupported ? (
           pair && !noLiquidity && pairState !== PairState.INVALID ? (
             <AutoColumn style={{ marginTop: '1rem' }}>
@@ -1040,132 +1044,139 @@ export default function AddLiquidity() {
           the pool. And earnings will be claimed while removing your liquidity.
         </Text>
         <Box sx={{ width: '100%', borderTop: '1px solid rgba(255,255,255,0.2)', height: '0' }}></Box> */}
-          </Box>
-          <MobileBottomShadowContainer>
-            <Box>
-              <Text
-                sx={{
-                  fontFamily: 'Poppins',
-                  fontStyle: 'normal',
-                  fontWeight: '400',
-                  fontSize: '1rem',
-                  lineHeight: '1rem',
-                  color: 'rgba(255, 255, 255, 0.6)'
-                }}
-              >
-                By adding liquidity to this pair,you will earn {!pairModeStable ? '0.3%' : '0.01%'} of all the trades on
-                this pair proportional to your share of the pool. And earnings will be claimed while removing your
-                liquidity.
-              </Text>
-              {addIsUnsupported ? (
-                <AutoColumn style={{ marginTop: '1rem' }}>
-                  <ButtonPrimary className="title" sx={{ fontWeight: '400!important' }} disabled={true}>
-                    <TYPE.main mb="4px">Unsupported Asset</TYPE.main>
-                  </ButtonPrimary>
-                </AutoColumn>
-              ) : !account ? (
-                <AutoColumn style={{ marginTop: '1rem' }}>
-                  <ConnectButtonInBody />
-                </AutoColumn>
-              ) : (
-                <AutoColumn style={{ marginTop: '1rem' }}>
-                  {(approvalA === ApprovalState.NOT_APPROVED ||
-                    approvalA === ApprovalState.PENDING ||
-                    approvalB === ApprovalState.NOT_APPROVED ||
-                    approvalB === ApprovalState.PENDING) &&
-                    isValid && (
-                      <RowBetween>
-                        {approvalA !== ApprovalState.APPROVED && (
-                          <ButtonPrimary
-                            className="title"
-                            style={{
-                              marginBottom: '0.5rem',
-                              fontWeight: '400!important'
-                            }}
-                            onClick={approveACallback}
-                            disabled={approvalA === ApprovalState.PENDING}
-                            width={approvalB !== ApprovalState.APPROVED ? '48%' : '100%'}
-                          >
-                            {approvalA === ApprovalState.PENDING ? (
-                              <Dots>Approving {currencies[Field.CURRENCY_A]?.symbol}</Dots>
-                            ) : (
-                              'Approve ' + currencies[Field.CURRENCY_A]?.symbol
-                            )}
-                          </ButtonPrimary>
-                        )}
-                        {approvalB !== ApprovalState.APPROVED && (
-                          <ButtonPrimary
-                            className="title"
-                            style={{
-                              marginBottom: '0.5rem',
-                              fontWeight: '400!important'
-                            }}
-                            onClick={approveBCallback}
-                            disabled={approvalB === ApprovalState.PENDING}
-                            width={approvalA !== ApprovalState.APPROVED ? '48%' : '100%'}
-                          >
-                            {approvalB === ApprovalState.PENDING ? (
-                              <Dots>Approving {currencies[Field.CURRENCY_B]?.symbol}</Dots>
-                            ) : (
-                              'Approve ' + currencies[Field.CURRENCY_B]?.symbol
-                            )}
-                          </ButtonPrimary>
-                        )}
-                      </RowBetween>
-                    )}
-                  <ButtonError
-                    className="title"
-                    sx={{ border: 'unset!important', fontWeight: '400!important' }}
-                    onClick={() => {
-                      expertMode ? onAdd() : setShowConfirm(true)
-                    }}
-                    disabled={!isValid || approvalA !== ApprovalState.APPROVED || approvalB !== ApprovalState.APPROVED}
-                    error={
-                      !!error || (!isValid && !!parsedAmounts[Field.CURRENCY_A] && !!parsedAmounts[Field.CURRENCY_B])
-                    }
-                  >
-                    <Text fontWeight={500}>{error ?? 'Supply'}</Text>
-                  </ButtonError>
-                </AutoColumn>
-              )}
-              {/* {!addIsUnsupported ? (
-      pair && !noLiquidity && pairState !== PairState.INVALID ? (
-        <AutoColumn style={{ minWidth: '20rem', width: '100%', maxWidth: '420px', marginTop: '1rem' }}>
-          <MinimalPositionCard showUnwrapped={oneCurrencyIsWETH} pair={pair} />
-        </AutoColumn>
-      ) : null
-    ) : (
-        <UnsupportedCurrencyFooter
-          show={addIsUnsupported}
-          currencies={[currencies.CURRENCY_A, currencies.CURRENCY_B]}
-        />
-      )} */}
+              </Box>
             </Box>
-          </MobileBottomShadowContainer>
-        </>
-      )}
-      {!isMobile && (
-        <Box
-          sx={{
-            background: 'rgba(28, 41, 53, 0.7)',
-            transform: 'translateY(-3rem)',
-            fontFamily: 'Poppins',
-            zIndex: -1,
-            color: 'rgba(255,255,255,0.6)',
-            maxWidth: isMobile ? '100%' : '30rem',
-            fontSize: '0.6rem',
-            position: 'relative',
-            width: '30rem',
-            fontWeight: 200,
-            padding: '1.2rem .9rem',
-            paddingTop: '4rem',
-            borderRadius: '1.6rem',
-            backdropFilter: 'blur(36.9183px)'
-          }}
-        >
-          By adding liquidity to this pair,you will earn {!pairModeStable ? '0.3%' : '0.01%'} of all the trades on this
-          pair proportional to your share of the pool. And earnings will be claimed while removing your liquidity.
-        </Box>
+          </>
+        )}
+
+        {!isMobile && (
+          <Box
+            sx={{
+              background: 'rgba(28, 41, 53, 0.7)',
+              transform: 'translateY(-3rem)',
+              fontFamily: 'Poppins',
+              zIndex: -1,
+              color: 'rgba(255,255,255,0.6)',
+              maxWidth: isMobile ? '100%' : '30rem',
+              fontSize: '0.6rem',
+              position: 'relative',
+              width: '30rem',
+              fontWeight: 200,
+              padding: '1.2rem .9rem',
+              paddingTop: '4rem',
+              borderRadius: '1.6rem',
+              backdropFilter: 'blur(36.9183px)'
+            }}
+          >
+            By adding liquidity to this pair,you will earn {!pairModeStable ? '0.3%' : '0.01%'} of all the trades on
+            this pair proportional to your share of the pool. And earnings will be claimed while removing your
+            liquidity.
+          </Box>
+        )}
+      </Box>
+
+      {isMobile && (
+        <MobileBottomShadowContainer>
+          <Box>
+            <Text
+              sx={{
+                fontFamily: 'Poppins',
+                fontStyle: 'normal',
+                fontWeight: '400',
+                fontSize: '1rem',
+                lineHeight: '1rem',
+                color: 'rgba(255, 255, 255, 0.6)'
+              }}
+            >
+              By adding liquidity to this pair,you will earn {!pairModeStable ? '0.3%' : '0.01%'} of all the trades on
+              this pair proportional to your share of the pool. And earnings will be claimed while removing your
+              liquidity.
+            </Text>
+            {addIsUnsupported ? (
+              <AutoColumn style={{ marginTop: '1rem' }}>
+                <ButtonPrimary className="secondary-title" sx={{ fontWeight: '400!important' }} disabled={true}>
+                  <TYPE.main mb="4px">Unsupported Asset</TYPE.main>
+                </ButtonPrimary>
+              </AutoColumn>
+            ) : !account ? (
+              <AutoColumn style={{ marginTop: '1rem' }}>
+                <ConnectButtonInBody />
+              </AutoColumn>
+            ) : (
+              <AutoColumn style={{ marginTop: '1rem' }}>
+                {(approvalA === ApprovalState.NOT_APPROVED ||
+                  approvalA === ApprovalState.PENDING ||
+                  approvalB === ApprovalState.NOT_APPROVED ||
+                  approvalB === ApprovalState.PENDING) &&
+                  isValid && (
+                    <RowBetween>
+                      {approvalA !== ApprovalState.APPROVED && (
+                        <ButtonPrimary
+                          className="secondary-title"
+                          style={{
+                            marginBottom: '0.5rem',
+                            fontWeight: '400!important'
+                          }}
+                          onClick={approveACallback}
+                          disabled={approvalA === ApprovalState.PENDING}
+                          width={approvalB !== ApprovalState.APPROVED ? '48%' : '100%'}
+                        >
+                          {approvalA === ApprovalState.PENDING ? (
+                            <Dots>Approving {currencies[Field.CURRENCY_A]?.symbol}</Dots>
+                          ) : (
+                            'Approve ' + currencies[Field.CURRENCY_A]?.symbol
+                          )}
+                        </ButtonPrimary>
+                      )}
+                      {approvalB !== ApprovalState.APPROVED && (
+                        <ButtonPrimary
+                          className="secondary-title"
+                          style={{
+                            marginBottom: '0.5rem',
+                            fontWeight: '400!important'
+                          }}
+                          onClick={approveBCallback}
+                          disabled={approvalB === ApprovalState.PENDING}
+                          width={approvalA !== ApprovalState.APPROVED ? '48%' : '100%'}
+                        >
+                          {approvalB === ApprovalState.PENDING ? (
+                            <Dots>Approving {currencies[Field.CURRENCY_B]?.symbol}</Dots>
+                          ) : (
+                            'Approve ' + currencies[Field.CURRENCY_B]?.symbol
+                          )}
+                        </ButtonPrimary>
+                      )}
+                    </RowBetween>
+                  )}
+                <ButtonError
+                  className="secondary-title"
+                  sx={{ border: 'unset!important', fontWeight: '400!important' }}
+                  onClick={() => {
+                    expertMode ? onAdd() : setShowConfirm(true)
+                  }}
+                  disabled={!isValid || approvalA !== ApprovalState.APPROVED || approvalB !== ApprovalState.APPROVED}
+                  error={
+                    !!error || (!isValid && !!parsedAmounts[Field.CURRENCY_A] && !!parsedAmounts[Field.CURRENCY_B])
+                  }
+                >
+                  <Text fontWeight={500}>{error ?? 'Supply'}</Text>
+                </ButtonError>
+              </AutoColumn>
+            )}
+            {/* {!addIsUnsupported ? (
+pair && !noLiquidity && pairState !== PairState.INVALID ? (
+  <AutoColumn style={{ minWidth: '20rem', width: '100%', maxWidth: '420px', marginTop: '1rem' }}>
+    <MinimalPositionCard showUnwrapped={oneCurrencyIsWETH} pair={pair} />
+  </AutoColumn>
+) : null
+) : (
+  <UnsupportedCurrencyFooter
+    show={addIsUnsupported}
+    currencies={[currencies.CURRENCY_A, currencies.CURRENCY_B]}
+  />
+)} */}
+          </Box>
+        </MobileBottomShadowContainer>
       )}
     </>
   )
@@ -1184,7 +1195,7 @@ const StyledArrowLeft = styled(ArrowLeft)`
 
 export function MobileBottomShadowContainer({ children, ...flexProps }: BoxProps) {
   return (
-    <Box flex={1} sx={{ position: 'relative', width: '100vw', minHeight: '10rem' }}>
+    <Box flex={1} sx={{ position: 'fixed', width: '100vw', minHeight: '15rem', bottom: 0 }}>
       <Box
         sx={{
           background: 'rgba(1, 1, 1, 0.5)',
@@ -1193,8 +1204,12 @@ export function MobileBottomShadowContainer({ children, ...flexProps }: BoxProps
           left: 0,
           right: 0,
           bottom: 0,
-          padding: '1rem',
-          minHeight: '10rem',
+          padding: '1.5rem',
+          paddingBottom: '2.5rem',
+          minHeight: '15rem',
+          '> div': {
+            lineHeight: '1.8rem'
+          },
           display: 'flex',
           height: 'max-content',
           borderTopLeftRadius: '1.5rem',

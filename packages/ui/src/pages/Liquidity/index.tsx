@@ -31,7 +31,7 @@ import { /* StyledInternalLink, */ StyledInternalLink, TYPE } from '../../theme'
 
 const PageWrapper = styled(AutoColumn)`
   max-width: 1132px;
-  width: 40rem;
+  width: 60rem;
   ${({ theme }) => theme.mediaWidth.upToSmall`
     width: 100%;
   `};
@@ -462,7 +462,7 @@ export default function Liquidity() {
 
         <AutoColumn gap="lg" justify="center">
           <AutoColumn gap="lg" style={{ width: '100%' }}>
-            <TitleRow style={{ marginTop: '1rem' }} padding={'0'}>
+            <TitleRow style={{ marginTop: isMobile ? 'unset' : '1rem' }} padding={'0'}>
               {/* <HideSmall> */}
               <TYPE.mediumHeader className="YourLiquidityText title">Your liquidity</TYPE.mediumHeader>
               {/* </HideSmall> */}
