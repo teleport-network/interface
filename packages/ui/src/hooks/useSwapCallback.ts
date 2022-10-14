@@ -145,13 +145,13 @@ export function useSwapCallback(
                   tokenInContract = getContract(WETH[chainId].address, WETH_ABI, library)
                 }
                 let step0 = tokenInContract!.interface.encodeFunctionData("approve", [routerContract.address, inputTokenAmount])
+                console.log('step0 approve', step0)
                 let step1 = routerContract!.interface.encodeFunctionData("swapExactTokensForTokens", routeItem)
-                multiFinalParams.push([tokenInContract!.address, step0])
-                multiFinalParams.push([routerContract.address, step1])
+                multiFinalParams.push([step1])
               }
               // let gas = await ans.multicall.estimateGas.aggregate(params)
-
-              return contract.estimateGas[methodName](...args, options)
+              // await ans.router.multicall(getDeadline(),params)
+              return contract.multicall.estimateGas(...multiFinalParams)
                 .then((gasEstimate) => {
                   return {
                     call,
