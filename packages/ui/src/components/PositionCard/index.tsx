@@ -115,7 +115,7 @@ export function MinimalPositionCard({ pair, showUnwrapped = false, ...boxProps }
               </RowFixed>
               <RowFixed>
                 <Text className="text-emphasize" fontWeight={400}>
-                  {userPoolBalance ? userPoolBalance.toSignificant(4) : '-'}
+                  {userPoolBalance ? userPoolBalance.toFixed(6) : '-'}
                 </Text>
               </RowFixed>
             </FixedHeightRow>
