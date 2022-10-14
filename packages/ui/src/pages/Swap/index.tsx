@@ -449,7 +449,7 @@ export default function Swap({ history }: RouteComponentProps) {
             {showWrap ? null : (
               <Card
                 padding={showWrap ? '.25rem 1rem 0 1rem' : '0.5rem 0px'}
-                sx={{ color: '#D7DCE0', fontSize: '.4rem', fontWeight: 400 }}
+                sx={{ color: '#D7DCE0', /*  fontSize: '.4rem', */ fontWeight: 400 }}
                 borderRadius={'1rem'}
               >
                 <AutoColumn gap="8px" style={{ padding: '0 1rem' }}>

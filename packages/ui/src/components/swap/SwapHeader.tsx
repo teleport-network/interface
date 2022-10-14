@@ -21,7 +21,7 @@ export default function SwapHeader() {
   return (
     <StyledSwapHeader>
       <RowBetween>
-        <TYPE.black fontWeight={400} fontSize={'.7rem'} sx={{ fontFamily: 'Dela Gothic One', color: '#FFFFFF' }}>
+        <TYPE.black fontWeight={400} /* fontSize={'.7rem'} */ sx={{ fontFamily: 'Dela Gothic One', color: '#FFFFFF' }}>
           Swap
         </TYPE.black>
         <Settings />
