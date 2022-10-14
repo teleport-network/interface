@@ -273,7 +273,7 @@ export default function LiquidityDetail() {
                 marginBottom: '2rem'
               }
             : {
-                width: '40rem',
+                width: '60rem',
                 display: 'flex',
                 alignItems: 'flex-start',
                 marginBottom: '2rem',
@@ -321,7 +321,7 @@ export default function LiquidityDetail() {
       /> */}
       <Flex
         flexDirection={'column'}
-        width="40rem"
+        width="60rem"
         maxWidth={'90vw'}
         sx={{
           maxHeight: '100%',

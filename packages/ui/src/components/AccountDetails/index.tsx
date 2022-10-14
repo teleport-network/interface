@@ -319,7 +319,7 @@ export default function AccountDetails({
                     style={{
                       fontSize: '.825rem',
                       fontWeight: 400,
-                      border: `1px solid rgba(57,225,186,0.4)`,
+                      // border: `1px solid rgba(57,225,186,0.4)`,
                       padding: '0.4rem 0.8rem'
                     }}
                     onClick={() => {

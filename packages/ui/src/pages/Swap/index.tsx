@@ -485,12 +485,12 @@ export default function Swap({ history }: RouteComponentProps) {
             )}
             <BottomGrouping>
               {swapIsUnsupported ? (
-                <ButtonPrimary className="title" disabled={true}>
+                <ButtonPrimary className="secondary-title" disabled={true}>
                   <TYPE.main mb="4px">Unsupported Asset</TYPE.main>
                 </ButtonPrimary>
               ) : !account ? (
                 <ButtonLight
-                  className="title"
+                  className="secondary-title"
                   sx={{
                     fontSize: '1.1rem',
                     backgroundColor: '#39E1BA!important',
@@ -502,17 +502,17 @@ export default function Swap({ history }: RouteComponentProps) {
                   Connect Wallet
                 </ButtonLight>
               ) : showWrap ? (
-                <ButtonPrimary className="title" disabled={Boolean(wrapInputError)} onClick={onWrap}>
+                <ButtonPrimary className="secondary-title" disabled={Boolean(wrapInputError)} onClick={onWrap}>
                   {wrapInputError ??
                     (wrapType === WrapType.WRAP ? 'Wrap' : wrapType === WrapType.UNWRAP ? 'Unwrap' : null)}
                 </ButtonPrimary>
               ) : noRoute && userHasSpecifiedInputOutput ? (
                 <GreyCard style={{ textAlign: 'center' }}>
-                  <TYPE.main className="title" mb="4px">
+                  <TYPE.main className="secondary-title" mb="4px">
                     Insufficient liquidity for this trade.
                   </TYPE.main>
                   {singleHopOnly && (
-                    <TYPE.main className="title" mb="4px">
+                    <TYPE.main className="secondary-title" mb="4px">
                       Try enabling multi-hop trades.
                     </TYPE.main>
                   )}
@@ -520,7 +520,7 @@ export default function Swap({ history }: RouteComponentProps) {
               ) : showApproveFlow ? (
                 <RowBetween>
                   <ButtonConfirmed
-                    className="title"
+                    className="secondary-title"
                     onClick={approveCallback}
                     disabled={approval !== ApprovalState.NOT_APPROVED || approvalSubmitted}
                     width="48%"
@@ -538,7 +538,7 @@ export default function Swap({ history }: RouteComponentProps) {
                     )}
                   </ButtonConfirmed>
                   <ButtonError
-                    className="title"
+                    className="secondary-title"
                     onClick={() => {
                       if (isExpertMode) {
                         handleSwap()
@@ -585,7 +585,7 @@ export default function Swap({ history }: RouteComponentProps) {
                   disabled={!isValid || (priceImpactSeverity > 3 && !isExpertMode) || !!swapCallbackError}
                   error={isValid && priceImpactSeverity > 2 && !swapCallbackError}
                 >
-                  <Text className="title" fontWeight={500}>
+                  <Text className="secondary-title" fontWeight={500}>
                     {swapInputError
                       ? swapInputError
                       : priceImpactSeverity > 3 && !isExpertMode
