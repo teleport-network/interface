@@ -19,7 +19,7 @@ import PoolCard from './PoolCard'
 // import { OutlineCard } from '../../components/Card'
 
 const PageWrapper = styled(AutoColumn)`
-  max-width: 67.5rem;
+  max-width: 80rem;
   width: 100%;
   ${({ theme }) => theme.mediaWidth.upToSmall`
   width: 100%;
