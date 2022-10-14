@@ -12,7 +12,7 @@ export class Currency {
   public readonly decimals: number
   public readonly symbol?: string
   public readonly name?: string
-
+  public readonly address?: string
   /**
    * The only instance of the base class `Currency`.
    */

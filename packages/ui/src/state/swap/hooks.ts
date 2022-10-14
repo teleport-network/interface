@@ -1,5 +1,5 @@
 import { parseUnits } from '@ethersproject/units'
-import { Currency, CurrencyAmount, ETHER, JSBI, Token, TokenAmount, Trade } from '@teleswap/sdk'
+import { Currency, CurrencyAmount, ETHER, JSBI, Token, TokenAmount, Trade, WETH } from '@teleswap/sdk'
 import BigNumber from 'bignumber.js'
 import { ParsedQs } from 'qs'
 import { useCallback, useEffect, useState } from 'react'
@@ -18,6 +18,7 @@ import { useCurrencyBalances } from '../wallet/hooks'
 import { Field, replaceSwapState, selectCurrency, setRecipient, switchCurrencies, typeInput } from './actions'
 import { SwapState } from './reducer'
 import { route } from 'state/routing/slice'
+
 
 export function useSwapState(): AppState['swap'] {
   return useSelector<AppState, AppState['swap']>((state) => state.swap)
@@ -114,7 +115,7 @@ export function useDerivedSwapInfo(): any | {
   inputError?: string
   routeData?: any
 } {
-  const { account } = useActiveWeb3React()
+  const { account, chainId } = useActiveWeb3React()
 
   const {
     independentField,
@@ -201,27 +202,34 @@ export function useDerivedSwapInfo(): any | {
     ; (async () => {
       try {
         if (
+          typedValue &&
           currencies[Field.INPUT] &&
-          currencies[Field.INPUT]?.hasOwnProperty('address') &&
+          currencies[Field.INPUT]?.hasOwnProperty('decimals') &&
           currencies[Field.OUTPUT] &&
-          currencies[Field.OUTPUT]?.hasOwnProperty('address') &&
           currencies[Field.OUTPUT]?.hasOwnProperty('decimals')
+          && chainId
         ) {
-          const inputItem = currencies[Field.INPUT]
-          if (!inputItem || !inputItem['address'] || !inputItem['chainId']) {
+          // if (currencyAmount.currency === ETHER) return new TokenAmount(WETH[chainId], currencyAmount.raw)
+          if (currencies[Field.INPUT]!['symbol'] === "ETH") {
+            currencies[Field.INPUT] = WETH[chainId]
+          }
+          if (currencies[Field.OUTPUT]!['symbol'] === "ETH") {
+            currencies[Field.OUTPUT] = WETH[chainId]
+          }
+          if (!currencies[Field.INPUT] || !currencies[Field.INPUT]!['address'] || !currencies[Field.INPUT]!['chainId']) {
             throw new Error(`Invalid`)
           }
-          const outputItem = currencies[Field.OUTPUT]
-          if (!outputItem || !outputItem['address'] || !outputItem['chainId']) {
+
+          if (!currencies[Field.OUTPUT] || !currencies[Field.OUTPUT]!['address'] || !currencies[Field.OUTPUT]!['chainId']) {
             throw new Error(`Invalid`)
           }
           const decimal = isExactIn ? currencies[Field.INPUT]?.decimals : currencies[Field.OUTPUT]?.decimals
           const amount = new BigNumber(typedValue).shiftedBy(decimal!).toNumber()
           const params: any = {
-            tokenInAddress: inputItem['address'],
-            tokenInChainId: inputItem['chainId'],
-            tokenOutAddress: outputItem['address'],
-            tokenOutChainId: outputItem['chainId'],
+            tokenInAddress: currencies[Field.INPUT]!['address'],
+            tokenInChainId: currencies[Field.INPUT]!['chainId'],
+            tokenOutAddress: currencies[Field.OUTPUT]!['address'],
+            tokenOutChainId: currencies[Field.OUTPUT]!['chainId'],
             amount,
             type: isExactIn ? 'exactIn' : 'exactOut',
             protocols: 'v2',
@@ -229,35 +237,35 @@ export function useDerivedSwapInfo(): any | {
           // let volidatas = Object.keys(params).find((key) => {
           //   return !!params[key] == false
           // })
-          params['tokenInDecimals'] = inputItem.decimals
-          params['tokenOutDecimals'] = outputItem.decimals
+          params['tokenInDecimals'] = currencies[Field.INPUT]!.decimals
+          params['tokenOutDecimals'] = currencies[Field.OUTPUT]!.decimals
           params['recipient'] = ''
           params['slippageTolerance'] = ''
           params['deadline'] = ''
           let response = await route(params)
-          // let response: any = {}
-          // response.data = {"blockNumber":"1852407","amount":"1000000000000000000","amountDecimals":"1","quote":"543458644977616213","quoteDecimals":"0.543458644977616213","quoteGasAdjusted":"543458631477616213","quoteGasAdjustedDecimals":"0.543458631477616213","gasUseEstimateQuote":"13499999999","gasUseEstimateQuoteDecimals":"0.000000013499999999","gasUseEstimate":"135000","gasUseEstimateUSD":"0.000000000115316359","gasPriceWei":"1","route":[[{"type":"v2-pool","tokenIn":{"chainId":420,"decimals":18,"address":"0x70aBC17e870366C336A5DAd05061828fEff76fF5"},"tokenOut":{"chainId":420,"decimals":18,"address":"0x56c822f91C1DC40ce32Ae6109C7cc1D18eD08ECE","symbol":"USDC"},"reserve0":{"token":{"chainId":420,"decimals":18,"address":"0x56c822f91C1DC40ce32Ae6109C7cc1D18eD08ECE","symbol":"USDC"},"quotient":"92837629675000000711"},"reserve1":{"token":{"chainId":420,"decimals":18,"address":"0x70aBC17e870366C336A5DAd05061828fEff76fF5","symbol":"USDT"},"quotient":"169317922103755095452"},"amountIn":"1000000000000000000","amountOut":"543458644977616213"}]],"routeString":"[V2] 100.00% = undefined -- [0xC0Be76E51DD829C8B98B6dB9212f3512540B2EC5] --> USDC","priceImpactWithoutFee":"0.9871","realizedLPFee":"3000000000000000000000000000","maxIn":"1000000000000000000","minOut":"540800000000000000","percents":[100]}
           if (response.data && response.data.hasOwnProperty('quoteDecimals')) {
-            const parsedOutAmount = tryParseAmount(
+            const outputAmount = tryParseAmount(
               response.data.quoteDecimals,
               (isExactIn ? outputCurrency : inputCurrency) ?? undefined
             )
-            response.data['parsedOutAmount'] = parsedOutAmount
-            response.data['currencies'] = currencies
+            response.data['inputAmount'] = parsedAmount
+            response.data['outputAmount'] = outputAmount
             setRouteData(response.data)
           }
         }
       } catch (error) {
-        console.log('useDerivedSwapInfo error', error)
+        console.error('useDerivedSwapInfo error', error)
       }
     })()
-  }, [typedValue, inputName, outputName, isExactIn])
+  }, [typedValue])
+  // inputName, outputName, isExactIn
 
   return {
     currencies,
     currencyBalances,
     parsedAmount,
-    v2Trade: v2Trade ?? undefined,
+    v2Trade: Object.keys(routeData).length > 0 ? v2Trade : undefined,
+    // v2Trade: v2Trade ?? undefined,
     inputError,
     routeData
   }

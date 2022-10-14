@@ -1,17 +1,20 @@
 import { BigNumber } from '@ethersproject/bignumber'
 import { Contract } from '@ethersproject/contracts'
-import { JSBI, Percent, Router, SwapParameters, Trade, TradeType } from '@teleswap/sdk'
+import { JSBI, Percent, Router, SwapParameters, Trade, TradeType, WETH } from '@teleswap/sdk'
 import { useMemo } from 'react'
 import { getTradeVersion } from 'utils/tradeVersion'
 
 import { BIPS_BASE, INITIAL_ALLOWED_SLIPPAGE } from '../constants'
 import { useTransactionAdder } from '../state/transactions/hooks'
-import { calculateGasMargin, getRouterContract, isAddress, shortenAddress } from '../utils'
+import { calculateGasMargin, getContract, getRouterContract, isAddress, shortenAddress } from '../utils'
 import isZero from '../utils/isZero'
 import { useActiveWeb3React } from './index'
+import { useTokenContract, useWETHContract } from './useContract'
 import useENS from './useENS'
 import { Version } from './useToggledVersion'
 import useTransactionDeadline from './useTransactionDeadline'
+import ERC20_ABI from '../constants/abis/erc20.json'
+import WETH_ABI from '../constants/abis/weth.json'
 
 export enum SwapCallbackState {
   INVALID,
@@ -101,7 +104,6 @@ export function useSwapCallback(
   const { account, chainId, library } = useActiveWeb3React()
 
   const swapCalls = useSwapCallArguments(trade, allowedSlippage, recipientAddressOrName)
-
   const addTransaction = useTransactionAdder()
 
   const { address: recipientAddress } = useENS(recipientAddressOrName)
@@ -127,48 +129,99 @@ export function useSwapCallback(
         const estimatedCalls: EstimatedSwapCall[] = await Promise.all(
           swapCalls.map((call) => {
             const {
-              parameters: { methodName, args, value },
+              parameters: { methodName, args, value, multiParams },
               contract
             } = call
             const options = !value || isZero(value) ? {} : { value }
-
-            return contract.estimateGas[methodName](...args, options)
-              .then((gasEstimate) => {
-                return {
-                  call,
-                  gasEstimate
+            if (multiParams && multiParams.length > 0) {
+              let routerContract = contract
+              let multiFinalParams: any = []
+              for (let m = 0; m < multiParams.length; m++) {
+                let routeItem = multiParams[m]
+                let inputTokenAddress = routeItem[2][0][0]
+                let inputTokenAmount = routeItem[0]
+                let tokenInContract = getContract(inputTokenAddress, ERC20_ABI, library)
+                if (inputTokenAddress && (inputTokenAddress === WETH[chainId]['address'])) {
+                  tokenInContract = getContract(WETH[chainId].address, WETH_ABI, library)
                 }
-              })
-              .catch((gasError) => {
-                console.debug('Gas estimate failed, trying eth_call to extract error', call)
+                let step0 = tokenInContract!.interface.encodeFunctionData("approve", [routerContract.address, inputTokenAmount])
+                let step1 = routerContract!.interface.encodeFunctionData("swapExactTokensForTokens", routeItem)
+                multiFinalParams.push([tokenInContract!.address, step0])
+                multiFinalParams.push([routerContract.address, step1])
+              }
+              // let gas = await ans.multicall.estimateGas.aggregate(params)
 
-                return contract.callStatic[methodName](...args, options)
-                  .then((result) => {
-                    console.debug('Unexpected successful call after failed estimate gas', call, gasError, result)
-                    return { call, error: new Error('Unexpected issue with estimating the gas. Please try again.') }
-                  })
-                  .catch((callError) => {
-                    console.debug('Call threw error', call, callError)
-                    let errorMessage: string
-                    switch (callError.reason) {
-                      case 'UniswapV2Router: INSUFFICIENT_OUTPUT_AMOUNT':
-                      case 'UniswapV2Router: EXCESSIVE_INPUT_AMOUNT':
-                        errorMessage =
-                          'This transaction will not succeed either due to price movement or fee on transfer. Try increasing your slippage tolerance.'
-                        break
-                      default:
-                        errorMessage = `The transaction cannot succeed due to error: ${callError.reason}. This is probably an issue with one of the tokens you are swapping.`
-                    }
-                    return { call, error: new Error(errorMessage) }
-                  })
-              })
+              return contract.estimateGas[methodName](...args, options)
+                .then((gasEstimate) => {
+                  return {
+                    call,
+                    gasEstimate
+                  }
+                })
+                .catch((gasError) => {
+                  console.debug('Gas estimate failed, trying eth_call to extract error', call)
+
+                  return contract.callStatic[methodName](...args, options)
+                    .then((result) => {
+                      console.debug('Unexpected successful call after failed estimate gas', call, gasError, result)
+                      return { call, error: new Error('Unexpected issue with estimating the gas. Please try again.') }
+                    })
+                    .catch((callError) => {
+                      console.debug('Call threw error', call, callError)
+                      let errorMessage: string
+                      switch (callError.reason) {
+                        case 'UniswapV2Router: INSUFFICIENT_OUTPUT_AMOUNT':
+                        case 'UniswapV2Router: EXCESSIVE_INPUT_AMOUNT':
+                          errorMessage =
+                            'This transaction will not succeed either due to price movement or fee on transfer. Try increasing your slippage tolerance.'
+                          break
+                        default:
+                          errorMessage = `The transaction cannot succeed due to error: ${callError.reason}. This is probably an issue with one of the tokens you are swapping.`
+                      }
+                      return { call, error: new Error(errorMessage) }
+                    })
+                })
+            } else {
+              return contract.estimateGas[methodName](...args, options)
+                .then((gasEstimate) => {
+                  return {
+                    call,
+                    gasEstimate
+                  }
+                })
+                .catch((gasError) => {
+                  console.debug('Gas estimate failed, trying eth_call to extract error', call)
+
+                  return contract.callStatic[methodName](...args, options)
+                    .then((result) => {
+                      console.debug('Unexpected successful call after failed estimate gas', call, gasError, result)
+                      return { call, error: new Error('Unexpected issue with estimating the gas. Please try again.') }
+                    })
+                    .catch((callError) => {
+                      console.debug('Call threw error', call, callError)
+                      let errorMessage: string
+                      switch (callError.reason) {
+                        case 'UniswapV2Router: INSUFFICIENT_OUTPUT_AMOUNT':
+                        case 'UniswapV2Router: EXCESSIVE_INPUT_AMOUNT':
+                          errorMessage =
+                            'This transaction will not succeed either due to price movement or fee on transfer. Try increasing your slippage tolerance.'
+                          break
+                        default:
+                          errorMessage = `The transaction cannot succeed due to error: ${callError.reason}. This is probably an issue with one of the tokens you are swapping.`
+                      }
+                      return { call, error: new Error(errorMessage) }
+                    })
+                })
+            }
+
           })
         )
 
         // a successful estimation is a bignumber gas estimate and the next call is also a bignumber gas estimate
         const successfulEstimation = estimatedCalls.find(
-          (el, ix, list): el is SuccessfulCall =>
-            'gasEstimate' in el && (ix === list.length - 1 || 'gasEstimate' in list[ix + 1])
+          (el, ix, list): el is SuccessfulCall => {
+            return 'gasEstimate' in el && (ix === list.length - 1 || 'gasEstimate' in list[ix + 1])
+          }
         )
 
         if (!successfulEstimation) {
@@ -199,11 +252,10 @@ export function useSwapCallback(
             const withRecipient =
               recipient === account
                 ? base
-                : `${base} to ${
-                    recipientAddressOrName && isAddress(recipientAddressOrName)
-                      ? shortenAddress(recipientAddressOrName)
-                      : recipientAddressOrName
-                  }`
+                : `${base} to ${recipientAddressOrName && isAddress(recipientAddressOrName)
+                  ? shortenAddress(recipientAddressOrName)
+                  : recipientAddressOrName
+                }`
 
             const withVersion =
               tradeVersion === Version.v2 ? withRecipient : `${withRecipient} on ${(tradeVersion as any).toUpperCase()}`

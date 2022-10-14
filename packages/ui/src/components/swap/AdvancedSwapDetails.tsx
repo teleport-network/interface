@@ -1,4 +1,5 @@
-import { Trade, TradeType } from '@teleswap/sdk'
+import { Trade } from '@teleswap/sdk'
+// TradeType
 import LineVIcon from 'assets/images/tele/lineV.png'
 import ArrowHGreen from 'assets/svg/arrowHGreen.svg'
 import ArrowHLoneLine from 'assets/svg/arrowHLoneLine.svg'
@@ -10,10 +11,10 @@ import { useState } from 'react'
 import { Box } from 'rebass'
 import styled from 'styled-components'
 
-import { Field } from '../../state/swap/actions'
+// import { Field } from '../../state/swap/actions'
 import { useUserSlippageTolerance } from '../../state/user/hooks'
 import { ExternalLink, TYPE } from '../../theme'
-import { computeSlippageAdjustedAmounts, computeTradePriceBreakdown } from '../../utils/prices'
+// import { computeSlippageAdjustedAmounts, computeTradePriceBreakdown } from '../../utils/prices'
 import { AutoColumn } from '../Column'
 import QuestionHelper from '../QuestionHelper'
 import { RowBetween, RowFixed } from '../Row'
@@ -36,10 +37,9 @@ function TradeSummary({ trade, allowedSlippage }: { trade: Trade; allowedSlippag
   const priceImpactWithoutFee = trade.routeData.priceImpactWithoutFee
   const realizedLPFee = trade.routeData.realizedLPFee
   // const isExactIn = trade.tradeType === TradeType.EXACT_INPUT
-  const isExactIn = trade?.routeData?.reqParams?.type === "exactIn"
+  const isExactIn = trade?.routeData?.reqParams?.type === 'exactIn'
   // const slippageAdjustedAmounts = computeSlippageAdjustedAmounts(trade, allowedSlippage)
   const slippageAdjustedAmounts = isExactIn ? trade.routeData.minOut : trade.routeData.maxIn
-  const { currencies } = trade.routeData
   return (
     <>
       <AutoColumn className="text-detail" style={{ padding: '0 16px', color: '#D7DCE0' }} gap="0.4rem">
@@ -58,9 +58,9 @@ function TradeSummary({ trade, allowedSlippage }: { trade: Trade; allowedSlippag
                 : `${slippageAdjustedAmounts[Field.INPUT]?.toSignificant(4)} ${trade.inputAmount.currency.symbol}` ??
                   '-'} */}
               {isExactIn
-                ? `${slippageAdjustedAmounts && slippageAdjustedAmounts.toSignificant(4)} ${currencies?.OUTPUT?.symbol || ''}` ??
+                ? `${slippageAdjustedAmounts && slippageAdjustedAmounts.toSignificant(4)} ${trade?.outputAmount?.currency?.symbol || ''}` ??
                 '-'
-                : `${slippageAdjustedAmounts && slippageAdjustedAmounts.toSignificant(4)} ${currencies?.INPUT?.symbol || ''}` ??
+                : `${slippageAdjustedAmounts && slippageAdjustedAmounts.toSignificant(4)} ${trade?.inputAmount?.currency?.symbol || ''}` ??
                 '-'}
             </TYPE.black>
           </RowFixed>
@@ -83,7 +83,7 @@ function TradeSummary({ trade, allowedSlippage }: { trade: Trade; allowedSlippag
             <QuestionHelper text="A portion of each trade (0.30%) goes to liquidity providers as a protocol incentive." />
           </RowFixed>
           <TYPE.black color={theme.text1}>
-            {realizedLPFee ? `${realizedLPFee.toSignificant(4)} ${currencies?.INPUT?.symbol}` : '-'}
+            {realizedLPFee ? `${realizedLPFee.toSignificant(4)} ${trade?.inputAmount?.currency?.symbol}` : '-'}
           </TYPE.black>
         </RowBetween>
       </AutoColumn>
@@ -170,7 +170,6 @@ if (window) {
 }
 
 export function AdvancedSwapDetails({ trade }: AdvancedSwapDetailsProps) {
-  debugger
   const theme = useThemedContext()
   const [showRouterDetail, setShowRouterDetail] = useState(false)
   const [allowedSlippage] = useUserSlippageTolerance()

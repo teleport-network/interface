@@ -53,6 +53,7 @@ export interface SwapParameters {
    * The amount of wei to send in hex.
    */
   value: string
+  multiParams: Array<any>
 }
 
 function toHex(currencyAmount: CurrencyAmount) {
@@ -68,7 +69,7 @@ export abstract class Router {
   /**
    * Cannot be constructed.
    */
-  private constructor() {}
+  private constructor() { }
   /**
    * Produces the on-chain method name to call and the hex encoded parameters to pass as arguments for a given trade.
    * @param trade to produce call parameters for
@@ -80,40 +81,72 @@ export abstract class Router {
     // the router does not support both ether in and out
     invariant(!(etherIn && etherOut), 'ETHER_IN_OUT')
     invariant(!('ttl' in options) || options.ttl > 0, 'TTL')
-    
+
     const to: string = validateAndParseAddress(options.recipient)
     const amountIn: string = toHex(trade.maximumAmountIn(options.allowedSlippage))
     const amountOut: string = toHex(trade.minimumAmountOut(options.allowedSlippage))
     const path: string[] = trade.route.path.map(token => token.address)
+    // const path: string[] = trade.routeData.route.map(token => token.address)
+
+    // const stables: boolean[] = trade.route.pairs.map(token => token.stable)
+    const stables: boolean[] = trade.route.pairs.map(token => token.stable)
     const deadline =
       'ttl' in options
         ? `0x${(Math.floor(new Date().getTime() / 1000) + options.ttl).toString(16)}`
         : `0x${options.deadline.toString(16)}`
 
     const useFeeOnTransfer = Boolean(options.feeOnTransfer)
-
+    const routeDataRoute = trade?.routeData?.route || null
     let methodName: string
     // let args: (string | string[])[]
     let args: any
     let value: string
+    let routePathArge = []
+    let pathLength = path.length
+    let multiParams = []
     switch (trade.tradeType) {
       case TradeType.EXACT_INPUT:
         if (etherIn) {
           methodName = useFeeOnTransfer ? 'swapExactETHForTokensSupportingFeeOnTransferTokens' : 'swapExactETHForTokens'
           // (uint amountOutMin, address[] calldata path, address to, uint deadline)
-          args = [amountOut, [[...path, getRoutePairMode()]], to, deadline]
+          for (let i = 0; i < pathLength; i++) {
+            if (i < pathLength - 1) {
+              routePathArge.push([path[i], path[i + 1], stables[i]])
+            }
+          }
+          // args = [amountOut, routePathArge, to, deadline]
+          args = [0, routePathArge, to, deadline]
           value = amountIn
         } else if (etherOut) {
           methodName = useFeeOnTransfer ? 'swapExactTokensForETHSupportingFeeOnTransferTokens' : 'swapExactTokensForETH'
           // (uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline)
-          args = [amountIn, amountOut, [[...path, getRoutePairMode()]], to, deadline]
+          for (let index = 0; index < routeDataRoute.length; index++) {
+            let routePathArge = []
+            let routeDataOne = routeDataRoute[index]
+            for (let itemIndex = 0; itemIndex < routeDataOne.length; itemIndex++) {
+              routePathArge.push([routeDataOne[itemIndex]['tokenIn']['address'], routeDataOne[itemIndex]['tokenOut']['address'], routeDataOne[itemIndex]['stable']])
+            }
+            let amountInString = routeDataOne[0]['amountIn']
+            let amountInHex = '0x' + Number(amountInString).toString(16)
+            let rowParams = [amountInHex, 0, routePathArge, to, deadline]
+            multiParams.push(rowParams)
+          }
+          // amountOut = 0
+          // args = [amountIn, 0, routePathArge, to, deadline]
+          args = []
           value = ZERO_HEX
         } else {
           methodName = useFeeOnTransfer
             ? 'swapExactTokensForTokensSupportingFeeOnTransferTokens'
             : 'swapExactTokensForTokens'
           // (uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline)
-          args = [amountIn, amountOut, [[...path, getRoutePairMode()]], to, deadline]
+          for (let i = 0; i < pathLength; i++) {
+            if (i < pathLength - 1) {
+              routePathArge.push([path[i], path[i + 1], stables[i]])
+            }
+          }
+          args = [amountIn, 0, routePathArge, to, deadline]
+          // args = [amountIn, amountOut, routePathArge, to, deadline]
           value = ZERO_HEX
         }
         break
@@ -140,7 +173,8 @@ export abstract class Router {
     return {
       methodName,
       args,
-      value
+      value,
+      multiParams
     }
   }
 }
