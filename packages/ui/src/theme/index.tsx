@@ -171,7 +171,7 @@ export const TYPE = {
     return <TextWrapper fontWeight={500} fontSize="1.5rem" {...props} />
   },
   subHeader(props: TextProps) {
-    return <TextWrapper fontWeight={400} fontSize={14} {...props} />
+    return <TextWrapper fontWeight={400} fontSize="1rem" {...props} />
   },
   small(props: TextProps) {
     return <TextWrapper fontWeight={500} fontSize={11} {...props} />

@@ -97,9 +97,9 @@ export default function FarmList() {
           <TYPE.largeHeader color="#FFF" style={{ marginTop: '0.5rem' }}>
             Farming Pools
           </TYPE.largeHeader>
-          <TYPE.mediumHeader color="#FFF" style={{ marginTop: '12px', width: '100%' }}>
+          <TYPE.subHeader color="#FFF" style={{ marginTop: '12px', width: '100%' }}>
             Stake LP tokens to earn rewards
-          </TYPE.mediumHeader>
+          </TYPE.subHeader>
           {/* <Countdown exactEnd={stakingInfos?.[0]?.periodFinish} /> */}
         </DataRow>
 
