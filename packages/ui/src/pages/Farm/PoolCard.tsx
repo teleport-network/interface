@@ -1,3 +1,4 @@
+import Tooltip, { tooltipClasses, TooltipProps } from '@mui/material/Tooltip'
 import { Token, TokenAmount } from '@teleswap/sdk'
 import { ReactComponent as AddIcon } from 'assets/svg/action/add.svg'
 import { ReactComponent as ArrowDown } from 'assets/svg/action/arrowDown.svg'
@@ -39,6 +40,14 @@ import { useColor } from '../../hooks/useColor'
 import { TYPE } from '../../theme'
 // import { Token } from '@teleswap/sdk'
 // import { useMasterChefPoolInfo } from 'hooks/farm/useMasterChefPoolInfo'
+
+const HelpTextToolTip = styled(({ className, ...props }: TooltipProps) => (
+  <Tooltip {...props} classes={{ popper: className }} />
+))(() => ({
+  [`& .${tooltipClasses.tooltip}`]: {
+    fontSize: '0.9rem'
+  }
+}))
 
 const StatContainer = styled.div`
   display: flex;
@@ -314,10 +323,17 @@ export default function PoolCard({ pid, stakingInfo }: { pid: number; stakingInf
   }
 
   const MultiplierStatus = ({ isHideInMobile }: { isHideInMobile?: boolean }) => (
-    <StakingColumn isMobile={isMobile} isHideInMobile={isHideInMobile} style={{ maxWidth: '5rem' }}>
+    <StakingColumn isMobile={isMobile} isHideInMobile={isHideInMobile} style={{ maxWidth: '5.5rem' }}>
       <TYPE.gray fontSize="0.9rem" width="100%" className="stakingColTitle" display="flex" alignItems="center">
         <span>Multiplier</span>
-        <QuestionIcon style={{ marginLeft: '0.3rem' }} />
+        <HelpTextToolTip
+          placeholder="top-right"
+          title={`The Multiplier represents the proportion of TELE rewards each farm receives, as a proportion of the TELE rebased each epoch.
+For example, if a 1x farm received 1 TELE per epoch, a 40x farm would receive 40 TELE per epoch.
+This amount is already included in all APR calculations for the farm`}
+        >
+          <QuestionIcon style={{ marginLeft: '0.3rem' }} />
+        </HelpTextToolTip>
       </TYPE.gray>
       <TYPE.white fontSize="1.2rem">1X</TYPE.white>
     </StakingColumn>
