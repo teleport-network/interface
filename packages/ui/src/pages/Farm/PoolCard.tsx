@@ -121,7 +121,7 @@ const StakingColumn = styled.div<{ isMobile: boolean; isHideInMobile?: boolean; 
     margin-bottom: 0.46rem;
   }
   .actions {
-    margin-left: 0.8rem;
+    margin-left: auto;
 
     svg.button {
       cursor: pointer;
@@ -280,10 +280,20 @@ export default function PoolCard({ pid, stakingInfo }: { pid: number; stakingInf
     isHideInMobile?: boolean
     marginTop?: string | number
   }) => {
+    const parsedPendingAmount = `${stakingInfo.pendingReward.toSignificant(6)} ${rewardToken.symbol}`
     return (
       <StakingColumn isMobile={isMobile} isHideInMobile={isHideInMobile} style={{ marginTop }}>
         <StakingColumnTitle>Earned Rewards</StakingColumnTitle>
-        <TYPE.white fontSize="1.2rem">
+        <TYPE.white
+          title={parsedPendingAmount}
+          fontSize="1.2rem"
+          style={{
+            textOverflow: 'ellipsis',
+            overflow: 'hidden',
+            whiteSpace: 'nowrap',
+            maxWidth: isMobile ? '50%' : '70%'
+          }}
+        >
           {stakingInfo.pendingReward.toSignificant(6)} {rewardToken.symbol}
         </TYPE.white>
         <div className="actions">
@@ -292,7 +302,7 @@ export default function PoolCard({ pid, stakingInfo }: { pid: number; stakingInf
             width="auto"
             fontSize="0.9rem"
             padding="0.166rem 0.4rem"
-            borderRadius="0.133rem"
+            borderRadius="0.6rem"
             onClick={() => setShowClaimRewardModal(true)}
           >
             Claim
@@ -306,7 +316,7 @@ export default function PoolCard({ pid, stakingInfo }: { pid: number; stakingInf
     <Wrapper showBackground={isStaking} bgColor={backgroundColor}>
       <TopSection>
         <DoubleCurrencyLogo currency0={currency0} currency1={currency1} size={24} />
-        <TYPE.white fontWeight={600} fontSize={18} style={{ marginLeft: '0.26rem' }}>
+        <TYPE.white fontWeight={600} fontSize={18} style={{ marginLeft: '0.26rem' }} width="12rem">
           {poolInfo?.stakingAsset.name}
         </TYPE.white>
         {poolInfo?.stakingAsset.isLpToken && (

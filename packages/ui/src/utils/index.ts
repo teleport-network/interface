@@ -5,17 +5,7 @@ import { Contract } from '@ethersproject/contracts'
 import { JsonRpcSigner, Web3Provider } from '@ethersproject/providers'
 import ITeleswapV2Router02ABI from '@teleswap/contracts/build/ITeleswapV2Router02.json'
 // import { abi as IUniswapV2Router02ABI } from 'constants/abis/TeleswapV2Router02.json'
-import {
-  ChainId,
-  CONTRACT_ADDRESS,
-  Currency,
-  CurrencyAmount,
-  ETHER,
-  JSBI,
-  Percent,
-  PERIPHERY_NAME,
-  Token
-} from '@teleswap/sdk'
+import { ChainId, CONTRACT_ADDRESS, Currency, CurrencyAmount, ETHER, JSBI, Percent, Token } from '@teleswap/sdk'
 
 import { TokenAddressMap } from '../state/lists/hooks'
 
@@ -111,12 +101,7 @@ export function getContract(address: string, ABI: any, library: Web3Provider, ac
 
 // account is optional
 export function getRouterContract(chainId: ChainId, library: Web3Provider, account?: string): Contract {
-  return getContract(
-    CONTRACT_ADDRESS[chainId]?.periphery[PERIPHERY_NAME.ROUTER] as string,
-    ITeleswapV2Router02ABI,
-    library,
-    account
-  )
+  return getContract(CONTRACT_ADDRESS[chainId]?.ROUTER as string, ITeleswapV2Router02ABI, library, account)
 }
 
 export function escapeRegExp(string: string): string {

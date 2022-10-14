@@ -33,8 +33,8 @@ export function transformSwapRouteToGetQuoteResult(
 
   const percents: number[] = []
 
-  let maxIn = CurrencyAmount.fromRawAmount(amount.currency, ZERO)
-  let minOut = CurrencyAmount.fromRawAmount(quote.currency, ZERO)
+  let maxIn = CurrencyAmount.fromRawAmount(type == 'exactIn' ? amount.currency : quote.currency, ZERO)
+  let minOut = CurrencyAmount.fromRawAmount(type == 'exactIn' ? quote.currency : amount.currency, ZERO)
 
   for (const subRoute of route) {
     const { amount, quote, tokenPath, percent } = subRoute
@@ -46,12 +46,34 @@ export function transformSwapRouteToGetQuoteResult(
       50
     )
 
-    maxIn = maxIn.add(CurrencyAmount.fromRawAmount(amount.currency, slippageAdjustedAmounts[Field.INPUT].quotient))
-    minOut = minOut.add(CurrencyAmount.fromRawAmount(quote.currency, slippageAdjustedAmounts[Field.OUTPUT].quotient))
+    maxIn = maxIn.add(
+      CurrencyAmount.fromRawAmount(
+        type == 'exactIn' ? amount.currency : quote.currency,
+        slippageAdjustedAmounts[Field.INPUT].quotient
+      )
+    )
+    minOut = minOut.add(
+      CurrencyAmount.fromRawAmount(
+        type == 'exactIn' ? quote.currency : amount.currency,
+        slippageAdjustedAmounts[Field.OUTPUT].quotient
+      )
+    )
 
     // subRoute.percent, subRoute.tokenPath
     const { priceImpactWithoutFee, realizedLPFee } = computeTradePriceBreakdownByRoute(
       subRoute as V2RouteWithValidQuote
+    )
+    console.log(
+      'priceImpactWithoutFee',
+      priceImpactWithoutFee.numerator.toString(),
+      priceImpactWithoutFee.denominator.toString(),
+      priceImpactWithoutFee.toSignificant(4)
+    )
+    console.log(
+      'realizedLPFee',
+      realizedLPFee.numerator.toString(),
+      realizedLPFee.denominator.toString(),
+      realizedLPFee.toSignificant(4)
     )
     _priceImpactWithoutFee = _priceImpactWithoutFee.add(
       priceImpactWithoutFee.multiply(subRoute.percent.toString()).divide(JSBI.BigInt(100))
@@ -159,7 +181,16 @@ export function transformSwapRouteToGetQuoteResult(
     route: routeResponse,
     routeString: routeAmountsToString(route),
     priceImpactWithoutFee: _priceImpactWithoutFee,
-    realizedLPFee: _realizedLPFee,
+    realizedLPFee: new Fraction(
+      _realizedLPFee.numerator,
+      JSBI.multiply(
+        _realizedLPFee.denominator,
+        JSBI.exponentiate(
+          JSBI.BigInt(10),
+          JSBI.BigInt(type == 'exactIn' ? amount.currency.decimals : quote.currency.decimals)
+        )
+      )
+    ),
     maxIn,
     minOut,
     percents

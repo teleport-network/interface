@@ -9,6 +9,7 @@ import teleport from 'assets/images/teleport.png'
 import walletConnectIcon from 'assets/images/walletConnectIcon.svg'
 
 import { fortmatic, injected, portis, teleInjected, walletconnect, walletlink } from '../connectors'
+import { FarmingPool, LiquidityAsset } from './farming.config'
 
 export const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
 
@@ -17,6 +18,19 @@ export { PRELOADED_PROPOSALS } from './proposals'
 // a list of tokens by chain
 type ChainTokenList = {
   readonly [chainId in ChainId]: Token[]
+}
+
+export enum DEFAULT_TOKEN_NAME {
+  WETH = 'WETH',
+  USDT = 'USDT',
+  USDC = 'USDC',
+  DAI = 'DAI'
+}
+
+type DefaultTokenList = {
+  readonly [chainId in ChainId]?: {
+    [tokenName in DEFAULT_TOKEN_NAME]: Token
+  }
 }
 
 export const AMPL = new Token(ChainId.MAINNET, '0xD46bA6D942050d489DBd938a2C909A5d5039A161', 9, 'AMPL', 'Ampleforth')
@@ -35,6 +49,16 @@ export const USDT = new Token(
   'USDT',
   'Test Tether USD'
 )
+
+export const DEFAULT_TOKENS: DefaultTokenList = {
+  [ChainId.OP_GOERLI]: {
+    [DEFAULT_TOKEN_NAME.WETH]: WETH[ChainId.OP_GOERLI],
+    [DEFAULT_TOKEN_NAME.USDT]: USDT,
+    [DEFAULT_TOKEN_NAME.USDC]: USDC,
+    [DEFAULT_TOKEN_NAME.DAI]: DAI
+  }
+}
+
 export const WBTC = new Token(ChainId.MAINNET, '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599', 8, 'WBTC', 'Wrapped BTC')
 export const FEI = new Token(ChainId.MAINNET, '0x956F47F50A910163D8BF957Cf5846D573E7f87CA', 18, 'FEI', 'Fei USD')
 export const TRIBE = new Token(ChainId.MAINNET, '0xc7283b66Eb1EB5FB86327f08e1B5816b0720212B', 18, 'TRIBE', 'Tribe')
@@ -145,8 +169,47 @@ export const BASES_TO_TRACK_LIQUIDITY_FOR: ChainTokenList = {
   [ChainId.MAINNET]: [...WETH_ONLY[ChainId.MAINNET], DAI, USDC, USDT, WBTC]
 }
 
+export const SHARING_PAIRS: FarmingPool[] = [
+  {
+    // pid 8
+    stakingAsset: {
+      name: 'USDC-USDT',
+      decimal: 18,
+      isLpToken: true,
+      isStable: true,
+      tokenA: USDC,
+      tokenB: USDT
+    } as LiquidityAsset
+  },
+  {
+    // pid 9
+    stakingAsset: {
+      name: 'USDC-ETH',
+      decimal: 18,
+      isLpToken: true,
+      isStable: false,
+      tokenA: USDC,
+      tokenB: WETH[420]
+    } as LiquidityAsset
+  },
+  {
+    // pid 10
+    stakingAsset: {
+      name: 'USDC-SUSHI',
+      decimal: 18,
+      isLpToken: true,
+      isStable: false,
+      tokenA: USDC,
+      tokenB: UNI[420]
+    } as LiquidityAsset
+  }
+]
+
 export const PINNED_PAIRS: { readonly [chainId in ChainId]?: [Token, Token, boolean][] } = {
-  [ChainId.OP_GOERLI]: [[USDC, USDT, true]]
+  [ChainId.OP_GOERLI]: SHARING_PAIRS.map((e) => {
+    const pair = e.stakingAsset as LiquidityAsset
+    return [pair.tokenA, pair.tokenB, pair.isStable]
+  })
 }
 
 export interface WalletInfo {

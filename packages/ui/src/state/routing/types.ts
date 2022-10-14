@@ -3,6 +3,7 @@ import { Fraction, Percent } from '@teleswap/sdk'
 import { Route as V2Route } from '@teleswap/v2-sdk'
 import { Currency, CurrencyAmount, Token, TradeType } from '@uniswap/sdk-core'
 import { Route as V3Route } from '@uniswap/v3-sdk'
+import {QuoteArguments} from "../../lib/hooks/routing/clientSideSmartOrderRouter";
 
 export enum TradeState {
   LOADING,
@@ -52,6 +53,7 @@ export type V2PoolInRoute = {
 }
 
 export interface GetQuoteResult {
+  reqParams?: QuoteArguments
   quoteId?: string
   blockNumber: string
   amount: string

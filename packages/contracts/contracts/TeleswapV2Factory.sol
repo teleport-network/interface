@@ -12,13 +12,9 @@ contract TeleswapV2Factory is ITeleswapV2Factory {
 
     event PairCreated(address indexed token0, address indexed token1, bool stable, address pair, uint);
 
-    //    constructor(address _feeToSetter) public {
-    //        feeToSetter = _feeToSetter;
-    //    }
-
-    function initialize(address _feeToSetter) public {
-        feeToSetter = _feeToSetter;
-    }
+        constructor(address _feeToSetter) public {
+            feeToSetter = _feeToSetter;
+        }
 
     function allPairsLength() override external view returns (uint) {
         return allPairs.length;
