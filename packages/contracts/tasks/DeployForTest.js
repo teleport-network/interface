@@ -7,7 +7,7 @@
  */
 
 
-task("deploy", "deploy proxy")
+task("deploy", "deploy test contracts")
     .setAction(async (args, hre) => {
         console.log("your blockchain network:", hre.network.name)
         let [signer,] = await ethers.getSigners()
