@@ -1,4 +1,4 @@
-pragma solidity =0.6.6;
+pragma solidity >=0.6.6;
 pragma experimental ABIEncoderV2;
 
 import './interfaces/ITeleswapV2Factory.sol';
@@ -9,8 +9,9 @@ import './libraries/TeleswapV2Library.sol';
 import './libraries/SafeMath.sol';
 import './interfaces/IERC20.sol';
 import './interfaces/IWETH.sol';
+import './base/Multicall.sol';
 
-contract TeleswapV2Router02 is ITeleswapV2Router02 {
+contract TeleswapV2Router02 is ITeleswapV2Router02, Multicall {
     using SafeMath for uint;
 
     address public override factory;
@@ -25,17 +26,12 @@ contract TeleswapV2Router02 is ITeleswapV2Router02 {
         _;
     }
 
-    //    constructor(address _factory, address _WETH) public {
-    //        factory = _factory;
-    //        WETH = _WETH;
-    //        pairCodeHash = ITeleswapV2Factory(_factory).pairInitCodeHash();
-    //    }
+        constructor(address _factory, address _WETH) public {
+            factory = _factory;
+            WETH = _WETH;
+            pairCodeHash = ITeleswapV2Factory(_factory).pairInitCodeHash();
+        }
 
-    function initialize(address _factory, address _WETH) public override {
-        factory = _factory;
-        WETH = _WETH;
-        pairCodeHash = ITeleswapV2Factory(_factory).pairInitCodeHash();
-    }
 
     receive() external payable {
         assert(msg.sender == WETH);
