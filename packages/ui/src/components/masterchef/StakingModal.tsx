@@ -61,9 +61,6 @@ export default function StakingModal({ isOpen, onDismiss, pid, stakingInfo }: St
     onDismiss()
   }, [onDismiss])
 
-  // disabled
-  // const [signatureData, setSignatureData] = useState<{ v: number; r: string; s: string; deadline: number } | null>(null)
-  const signatureData = null
   const stakingCurrency = stakingInfo?.stakingToken
 
   const tokenAmount =
@@ -146,17 +143,12 @@ export default function StakingModal({ isOpen, onDismiss, pid, stakingInfo }: St
 
           <RowBetween>
             {approval !== ApprovalState.APPROVED && (
-              <ButtonConfirmed
-                mr="0.5rem"
-                onClick={approve}
-                confirmed={signatureData !== null}
-                disabled={approval !== ApprovalState.NOT_APPROVED || signatureData !== null}
-              >
+              <ButtonConfirmed mr="0.5rem" onClick={approve} disabled={approval !== ApprovalState.NOT_APPROVED}>
                 {t('approve')}
               </ButtonConfirmed>
             )}
             <ButtonError
-              disabled={signatureData === null && approval !== ApprovalState.APPROVED}
+              disabled={approval !== ApprovalState.APPROVED}
               // error={!!&& !!parsedAmount}
               onClick={onStake}
               fontWeight={600}

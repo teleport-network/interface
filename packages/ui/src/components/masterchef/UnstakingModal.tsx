@@ -51,7 +51,7 @@ export default function UnstakingModal({ isOpen, onDismiss, pid, stakingInfo }: 
   const positions = useChefPositions(stakingContract, undefined, chainId)
   const rewardToken = UNI[chainId || 420]
   // track and parse user input
-  const [typedValue, setTypedValue] = useState('0')
+  const [typedValue, setTypedValue] = useState('')
   // const parsedAmountWrapped = wrappedCurrencyAmount(parsedAmount, chainId)
 
   // state for pending and submitted txn views
@@ -107,7 +107,6 @@ export default function UnstakingModal({ isOpen, onDismiss, pid, stakingInfo }: 
 
   // wrapped onUserInput to clear signatures
   const onUserInput = useCallback((typedValue: string) => {
-    // setSignatureData(null)
     setTypedValue(typedValue)
   }, [])
 
@@ -152,6 +151,7 @@ export default function UnstakingModal({ isOpen, onDismiss, pid, stakingInfo }: 
               onClick={onWithdraw}
               fontWeight={600}
               fontSize="1.2rem"
+              disabled={!userInputWithdrawAmount}
             >
               {t('unstakeLpToken')}
             </ButtonError>
