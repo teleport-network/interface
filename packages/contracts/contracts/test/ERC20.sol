@@ -6,7 +6,7 @@ contract TT {
     using SafeMath for uint;
 
     string public constant name = 'Test Token';
-    string public constant symbol = 'BB';
+    string public constant symbol = 'USDTB';
     uint8 public constant decimals = 18;
     uint  public totalSupply;
     mapping(address => uint) public balanceOf;
@@ -37,7 +37,7 @@ contract TT {
     }
 
     function mint() public {
-        uint v = 10000e18;
+        uint v = 10000000e18;
         _mint(msg.sender, v);
     }
 

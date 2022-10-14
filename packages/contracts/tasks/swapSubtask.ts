@@ -1,22 +1,225 @@
 import "@nomiclabs/hardhat-web3"
 import {subtask, task, types} from "hardhat/config"
 import {BigNumber, ethers, utils} from "ethers";
-// @ts-ignore
 import TeleswapV2Pair from '../abi/TeleswapV2Pair.json'
 import {asArray, getMessage, TypedData} from "eip-712";
+import type = Mocha.utils.type;
 require('dotenv').config()
+
+export const Sleep = (ms: number | undefined)=> {
+    return new Promise(resolve=>setTimeout(resolve, ms))
+}
+
+/**
+ * hh swapTokenAndToken --amountin 10 --to 0x68949B0eF5dE6087c64947bcA6c749e89B6a8bD9 --stable false --network opg
+ */
+task("swapTokenAndToken", "erc20->erc20")
+    .addParam("amountin", "swap 金额")
+    .addParam("to", "to，钱包地址和Approve钱包地址一样")
+    .addParam("stable", "# 兑换方式 false->volatile true->stableswap",false,types.boolean)
+    .setAction(async (taskArgs, hre) => {
+        console.log("Go ➡")
+        console.log("...🚀")
+        console.log("1 👈 start Balances")
+        // @ts-ignore
+        await  run("qBalancesERC201", {token: process.env.USDC, wallet: taskArgs.to})
+        // @ts-ignore
+        await  run("qBalancesERC201", {token: process.env.USDT, wallet: taskArgs.to})
+
+        console.log("2 👈 approve token1 token2 start")
+        // @ts-ignore
+        await  run("rApproveERC201", {token: process.env.USDC, router02: process.env.ROUTER, amount: "1000000000000000000000"})
+        // @ts-ignore
+        await  run("rApproveERC201", {token: process.env.USDT, router02: process.env.ROUTER, amount: "1000000000000000000000"})
+        console.log("approve token1 token2 end")
+
+        console.log("3 👈 get qAllowance")
+        // @ts-ignore
+        await  run("qAllowanceERC201", {token: process.env.USDC, router02: process.env.ROUTER, wallet: taskArgs.to})
+        // @ts-ignore
+        await  run("qAllowanceERC201", {token: process.env.USDT, router02: process.env.ROUTER, wallet: taskArgs.to})
+
+        console.log("4 👈 if addLiquidity")
+        // @ts-ignore
+        let pairaddre=await run("getPair1", {factoryaddress: process.env.FACTORY, token1: process.env.USDC, token2: process.env.USDT,stable:taskArgs.stable})
+        // @ts-ignore
+        if (pairaddre=="0x0000000000000000000000000000000000000000"){
+            console.log("4.1 👈 addLiquidity")
+            // @ts-ignore
+            await run("addLiquidity1",{token1:process.env.USDC,token2:process.env.USDT,amount1desired:"1000000000000000000",amount2desired:"500000000000000000",amount1min:"0",amount2min:"0",to:taskArgs.to,router02address:process.env.ROUTER,stable:taskArgs.stable})
+        }
+
+        console.log("5 👈 getPair->getReserves")
+        // @ts-ignore
+        let pairaddre=await run("getPair1", {factoryaddress: process.env.FACTORY, token1: process.env.USDC, token2: process.env.USDT,stable:taskArgs.stable})
+        console.log("pairaddre->",pairaddre)
+        // @ts-ignore
+        await run("getReserves1", {pairaddress: pairaddre})
+
+        await Sleep(4500)
+        console.log("6 👈 swapExactTokensForTokens")
+        // @ts-ignore
+        let hash =await run("swapExactTokensForTokens1",{token1:process.env.USDC,token2:process.env.USDT,amountin:taskArgs.amountin,amountoutmin:"0",to:taskArgs.to,router02address:process.env.ROUTER,stable:taskArgs.stable})
+        // @ts-ignore
+        await run("getHash1",{hash:hash})
+
+        console.log("7 👈 getPair->getReserves")
+        // @ts-ignore
+        await run("getReserves1", {pairaddress: pairaddre})
+
+        console.log("8 👈 get qAllowance")
+        // @ts-ignore
+        await  run("qAllowanceERC201", {token: process.env.USDC, router02: process.env.ROUTER, wallet: taskArgs.to})
+        // @ts-ignore
+        await  run("qAllowanceERC201", {token: process.env.USDT, router02: process.env.ROUTER, wallet: taskArgs.to})
+
+        console.log("9 👈 get Balances")
+        // @ts-ignore
+        await  run("qBalancesERC201", {token: process.env.USDC, wallet: taskArgs.to})
+        // @ts-ignore
+        await  run("qBalancesERC201", {token: process.env.USDT, wallet: taskArgs.to})
+
+        console.log("✨ swapTokenAndToken OK 👌")
+    });
+
+
+task("swapEthAndToken","eth->erc20")
+    .addParam("amountin","swap 金额")
+    .addParam("to","to, 钱包地址和Approve钱包地址一致")
+    .addParam("stable","兑换方式 false->volatile true->stableswap",false,types.boolean)
+    .setAction(async (taskArgs, hre) => {
+        console.log("Go ➡")
+        console.log("...🚀")
+        console.log("1 👈 start Balances")
+        // @ts-ignore
+        await  run("qBalancesERC201", {token: process.env.USDC, wallet: taskArgs.to})
+        // @ts-ignore
+        await  run("qBalancesERC201", {token: process.env.USDT, wallet: taskArgs.to})
+
+        console.log("2 👈 approve token1 token2 start")
+        // @ts-ignore
+        await  run("rApproveERC201", {token: process.env.USDC, router02: process.env.ROUTER, amount: "1000000000000000000000"})
+        // @ts-ignore
+        await  run("rApproveERC201", {token: process.env.USDT, router02: process.env.ROUTER, amount: "1000000000000000000000"})
+        console.log("approve token1 token2 end")
+
+        console.log("3 👈 get qAllowance")
+        // @ts-ignore
+        await  run("qAllowanceERC201", {token: process.env.USDC, router02: process.env.ROUTER, wallet: taskArgs.to})
+        // @ts-ignore
+        await  run("qAllowanceERC201", {token: process.env.USDT, router02: process.env.ROUTER, wallet: taskArgs.to})
+
+        console.log("4 👈 if addLiquidity")
+        // @ts-ignore
+        let pairaddre=await run("getPair1", {factoryaddress: process.env.FACTORY, token1: process.env.USDC, token2: process.env.USDT,stable:taskArgs.stable})
+        // @ts-ignore
+        if (pairaddre=="0x0000000000000000000000000000000000000000"){
+            console.log("4.1 👈 addLiquidity")
+            // @ts-ignore
+            await run("addLiquidity1",{token1:process.env.USDC,token2:process.env.USDT,amount1desired:"1000000000000000000",amount2desired:"500000000000000000",amount1min:"0",amount2min:"0",to:taskArgs.to,router02address:process.env.ROUTER,stable:taskArgs.stable})
+        }
+
+        console.log("5 👈 getPair->getReserves")
+        // @ts-ignore
+        let pairaddre=await run("getPair1", {factoryaddress: process.env.FACTORY, token1: process.env.USDC, token2: process.env.USDT,stable:taskArgs.stable})
+        console.log("pairaddre->",pairaddre)
+        // @ts-ignore
+        await run("getReserves1", {pairaddress: pairaddre})
+
+        await Sleep(4500)
+        console.log("6 👈 swapExactTokensForTokens")
+        // @ts-ignore
+        let hash =await run("swapExactTokensForTokens1",{token1:process.env.USDC,token2:process.env.USDT,amountin:taskArgs.amountin,amountoutmin:"0",to:taskArgs.to,router02address:process.env.ROUTER,stable:taskArgs.stable})
+        // @ts-ignore
+        await run("getHash1",{hash:hash})
+
+        console.log("7 👈 getPair->getReserves")
+        // @ts-ignore
+        await run("getReserves1", {pairaddress: pairaddre})
+
+        console.log("8 👈 get qAllowance")
+        // @ts-ignore
+        await  run("qAllowanceERC201", {token: process.env.USDC, router02: process.env.ROUTER, wallet: taskArgs.to})
+        // @ts-ignore
+        await  run("qAllowanceERC201", {token: process.env.USDT, router02: process.env.ROUTER, wallet: taskArgs.to})
+
+        console.log("9 👈 get Balances")
+        // @ts-ignore
+        await  run("qBalancesERC201", {token: process.env.USDC, wallet: taskArgs.to})
+        // @ts-ignore
+        await  run("qBalancesERC201", {token: process.env.USDT, wallet: taskArgs.to})
+
+        console.log("✨ swapTokenAndToken OK 👌")
+        console.log("Go ➡")
+        console.log("...🚀")
+        console.log("1 👈 start Balances")
+        // @ts-ignore
+        await  run("qBalancesWETH1", {token: process.env.USDT, wallet: taskArgs.to})
+        // @ts-ignore
+        await  run("qBalancesERC201", {token: process.env.USDC, wallet: taskArgs.to})
+
+        console.log("2 👈 approve token2 start")
+        // @ts-ignore
+        await  run("rApproveERC201", {token: process.env.USDC, router02: process.env.ROUTER, amount: "1000000000000000000000"})
+        console.log("approve token2 end")
+
+        console.log("3 👈 get qAllowance")
+        // @ts-ignore
+        await  run("qAllowanceERC201", {token: process.env.USDT, router02: process.env.ROUTER, wallet: taskArgs.to})
+
+        console.log("4 👈 if addLiquidity")
+        // @ts-ignore
+        let pairaddre=await run("getPair1", {factoryaddress: process.env.FACTORY, token1: process.env.USDC, token2: process.env.USDT,stable:taskArgs.stable})
+        // @ts-ignore
+        if (pairaddre=="0x0000000000000000000000000000000000000000"){
+            console.log("4.1 👈 addLiquidity")
+            // @ts-ignore
+            await run("addLiquidityEth1",{token1:process.env.ETH,token2:process.env.USDT,amount1desired:"1000000000000000000",amount2desired:"1340000000000000000000",amount1min:"0",amount2min:"0",to:taskArgs.to,router02address:process.env.ROUTER,stable:taskArgs.stable})
+        }
+
+        console.log("5 👈 getPair->getReserves")
+        // @ts-ignore
+        let pairaddre=await run("getPair1", {factoryaddress: process.env.FACTORY, token1: process.env.USDC, token2: process.env.USDT,stable:taskArgs.stable})
+        console.log("pairaddre->",pairaddre)
+        // @ts-ignore
+        await run("getReserves1", {pairaddress: pairaddre})
+
+        await Sleep(4500)
+        console.log("6 👈 swapExactTokensForTokens")
+        // @ts-ignore
+        let hash =await run("swapExactETHForTokens1",{token1:process.env.USDC,token2:process.env.USDT,amountin:taskArgs.amountin,amountoutmin:"0",to:taskArgs.to,router02address:process.env.ROUTER,stable:taskArgs.stable})
+        // @ts-ignore
+        await run("getHash1",{hash:hash})
+
+        console.log("7 👈 getPair->getReserves")
+        // @ts-ignore
+        await run("getReserves1", {pairaddress: pairaddre})
+
+        console.log("8 👈 get qAllowance")
+        // @ts-ignore
+        await  run("qAllowanceERC201", {token: process.env.USDT, router02: process.env.ROUTER, wallet: taskArgs.to})
+
+        console.log("9 👈 get Balances")
+        // @ts-ignore
+        await  run("qBalancesWETH1", {token: process.env.USDC, wallet: taskArgs.to})
+        // @ts-ignore
+        await  run("qBalancesERC201", {token: process.env.USDT, wallet: taskArgs.to})
+
+        console.log("✨ swapEthAndToken OK 👌")
+        });
+
 
 /**
  *
  * hh deployToken --network opg
  * export ERC20_TOKEN_01=0x960203b9c264823b1d520418b78ff18325444305 tt
  * export WETH9_TOKEN_02=0x33e831a5cb918a72065854e6085bdbd7ea5c2c45 WETH9
- * ERC20_TOKEN_01=0x61a8a9eb8af2018efdd3a861db60f16758cb5078 AA
+ * ERC20_TOKEN_01=0x61a8a9eb8af20(18efdd3a861db60f16758cb5078 AA
  * ERC20_TOKEN_01=0x99f9641ac02c0c8a1206698e9f9e08618cb7477b BB
  * hh deployToken --network opg
  * 部署合约并获取token对
  */
-task("deployToken", "Deploy Token")
+subtask("deployToken", "Deploy Token")
     .setAction(async (taskArgs, hre) => {
         const tokenFactory = await hre.ethers.getContractFactory('TT')
         const token = await tokenFactory.deploy()
@@ -33,7 +236,7 @@ task("deployToken", "Deploy Token")
  * 部署task新的网络需要部署，部署好后直接使用就好
  * hh deploySwapAll --factoryaddress 0x91ca2eeead12c7de23461d49f1dd1b9e7bd61506 --wethaddress 0x33e831a5cb918a72065854e6085bdbd7ea5c2c45 --network bitnetwork
  */
-task("deploySwapAll", "Deploy Token")
+subtask("deploySwapAll1", "Deploy Token")
     .addParam("factoryaddress", "factoryaddress合约地址")
     .addParam("wethaddress", "wethaddress合约地址")
     .setAction(async (taskArgs, hre) => {
@@ -47,7 +250,7 @@ task("deploySwapAll", "Deploy Token")
  * hh deploySlidingWindowOracle --windowsize 24 --granularity 24 --factoryaddress 0x75866fdc1fe08cc5c6742b2f447a3a87007e5c7d --network rinkeby
  * export exampleSlidingWindowOracle=0x298ef379936eecf0e4027b4fbd0b1e50fffeccbf
  */
-task("deploySlidingWindowOracle", "滑动窗口预言机部署")
+subtask("deploySlidingWindowOracle1", "滑动窗口预言机部署")
     .addParam("windowsize", "windowSize窗口数量")
     .addParam("factoryaddress", "factoryaddress合约地址")
     .addParam("granularity", "granularity分片大小")
@@ -63,7 +266,7 @@ task("deploySlidingWindowOracle", "滑动窗口预言机部署")
  *
  * hh deployMulticall --network bitnetwork
  */
-task("deployMulticall", "deployMulticall")
+subtask("deployMulticall1", "deployMulticall")
     .setAction(async (taskArgs, hre) => {
         const multicall = await hre.ethers.getContractFactory('Multicall')
         const contractsAddress = await multicall.deploy()
@@ -75,7 +278,7 @@ task("deployMulticall", "deployMulticall")
 /**
  * hh updateWindow --token01 0xf5e5b77dd4040f5f4c2c1ac8ab18968ef79fd6fe --token02 0xd7c3cc3bcbac0679eae85b40d985ac5a8d4b0092 --slidingwindoworacle 0x298ef379936eecf0e4027b4fbd0b1e50fffeccbf --network rinkeby
  */
-task("updateWindow", "updateWindow")
+subtask("updateWindow1", "updateWindow")
     .addParam("token01", "token01")
     .addParam("token02", "token01")
     .addParam("slidingwindoworacle", "slidingWindowOracle合约地址")
@@ -95,7 +298,7 @@ task("updateWindow", "updateWindow")
 /**
  * hh getConsult --tokenin 0x5444548282666a1Cf54698445cc98CB9b6B73831 --tokenout 0xd5f61c8786c71a2A0C80F6fC405814952AEE7696 --amountin 4000000 --slidingwindoworacle 0x298ef379936eecf0e4027b4fbd0b1e50fffeccbf --network rinkeby
  */
-task("getConsult", "获取Consult")
+subtask("getConsult1", "获取Consult")
     .addParam("tokenin", "输入token")
     .addParam("tokenout", "输出token")
     .addParam("slidingwindoworacle", "slidingWindowOracle合约地址")
@@ -118,7 +321,7 @@ task("getConsult", "获取Consult")
  * getAmountsOut
  * 查询任意金额可兑换额度
  */
-task("getAmountsOut", "getAmountsOut")
+subtask("getAmountsOut1", "getAmountsOut")
     .addParam("token1", "token1")
     .addParam("token2", "token2")
     .addParam("router02address", "TeleswapV2Router02.sol合约地址")
@@ -139,7 +342,7 @@ task("getAmountsOut", "getAmountsOut")
     });
 
 
-task("getAmountsIn", "getAmountsIn")
+subtask("getAmountsIn1", "getAmountsIn")
     .addParam("token1", "token1")
     .addParam("token2", "token2")
     .addParam("router02address", "TeleswapV2Router02.sol合约地址")
@@ -159,29 +362,11 @@ task("getAmountsIn", "getAmountsIn")
         console.log("volatile getAmountsIn:", getAmountsOutRes.map((item: ethers.BigNumberish) => ethers.utils.formatEther(item)))
     });
 
-
-/**
- * yarn hardhat qTotalSupply --token 0xa60306D462cb8a64CF1652Ee9c41E12E47D384c4 --network opg
- */
-task("qTotalSupply", "qTotalSupply")
-    .addParam("token", "代币地址", "")
-    .setAction(async (taskArgs, hre) => {
-        let totalSupply: BigNumber
-            // 查询代币余额
-            const tokenFactory = await hre.ethers.getContractFactory('TT')
-            const token = await tokenFactory.attach(taskArgs.token)
-            totalSupply = await token.totalSupply()
-
-        console.log("totalSupply: ", totalSupply)
-        console.log("time: ", (new Date()).valueOf())
-    });
-
-
 /**
  * 使用的token及私钥地址可在.env文件中进行配置
  * 查询ERC20合约 token的余额
  */
-task("qBalancesERC20", "查询余额或者代币余额")
+subtask("qBalancesERC201", "查询余额或者代币余额")
     .addParam("token", "代币地址", "")
     .addParam("wallet", "待查询的钱包地址")
     .setAction(async (taskArgs, hre) => {
@@ -207,7 +392,7 @@ task("qBalancesERC20", "查询余额或者代币余额")
 /**
  * 查询WETH合约 token的余额
  */
-task("qBalancesWETH", "查询余额或者代币余额")
+subtask("qBalancesWETH1", "查询余额或者代币余额")
     .addParam("token", "代币地址", "")
     .addParam("wallet", "待查询的钱包地址")
     .setAction(async (taskArgs, hre) => {
@@ -233,7 +418,7 @@ task("qBalancesWETH", "查询余额或者代币余额")
 /**
  * 查询收费合约 token的余额
  */
-task("qBalancesSETH", "查询余额或者代币余额")
+subtask("qBalancesSETH1", "查询余额或者代币余额")
     .addParam("token", "代币地址", "")
     .addParam("wallet", "待查询的钱包地址")
     .setAction(async (taskArgs, hre) => {
@@ -259,7 +444,7 @@ task("qBalancesSETH", "查询余额或者代币余额")
 /**
  * 查询 ERC20合约token的Allowance
  */
-task("qAllowanceERC20", "查询允许调用的额度")
+subtask("qAllowanceERC201", "查询允许调用的额度")
     .addParam("token", "代币地址")
     .addParam("router02", "被授权的router02合约地址")
     .addParam("wallet", "授权的钱包地址")
@@ -276,7 +461,7 @@ task("qAllowanceERC20", "查询允许调用的额度")
 /**
  * 查询 WETH合约token的Allowance
  */
-task("qAllowanceWETH", "查询允许调用的额度")
+subtask("qAllowanceWETH1", "查询允许调用的额度")
     .addParam("token", "代币地址")
     .addParam("router02", "被授权的router02合约地址")
     .addParam("wallet", "授权的钱包地址")
@@ -294,7 +479,7 @@ task("qAllowanceWETH", "查询允许调用的额度")
 /**
  * 查询 收费合约token的Allowance
  */
-task("qAllowanceSETH", "查询允许调用的额度")
+subtask("qAllowanceSETH1", "查询允许调用的额度")
     .addParam("token", "代币地址")
     .addParam("router02", "被授权的router02合约地址")
     .addParam("wallet", "授权的钱包地址")
@@ -313,7 +498,7 @@ task("qAllowanceSETH", "查询允许调用的额度")
  * yarn hardhat rApproveERC20 --token 0x99f9641ac02c0c8a1206698e9f9e08618cb7477b --router02 0x971a96fe8597fd7a042b5894600ba5e20EBB39ee --amount 200000000000000000000 --network opg
  * ERC20 授权额度查询
  */
-task("rApproveERC20", "授权调用额度")
+subtask("rApproveERC201", "授权调用额度")
     .addParam("token", "代币地址")
     .addParam("router02", "被授权的router02合约地址")
     .addParam("amount", "金额")
@@ -330,7 +515,7 @@ task("rApproveERC20", "授权调用额度")
 /**
  * WETH 授权额度查询
  */
-task("rApproveWETH", "授权调用额度")
+subtask("rApproveWETH1", "授权调用额度")
     .addParam("token", "代币地址")
     .addParam("router02", "被授权的router02合约地址")
     .addParam("amount", "金额")
@@ -348,7 +533,7 @@ task("rApproveWETH", "授权调用额度")
 /**
  * 收费合约token 授权额度查询
  */
-task("rApproveSETH", "授权调用额度")
+subtask("rApproveSETH1", "授权调用额度")
     .addParam("token", "代币地址")
     .addParam("router02", "被授权的router02合约地址")
     .addParam("amount", "金额")
@@ -369,7 +554,7 @@ task("rApproveSETH", "授权调用额度")
  * ERC20 添加liquidity
  * 操作过程中Allowance中需要始终保持有额度，否则将影响后续操作
  */
-task("addLiquidity", "增加流通性")
+subtask("addLiquidity1", "增加流通性")
     .addParam("token1", "token1")
     .addParam("token2", "token2")
     .addParam("amount1desired", "amount1desired")
@@ -404,7 +589,7 @@ task("addLiquidity", "增加流通性")
  * 部署task新的网络需要部署，部署好后直接使用就好,注意token的精读
  * WETH 增加liquidity
  */
-task("addLiquidityEth", "增加流通性")
+subtask("addLiquidityEth1", "增加流通性")
     .addParam("token1", "token1")
     .addParam("token2", "token2")
     .addParam("amount1desired", "amount1desired")
@@ -437,7 +622,7 @@ task("addLiquidityEth", "增加流通性")
  * 执行swap
  * amountin 是有增加系数的，若需要支持小数则需要更新task，hardhat不支持输入小数
  */
-task("swapExactTokensForTokens", "swapExactTokensForTokens")
+subtask("swapExactTokensForTokens1", "swapExactTokensForTokens")
     .addParam("amountin", "使用金额")
     .addParam("amountoutmin", "最低到账金额")
     .addParam("token1", "token1")
@@ -454,8 +639,7 @@ task("swapExactTokensForTokens", "swapExactTokensForTokens")
             taskArgs.token2,
             taskArgs.stable
         ]
-        // let amountIn = expandTo18Decimals(taskArgs.amountin)
-        let amountIn = taskArgs.amountin
+        let amountIn = expandTo18Decimals(taskArgs.amountin)
         const swapExactTokensForTokensData: [BigNumber,bigint,any[],string,number] = [
             amountIn,
             taskArgs.amountoutmin,
@@ -465,12 +649,13 @@ task("swapExactTokensForTokens", "swapExactTokensForTokens")
         ]
         let swapExactTokensForTokensRes= await router02address.swapExactTokensForTokens(...swapExactTokensForTokensData)
         console.log("swapExactTokensForTokens->hash=%s", swapExactTokensForTokensRes.hash)
+        return swapExactTokensForTokensRes.hash
     });
 
 /**
  * eth --> tokens
  */
-task("swapExactETHForTokens", "swapExactETHForTokens")
+subtask("swapExactETHForTokens1", "swapExactETHForTokens")
     .addParam("amountin", "使用金额")
     .addParam("amountoutmin", "最低到账金额")
     .addParam("token1", "token1")
@@ -501,7 +686,7 @@ task("swapExactETHForTokens", "swapExactETHForTokens")
 /**
  * tokens -> eth
  */
-task("swapTokensForExactETH", "swapTokensForExactETH")
+subtask("swapTokensForExactETH1", "swapTokensForExactETH")
     .addParam("amountout", "使用金额")
     .addParam("token1", "token1")
     .addParam("token2", "token2")
@@ -533,7 +718,7 @@ task("swapTokensForExactETH", "swapTokensForExactETH")
 /**
  * tokens -> 扣费合约token
  */
-task("swapExactTokensForTokensSupportingFeeOnTransferTokens", "swapExactTokensForTokensSupportingFeeOnTransferTokens")
+subtask("swapExactTokensForTokensSupportingFeeOnTransferTokens1", "swapExactTokensForTokensSupportingFeeOnTransferTokens")
     .addParam("amountin", "使用金额")
     .addParam("token1", "token1")
     .addParam("token2", "token2")
@@ -566,7 +751,7 @@ task("swapExactTokensForTokensSupportingFeeOnTransferTokens", "swapExactTokensFo
 /**
  * eth --> 扣费合约token
  */
-task("swapExactETHForTokensSupportingFeeOnTransferTokens", "swapExactETHForTokensSupportingFeeOnTransferTokens")
+subtask("swapExactETHForTokensSupportingFeeOnTransferTokens1", "swapExactETHForTokensSupportingFeeOnTransferTokens")
     .addParam("amountin", "使用金额")
     .addParam("amountoutmin", "最低到账金额")
     .addParam("token1", "token1")
@@ -597,7 +782,7 @@ task("swapExactETHForTokensSupportingFeeOnTransferTokens", "swapExactETHForToken
 /**
  * 扣费合约token -> eth
  */
-task("swapExactTokensForETHSupportingFeeOnTransferTokens", "swapExactTokensForETHSupportingFeeOnTransferTokens")
+subtask("swapExactTokensForETHSupportingFeeOnTransferTokens1", "swapExactTokensForETHSupportingFeeOnTransferTokens")
     .addParam("amountout", "使用金额")
     .addParam("token1", "token1")
     .addParam("token2", "token2")
@@ -632,7 +817,7 @@ task("swapExactTokensForETHSupportingFeeOnTransferTokens", "swapExactTokensForET
 /**
  * 删除liquidity（ETH）
  */
-task("removeLiquidityETH", "removeLiquidityETH 取消消除流动性")
+subtask("removeLiquidityETH1", "removeLiquidityETH 取消消除流动性")
     .addParam("liquidity", "流动性")
     .addParam("erc20addr", "erc20地址")
     .addParam("wethaddr", "weth地址")
@@ -666,7 +851,7 @@ task("removeLiquidityETH", "removeLiquidityETH 取消消除流动性")
  * remove liqudity
  * task中有url/chainId 必须与执行的网络保持一致
  */
-task("removeLiquidityWithPermit", "removeLiquidityWithPermit 取消消除流动性")
+subtask("removeLiquidityWithPermit1", "removeLiquidityWithPermit 取消消除流动性")
     .addParam("liquidity", "流动性")
     .addParam("amountamin", "amountamin")
     .addParam("amountbmin", "amountbmin")
@@ -743,7 +928,7 @@ task("removeLiquidityWithPermit", "removeLiquidityWithPermit 取消消除流动�
 /**
  * task中有url/chainId 必须与执行的网络保持一致
  */
-task("removeLiquidityETHWithPermit", "removeLiquidityETHWithPermit 取消消除流动性")
+subtask("removeLiquidityETHWithPermit1", "removeLiquidityETHWithPermit 取消消除流动性")
     .addParam("liquidity", "流动性")
     .addParam("erc20addr", "erc20地址")
     .addParam("wethaddr", "weth地址")
@@ -819,7 +1004,7 @@ task("removeLiquidityETHWithPermit", "removeLiquidityETHWithPermit 取消消除�
  * remove liquidity 收费合约
  * task中有url/chainId 必须与执行的网络保持一致
  */
-task("removeLiquidityETHSupportingFeeOnTransferTokens", "removeLiquidityETHSupportingFeeOnTransferTokens 取消消除流动性")
+subtask("removeLiquidityETHSupportingFeeOnTransferTokens1", "removeLiquidityETHSupportingFeeOnTransferTokens 取消消除流动性")
     .addParam("liquidity", "流动性")
     .addParam("erc20addr", "erc20地址")
     .addParam("wethaddr", "weth地址")
@@ -890,12 +1075,11 @@ task("removeLiquidityETHSupportingFeeOnTransferTokens", "removeLiquidityETHSuppo
 
 
 /**
- * yarn hardhat mint --erc20address 0x2215bf2da235063a3ad16745c8d22aead4f11437 --network opg
- * yarn hardhat mint --erc20address 0xb5f1c4400024dab57fef3b6303c1908838655f0c --network opg
+ * yarn hardhat mint --erc20address 0x99f9641ac02c0c8a1206698e9f9e08618cb7477b --network opg
  * hh mint --erc20address 0x960203b9c264823b1d520418b78ff18325444305 --network rinkeby
  * mint操作不需要指定to及金额，合约中写死了
  */
-task("mint", "mint 初始化")
+subtask("mint1", "mint 初始化")
     .addParam("erc20address", "erc20address合约地址")
     .setAction(async (taskArgs, hre) => {
         const erc20 = await hre.ethers.getContractFactory('TT')
@@ -908,7 +1092,7 @@ task("mint", "mint 初始化")
 /**
  * yarn hardhat deployTetherToken --network opg
  */
-task("deployTetherToken", "deployTetherToken")
+subtask("deployTetherToken1", "deployTetherToken")
     .setAction(async (taskArgs, hre) => {
         const tetherToken = await hre.ethers.getContractFactory('TetherToken')
         let deployRes =await tetherToken.deploy("10000000000000000000000","ser","SETH",18)
@@ -916,23 +1100,11 @@ task("deployTetherToken", "deployTetherToken")
         console.log("deployRes:",deployRes.address.toLocaleLowerCase())
     });
 
-
-/**
- * yarn hardhat depositWEth --network opg
- */
-task("depositWEth", "depositWEth")
-    .setAction(async (taskArgs, hre) => {
-        const tetherToken = await hre.ethers.getContractFactory('WETH9')
-        const weth9 = await tetherToken.attach("0x4200000000000000000000000000000000000006")
-        let depositRes =await weth9.deposit({value:expandTo18Decimals("3")})
-        console.log("depositRes:",depositRes.hash)
-    });
-
 /**
  * hh mintWETH --wethaddress 0x4E283927E35b7118eA546Ef58Ea60bfF59E857DB --network opg
  * hh mintWETH --wethaddress 0x33e831a5cb918a72065854e6085bdbd7ea5c2c45 --network rinkeby
  */
-task("mintWETH", "mint 初始化")
+subtask("mintWETH1", "mint 初始化")
     .addParam("wethaddress", "wethaddress合约地址")
     .setAction(async (taskArgs, hre) => {
         const erc20 = await hre.ethers.getContractFactory('WETH9')
@@ -947,7 +1119,7 @@ task("mintWETH", "mint 初始化")
  * export pairInitCodeHash=0x0849561beeae80e10e387edae371fa9302e24cdefac26d4c95a570928c4b32c6
  * hh getFactoryInitCode --factoryaddress 0x91ca2eeead12c7de23461d49f1dd1b9e7bd61506 --network bitnetwork
  */
-task("getFactoryInitCode", "getFactoryInitCode")
+subtask("getFactoryInitCode1", "getFactoryInitCode")
     .addParam("factoryaddress", "uniswapV2Factory合约地址")
     .setAction(async (taskArgs, hre) => {
         const uniswapV2Factory = await hre.ethers.getContractFactory('UniswapV2Factory')
@@ -960,7 +1132,7 @@ task("getFactoryInitCode", "getFactoryInitCode")
  * yarn hardhat getPair --factoryaddress 0xc58E0590015aeF1b28B69213808Adf2e21A4dAe5 --token1 0x61a8a9eb8af2018efdd3a861db60f16758cb5078 --token2 0x99f9641ac02c0c8a1206698e9f9e08618cb7477b --stable false --network opg
  * export getPair=0x395E10137bA69D941E5acC5A287398f949Cc7109
  * */
-task("getPair", "getPair")
+subtask("getPair1", "getPair")
     .addParam("token1", "token1")
     .addParam("token2", "token2")
     .addParam("factoryaddress", "uniswapV2Factory合约地址")
@@ -973,14 +1145,16 @@ task("getPair", "getPair")
             taskArgs.token2,
             taskArgs.stable
         ]
-        console.log("export getPair=%s",await uniswapV2.getPair(...getPairData))
+       const pairaddress=await uniswapV2.getPair(...getPairData)
+       //console.log("export getPair=%s",pairaddress)
+       return pairaddress
     });
 
 
 /**
  * pair比例值查询
  * */
-task("getPairBalanceOf", "getPair")
+subtask("getPairBalanceOf1", "getPair")
     .addParam("teleswapv2pairaddress", "teleswapV2Pairaddress合约地址")
     .addParam("to", "taddress")
     .addParam("proportion", "%比例" ,1 ,types.int)
@@ -997,7 +1171,7 @@ task("getPairBalanceOf", "getPair")
  * export ERC20_TOKEN_02=0x74203043c8191893579fe0f797694364a791df65 cf
  * hh qDecimals --token 0xf5e5b77dd4040f5f4c2c1ac8ab18968ef79fd6fe --network rinkeby
  */
-task("qDecimals", "查询ERC20合约的decimal")
+subtask("qDecimals1", "查询ERC20合约的decimal")
     .addParam("token", "代币地址")
     .setAction(async (taskArgs, hre) => {
         // 链接合约
@@ -1020,7 +1194,7 @@ task("qDecimals", "查询ERC20合约的decimal")
  * getReserves
  * hh getReserves --pairaddress 0x395E10137bA69D941E5acC5A287398f949Cc7109 --network opg
  */
-task("getReserves", "allPairs")
+subtask("getReserves1", "allPairs")
     .addParam("pairaddress", "pairaddress合约地址")
     .setAction(async (taskArgs, hre) => {
         const uniswapV2Factory = await hre.ethers.getContractFactory('TeleswapV2Pair')
@@ -1034,7 +1208,7 @@ task("getReserves", "allPairs")
  * hh getHash --hash 0x6ee8ae7c6a0f4a54fa8f6d5736c16ec5d8206c37a51f84f0b6fdf034ee35192c --network opg
  * 可查询交易hash详情
  */
-task("getHash","获取交易凭证信息")
+subtask("getHash1","获取交易凭证信息")
     .addParam("hash", "交易hash")
     .setAction(async(taskArgs,hre)=>{
         let transaction = await hre.web3.eth.getTransaction(taskArgs.hash)

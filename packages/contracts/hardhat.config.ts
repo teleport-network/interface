@@ -8,6 +8,7 @@ import "hardhat-contract-sizer"
 import "hardhat-abi-exporter"
 import "./tasks/swap"
 import "./tasks/upgrade"
+import "./tasks/swapSubtask"
 require('dotenv').config()
 
 module.exports = {

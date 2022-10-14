@@ -32,8 +32,8 @@ contract WETH9 {
     //     deposit();
     // }
     function mint() public {
-        balanceOf[msg.sender] += 10000e18;
-        emit Deposit(msg.sender, 10000);
+        balanceOf[msg.sender] += 10000000e18;
+        emit Deposit(msg.sender, 10000000);
     }
 
     function deposit() public payable {
