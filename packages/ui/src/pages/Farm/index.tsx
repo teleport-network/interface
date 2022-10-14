@@ -2,9 +2,10 @@
 // import { CHAINID_TO_FARMING_CONFIG } from 'constants/farming.config'
 // import { useChefPositions } from 'hooks/farm/useChefPositions'
 // import { useChefContract } from 'hooks/farm/useChefContract'
+import Toggle from 'components/Toggle'
 import { useChefStakingInfo } from 'hooks/farm/useChefStakingInfo'
 // import { useMasterChefPoolInfo } from 'hooks/farm/useMasterChefPoolInfo'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import styled from 'styled-components'
 
 import { AutoColumn } from '../../components/Column'
@@ -50,8 +51,22 @@ flex-direction: column;
 `};
 `
 
+const FarmListFilterBar = styled.div`
+  display: flex;
+
+  .filter-option {
+    display: flex;
+    align-items: center;
+    .toggleText {
+      margin-left: 0.86rem;
+    }
+  }
+`
+
 export default function FarmList() {
   const { chainId } = useActiveWeb3React()
+  const [hideInActivePool, setHideInActivePool] = useState(false)
+  const [filterOnlyStaked, setFilterOnlyStaked] = useState(true)
   console.debug('chainId', chainId)
   // const mchefContract = useChefContract(farmingConfig?.chefType || Chef.MINICHEF)
   // const positions = useChefPositions(mchefContract, undefined, chainId)
@@ -72,7 +87,20 @@ export default function FarmList() {
           <TYPE.subHeader color="#FFF" style={{ marginTop: '12px', width: '100%' }}>
             Stake LP tokens to earn rewards
           </TYPE.subHeader>
-          {/* <Countdown exactEnd={stakingInfos?.[0]?.periodFinish} /> */}
+          <FarmListFilterBar>
+            <div className="filter-option" style={{ marginRight: '2.6rem' }}>
+              <Toggle isActive={filterOnlyStaked} toggle={() => setFilterOnlyStaked((state) => !state)} />
+              <TYPE.white fontSize="1.2rem" className="toggleText">
+                Staked
+              </TYPE.white>
+            </div>
+            <div className="filter-option">
+              <Toggle isActive={hideInActivePool} toggle={() => setHideInActivePool((state) => !state)} />
+              <TYPE.white fontSize="1.2rem" className="toggleText">
+                Hide inactive pools
+              </TYPE.white>
+            </div>
+          </FarmListFilterBar>
         </DataRow>
 
         <PoolSection>
