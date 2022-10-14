@@ -698,7 +698,7 @@ export default function AddLiquidity() {
               <Box sx={{ fontWeight: 400, marginBottom: '.5rem' }} className={'secondary-title'}>
                 Pair Mode
               </Box>
-              <Box sx={{ display: 'flex', fontWeight: 100, fontSize: '.5rem', alignItems: 'center' }}>
+              <Box sx={{ display: 'flex', fontWeight: 100, /* fontSize: '.5rem', */ alignItems: 'center' }}>
                 <Flex alignItems={'center'} sx={{ flex: 1 }} onClick={() => setPairModeStable(false)}>
                   <CustomizedRadio type="radio" name="pairMode" id="Volatile" checked={!pairModeStable} />
                   <label
