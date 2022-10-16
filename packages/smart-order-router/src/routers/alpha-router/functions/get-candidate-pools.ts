@@ -635,9 +635,6 @@ export async function getV2CandidatePools({
     blockNumber,
   });
 
-  console.log(tokenIn, tokenOut)
-  console.log('debug joy', 'alPoolsRaw', allPoolsRaw)
-
   const allPools = _.map(allPoolsRaw, (pool) => {
     return {
       ...pool,
@@ -651,8 +648,6 @@ export async function getV2CandidatePools({
       },
     };
   });
-
-  console.log('debug joy', 'allPools', allPools)
 
   metric.putMetric(
     'V2SubgraphPoolsLoad',
