@@ -37,8 +37,6 @@ export const UNISWAP_MULTICALL_ADDRESSES: AddressMap = {
   ...constructSameAddressMap('0xb77C28244B48330FAFFC82382F502702F2B04048'),
   [ChainId.CELO]: CELO_MULTICALL_ADDRESS,
   [ChainId.CELO_ALFAJORES]: CELO_MULTICALL_ADDRESS,
-
-  // TODO: Gnosis + Moonbeam contracts to be deployed
 };
 
 export const OVM_GASPRICE_ADDRESS =
