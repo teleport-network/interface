@@ -3,7 +3,7 @@
 // import { useChefPositions } from 'hooks/farm/useChefPositions'
 // import { useChefContract } from 'hooks/farm/useChefContract'
 import Toggle from 'components/Toggle'
-import { useChefStakingInfo } from 'hooks/farm/useChefStakingInfo'
+import { useFilterForStakingInfo } from 'hooks/farm/useFilterForStakingInfo'
 // import { useMasterChefPoolInfo } from 'hooks/farm/useMasterChefPoolInfo'
 import { useEffect, useState } from 'react'
 import styled from 'styled-components'
@@ -65,12 +65,15 @@ const FarmListFilterBar = styled.div`
 
 export default function FarmList() {
   const { chainId } = useActiveWeb3React()
-  const [hideInActivePool, setHideInActivePool] = useState(false)
-  const [filterOnlyStaked, setFilterOnlyStaked] = useState(true)
+  const [hideInActivePool, setHideInActivePool] = useState(true)
+  const [filterOnlyStaked, setFilterOnlyStaked] = useState(false)
   console.debug('chainId', chainId)
   // const mchefContract = useChefContract(farmingConfig?.chefType || Chef.MINICHEF)
   // const positions = useChefPositions(mchefContract, undefined, chainId)
-  const stakingInfos = useChefStakingInfo()
+  const stakingInfos = useFilterForStakingInfo({
+    stakedOnly: filterOnlyStaked,
+    hideInactive: hideInActivePool
+  })
   useEffect(() => {
     console.info('useChefStakingInfo', stakingInfos)
   }, [stakingInfos])
@@ -106,10 +109,8 @@ export default function FarmList() {
         <PoolSection>
           {stakingInfos.length === 0
             ? 'Loading...'
-            : stakingInfos.map((_poolInfo, pid) => {
-                if (!_poolInfo) return null
-                if (_poolInfo.isHidden) return null
-                return <PoolCard key={pid} pid={pid} stakingInfo={_poolInfo} />
+            : stakingInfos.map((_poolInfo) => {
+                return <PoolCard key={_poolInfo.id} pid={_poolInfo.id} stakingInfo={_poolInfo} />
               })}
         </PoolSection>
       </AutoColumn>
