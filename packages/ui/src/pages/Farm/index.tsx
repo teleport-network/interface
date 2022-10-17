@@ -19,7 +19,7 @@ import PoolCard from './PoolCard'
 // import { OutlineCard } from '../../components/Card'
 
 const PageWrapper = styled(AutoColumn)`
-  max-width: 67.5rem;
+  max-width: 60rem;
   width: 100%;
   ${({ theme }) => theme.mediaWidth.upToSmall`
   width: 100%;
@@ -31,7 +31,7 @@ const PoolSection = styled.div`
   flex-wrap: wrap;
   height: 60vh;
   overflow-y: auto;
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  // border: 1px solid rgba(255, 255, 255, 0.4);
   border-radius: 24px;
   grid-template-columns: 1fr;
   // row-gap: 24px;

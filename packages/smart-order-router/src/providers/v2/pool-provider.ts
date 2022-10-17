@@ -115,8 +115,6 @@ export class V2PoolProvider implements IV2PoolProvider {
       providerConfig
     );
 
-    console.log('debug jjooooyy!!!!!!', reservesResults)
-
     log.info(
       `Got reserves for ${poolAddressSet.size} pools ${
         providerConfig?.blockNumber

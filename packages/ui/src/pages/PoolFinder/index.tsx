@@ -71,7 +71,7 @@ export default function PoolFinder() {
 
   const prerequisiteMessage = (
     <LightCard padding="45px 10px">
-      <Text textAlign="center">
+      <Text textAlign="center" className="text">
         {!account ? 'Connect to a wallet to find pools' : 'Select a token to find your liquidity.'}
       </Text>
     </LightCard>
@@ -83,7 +83,7 @@ export default function PoolFinder() {
       <AutoColumn style={{ padding: '1rem' }} gap="md">
         <BlueCard>
           <AutoColumn gap="10px">
-            <TYPE.link fontWeight={400} color={'primaryText1'}>
+            <TYPE.link fontWeight={400} color={'primaryText1'} className="text">
               <b>Tip:</b> Use this tool to find pairs that don&apos;t automatically appear in the interface.
             </TYPE.link>
           </AutoColumn>
@@ -134,9 +134,9 @@ export default function PoolFinder() {
 
         {hasPosition && (
           <ColumnCenter
-            style={{ justifyItems: 'center', backgroundColor: '', padding: '12px 0px', borderRadius: '12px' }}
+            style={{ justifyItems: 'center', backgroundColor: '', padding: '1rem 0px', borderRadius: '1rem' }}
           >
-            <Text textAlign="center" fontWeight={500}>
+            <Text textAlign="center" className="text" fontWeight={500}>
               Pool Found!
             </Text>
             <StyledInternalLink to={`/liquidity`}>
@@ -161,7 +161,7 @@ export default function PoolFinder() {
             )
           ) : validPairNoLiquidity ? (
             <LightCard padding="45px 10px">
-              <AutoColumn gap="sm" justify="center">
+              <AutoColumn gap="sm" justify="center" className="text">
                 <Text textAlign="center">No pool found.</Text>
                 <StyledInternalLink to={`/add/${currencyId(currency0)}/${currencyId(currency1)}`}>
                   Create pool.
@@ -170,7 +170,7 @@ export default function PoolFinder() {
             </LightCard>
           ) : pairState === PairState.INVALID ? (
             <LightCard padding="45px 10px">
-              <AutoColumn gap="sm" justify="center">
+              <AutoColumn gap="sm" justify="center" className="text">
                 <Text textAlign="center" fontWeight={500}>
                   Invalid pair.
                 </Text>
@@ -178,7 +178,7 @@ export default function PoolFinder() {
             </LightCard>
           ) : pairState === PairState.LOADING ? (
             <LightCard padding="45px 10px">
-              <AutoColumn gap="sm" justify="center">
+              <AutoColumn gap="sm" justify="center" className="text">
                 <Text textAlign="center">
                   Loading
                   <Dots />
