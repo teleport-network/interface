@@ -1,7 +1,6 @@
 import JSBI from 'jsbi'
 import Web3 from 'web3'
-import { CONTRACT_ADDRESS } from '@teleswap/sdk';
-import { ChainId } from '@teleswap/sdk';
+import { CONTRACT_ADDRESS, ChainId } from '@teleswap/sdk';
 import factoryJSON from '@teleswap/contracts/artifacts/contracts/TeleswapV2Factory.sol/TeleswapV2Factory.json'
 
 // TODO: ChainID is hard code
