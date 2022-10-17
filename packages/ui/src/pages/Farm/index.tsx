@@ -1,10 +1,6 @@
-// import { Chef } from 'constants/farm/chef.enum'
-// import { CHAINID_TO_FARMING_CONFIG } from 'constants/farming.config'
-// import { useChefPositions } from 'hooks/farm/useChefPositions'
-// import { useChefContract } from 'hooks/farm/useChefContract'
+import { ReactComponent as SearchIcon } from 'assets/svg/search.svg'
 import Toggle from 'components/Toggle'
 import { useFilterForStakingInfo } from 'hooks/farm/useFilterForStakingInfo'
-// import { useMasterChefPoolInfo } from 'hooks/farm/useMasterChefPoolInfo'
 import { useEffect, useState } from 'react'
 import styled from 'styled-components'
 
@@ -14,10 +10,6 @@ import { RowBetween } from '../../components/Row'
 import { useActiveWeb3React } from '../../hooks'
 import { TYPE } from '../../theme'
 import PoolCard from './PoolCard'
-
-// import { JSBI } from '@teleswap/sdk'
-// import { BIG_INT_ZERO } from '../../constants'
-// import { OutlineCard } from '../../components/Card'
 
 const PageWrapper = styled(AutoColumn)`
   max-width: 60rem;
@@ -53,6 +45,7 @@ flex-direction: column;
 
 const FarmListFilterBar = styled.div`
   display: flex;
+  width: 100%;
 
   .filter-option {
     display: flex;
@@ -61,18 +54,54 @@ const FarmListFilterBar = styled.div`
       margin-left: 0.86rem;
     }
   }
+
+  #searchBar {
+  }
+`
+
+const StyledSearchInput = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0.6rem 1rem;
+
+  width: 20rem;
+  height: 3rem;
+
+  /* 透明度/纯白-0.2 */
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 1rem;
+
+  margin-left: auto;
+  input {
+    background: transparent;
+    width: 100%;
+    border: 0;
+    color: ${({ theme }) => theme.text1};
+
+    &:focus {
+      outline: none;
+    }
+  }
+`
+
+const StyledSearchIcon = styled(SearchIcon)`
+  width: 1.7rem;
+  margin-right: 0.8rem;
 `
 
 export default function FarmList() {
   const { chainId } = useActiveWeb3React()
   const [hideInActivePool, setHideInActivePool] = useState(true)
   const [filterOnlyStaked, setFilterOnlyStaked] = useState(false)
+  const [searchKeyword, setSearchKeyword] = useState('')
   console.debug('chainId', chainId)
   // const mchefContract = useChefContract(farmingConfig?.chefType || Chef.MINICHEF)
   // const positions = useChefPositions(mchefContract, undefined, chainId)
   const stakingInfos = useFilterForStakingInfo({
     stakedOnly: filterOnlyStaked,
-    hideInactive: hideInActivePool
+    hideInactive: hideInActivePool,
+    searchKeyword
   })
   useEffect(() => {
     console.info('useChefStakingInfo', stakingInfos)
@@ -103,6 +132,11 @@ export default function FarmList() {
                 Hide inactive pools
               </TYPE.white>
             </div>
+
+            <StyledSearchInput id="searchBar">
+              <StyledSearchIcon />
+              <input type="text" onChange={({ target }) => setSearchKeyword(target.value)} placeholder="Search Pools" />
+            </StyledSearchInput>
           </FarmListFilterBar>
         </DataRow>
 
