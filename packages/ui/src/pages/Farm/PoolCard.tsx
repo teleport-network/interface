@@ -156,6 +156,20 @@ const MobilePoolDetailSection = styled.div`
   }
 `
 
+const LPTag = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  width: 4.5rem;
+  height: 1.62rem;
+
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 0.5rem;
+
+  margin-left: 0.75rem;
+`
+
 const StakingColumnTitle = ({ children }: { children: React.ReactNode }) => (
   <TYPE.gray fontSize="0.9rem" width="100%" className="stakingColTitle">
     {children}
@@ -307,8 +321,17 @@ This amount is already included in all APR calculations for the farm`}
     <Wrapper showBackground={isStaking} bgColor={backgroundColor}>
       <TopSection>
         <DoubleCurrencyLogo currency0={currency0} currency1={currency1} size={24} />
-        <TYPE.white fontWeight={600} fontSize={18} style={{ marginLeft: '0.26rem' }} width="12rem">
+        <TYPE.white
+          fontWeight={600}
+          fontSize={18}
+          style={{ marginLeft: '0.26rem', alignItems: 'center' }}
+          width="14rem"
+          display="flex"
+        >
           {stakingInfo.stakingAsset.name}
+          {stakingInfo.stakingAsset.isLpToken && (
+            <LPTag>{stakingInfo.stakingAsset.isStable ? 'Stable' : 'Volatile'}</LPTag>
+          )}
         </TYPE.white>
         {stakingInfo.stakingAsset.isLpToken && (
           <TYPE.green01
