@@ -819,7 +819,7 @@ export default function RemoveLiquidity() {
           </>
         )}
         {pair && (
-          <div style={{ padding: '10px 20px', fontSize: '.7rem' }}>
+          <div style={{ padding: '10px 20px' /* , fontSize: '.7rem' */ }}>
             <div
               style={{
                 width: '100%',

@@ -254,6 +254,13 @@ export default function LiquidityDetail() {
     })()
   }, [ethPrice, fullInfoPair, pair, pairModeStable])
 
+  const displayPercentage = useMemo(() => {
+    if (userHoldingPercentage instanceof Fraction) {
+      return (+userHoldingPercentage.toSignificant(18) * 100).toFixed(4)
+    }
+    return userHoldingPercentage
+  }, [userHoldingPercentage])
+
   return (
     <>
       <Box
@@ -266,7 +273,7 @@ export default function LiquidityDetail() {
                 marginBottom: '2rem'
               }
             : {
-                width: '40rem',
+                width: '60rem',
                 display: 'flex',
                 alignItems: 'flex-start',
                 marginBottom: '2rem',
@@ -314,7 +321,7 @@ export default function LiquidityDetail() {
       /> */}
       <Flex
         flexDirection={'column'}
-        width="40rem"
+        width="60rem"
         maxWidth={'90vw'}
         sx={{
           maxHeight: '100%',
@@ -485,12 +492,7 @@ export default function LiquidityDetail() {
               >
                 {userToken0AmountInPool?.toSignificant(12)}
               </Box>
-              <Box sx={{ justifySelf: 'end' }}>
-                {userHoldingPercentage instanceof Fraction
-                  ? +userHoldingPercentage.toSignificant(4) * 100
-                  : userHoldingPercentage}
-                %
-              </Box>
+              <Box sx={{ justifySelf: 'end' }}>{displayPercentage}%</Box>
               <Box
                 sx={{
                   gridRow: '3 / 5',
@@ -531,12 +533,7 @@ export default function LiquidityDetail() {
               >
                 {userToken1AmountInPool?.toSignificant(12)}
               </Box>
-              <Box sx={{ justifySelf: 'end' }}>
-                {userHoldingPercentage instanceof Fraction
-                  ? +userHoldingPercentage.toSignificant(4) * 100
-                  : userHoldingPercentage}
-                %
-              </Box>
+              <Box sx={{ justifySelf: 'end' }}>{displayPercentage}%</Box>
             </Box>
           ) : (
             <Box
@@ -597,12 +594,7 @@ export default function LiquidityDetail() {
               >
                 {userToken0AmountInPool?.toSignificant(12)}
               </Box>
-              <Box sx={{ justifySelf: 'end' }}>
-                {userHoldingPercentage instanceof Fraction
-                  ? +userHoldingPercentage.toSignificant(4) * 100
-                  : userHoldingPercentage}
-                %
-              </Box>
+              <Box sx={{ justifySelf: 'end' }}>{displayPercentage}%</Box>
               <Flex sx={{ gap: '0.5rem' }} alignItems="center">
                 <CurrencyLogo currency={currencyB} size="1rem" />
                 <Text
@@ -642,12 +634,7 @@ export default function LiquidityDetail() {
               >
                 {userToken1AmountInPool?.toSignificant(12)}
               </Box>
-              <Box sx={{ justifySelf: 'end' }}>
-                {userHoldingPercentage instanceof Fraction
-                  ? +userHoldingPercentage.toFixed(4) * 100
-                  : userHoldingPercentage}
-                %
-              </Box>
+              <Box sx={{ justifySelf: 'end' }}>{displayPercentage}%</Box>
             </Box>
           )}
           {/* <BorderVerticalContainer>
