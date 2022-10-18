@@ -29,6 +29,7 @@ interface ITeleswapV2Router02 is ITeleswapV2Router01 {
         uint deadline
     ) external;
     function swapExactETHForTokensSupportingFeeOnTransferTokens(
+        uint256 amountIn,
         uint amountOutMin,
         route[] calldata routes,
         address to,
@@ -41,4 +42,5 @@ interface ITeleswapV2Router02 is ITeleswapV2Router01 {
         address to,
         uint deadline
     ) external;
+    function multicall(uint256 deadline, bytes[] calldata data) external payable returns (bytes[] memory results);
 }
