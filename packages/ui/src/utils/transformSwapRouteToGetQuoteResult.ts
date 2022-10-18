@@ -63,18 +63,6 @@ export function transformSwapRouteToGetQuoteResult(
     const { priceImpactWithoutFee, realizedLPFee } = computeTradePriceBreakdownByRoute(
       subRoute as V2RouteWithValidQuote
     )
-    console.log(
-      'priceImpactWithoutFee',
-      priceImpactWithoutFee.numerator.toString(),
-      priceImpactWithoutFee.denominator.toString(),
-      priceImpactWithoutFee.toSignificant(4)
-    )
-    console.log(
-      'realizedLPFee',
-      realizedLPFee.numerator.toString(),
-      realizedLPFee.denominator.toString(),
-      realizedLPFee.toSignificant(4)
-    )
     _priceImpactWithoutFee = _priceImpactWithoutFee.add(
       priceImpactWithoutFee.multiply(subRoute.percent.toString()).divide(JSBI.BigInt(100))
     )

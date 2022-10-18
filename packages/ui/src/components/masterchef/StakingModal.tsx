@@ -1,5 +1,5 @@
 import { TransactionResponse } from '@ethersproject/providers'
-import { TokenAmount } from '@teleswap/sdk'
+import { JSBI, TokenAmount } from '@teleswap/sdk'
 import { LoadingView, SubmittedView } from 'components/ModalViews'
 import { Chef } from 'constants/farm/chef.enum'
 import { CHAINID_TO_FARMING_CONFIG } from 'constants/farming.config'
@@ -15,7 +15,6 @@ import { maxAmountSpend } from 'utils/maxAmountSpend'
 
 import { useActiveWeb3React } from '../../hooks'
 import { ApprovalState, useApproveCallback } from '../../hooks/useApproveCallback'
-import useTransactionDeadline from '../../hooks/useTransactionDeadline'
 import { useTransactionAdder } from '../../state/transactions/hooks'
 import { CloseIcon, TYPE } from '../../theme'
 import { ButtonConfirmed, ButtonError } from '../Button'
@@ -49,7 +48,7 @@ export default function StakingModal({ isOpen, onDismiss, pid, stakingInfo }: St
   const { chainId, account } = useActiveWeb3React()
   const { t } = useTranslation()
   // track and parse user input
-  const [typedValue, setTypedValue] = useState('0')
+  const [typedValue, setTypedValue] = useState('')
   // const parsedAmountWrapped = wrappedCurrencyAmount(parsedAmount, chainId)
 
   // state for pending and submitted txn views
@@ -62,16 +61,12 @@ export default function StakingModal({ isOpen, onDismiss, pid, stakingInfo }: St
     onDismiss()
   }, [onDismiss])
 
-  // approval data for stake
-  const deadline = useTransactionDeadline()
-  // disabled
-  // const [signatureData, setSignatureData] = useState<{ v: number; r: string; s: string; deadline: number } | null>(null)
-  const signatureData = null
   const stakingCurrency = stakingInfo?.stakingToken
 
-  const tokenAmount = stakingCurrency
-    ? new TokenAmount(stakingCurrency, utils.parseUnits(typedValue, stakingCurrency.decimals).toString())
-    : undefined
+  const tokenAmount =
+    stakingCurrency && typedValue
+      ? new TokenAmount(stakingCurrency, utils.parseUnits(typedValue, stakingCurrency.decimals).toString())
+      : undefined
   const stakeTokenBalance = useTokenBalance(account === null ? undefined : account, stakingCurrency)
   const stakingContract = useChefContractForCurrentChain()
   const farmingConfig = CHAINID_TO_FARMING_CONFIG[chainId || 420]
@@ -82,7 +77,18 @@ export default function StakingModal({ isOpen, onDismiss, pid, stakingInfo }: St
   // const stakingContract = useStakingContract(stakingInfo.stakingRewardAddress)
   async function onStake() {
     setAttempting(true)
-    if (stakingContract && deadline) {
+    /**
+     * do some checks
+     */
+    if (!tokenAmount) {
+      alert('Please your deposit amount to continue')
+      return
+    }
+    if (tokenAmount?.greaterThan(stakeTokenBalance || JSBI.BigInt(0))) {
+      alert('You do not have enough staked token')
+      return
+    }
+    if (stakingContract) {
       if (approval === ApprovalState.APPROVED) {
         mchef
           .deposit(pid, utils.parseUnits(typedValue, stakingCurrency?.decimals))
@@ -101,8 +107,6 @@ export default function StakingModal({ isOpen, onDismiss, pid, stakingInfo }: St
 
   // wrapped onUserInput to clear signatures
   const onUserInput = useCallback((typedValue: string) => {
-    // setSignatureData(null)
-    if (!typedValue) return
     setTypedValue(typedValue)
   }, [])
 
@@ -139,17 +143,12 @@ export default function StakingModal({ isOpen, onDismiss, pid, stakingInfo }: St
 
           <RowBetween>
             {approval !== ApprovalState.APPROVED && (
-              <ButtonConfirmed
-                mr="0.5rem"
-                onClick={approve}
-                confirmed={signatureData !== null}
-                disabled={approval !== ApprovalState.NOT_APPROVED || signatureData !== null}
-              >
+              <ButtonConfirmed mr="0.5rem" onClick={approve} disabled={approval !== ApprovalState.NOT_APPROVED}>
                 {t('approve')}
               </ButtonConfirmed>
             )}
             <ButtonError
-              disabled={signatureData === null && approval !== ApprovalState.APPROVED}
+              disabled={approval !== ApprovalState.APPROVED}
               // error={!!&& !!parsedAmount}
               onClick={onStake}
               fontWeight={600}
