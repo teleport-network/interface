@@ -19,7 +19,7 @@ import { Field, replaceSwapState, selectCurrency, setRecipient, switchCurrencies
 import { SwapState } from './reducer'
 import { route } from 'state/routing/slice'
 
-
+var timeout
 export function useSwapState(): AppState['swap'] {
   return useSelector<AppState, AppState['swap']>((state) => state.swap)
 }
@@ -201,58 +201,12 @@ export function useDerivedSwapInfo(): any | {
   useEffect(() => {
     ; (async () => {
       try {
-        if (
-          typedValue &&
-          currencies[Field.INPUT] &&
-          currencies[Field.INPUT]?.hasOwnProperty('decimals') &&
-          currencies[Field.OUTPUT] &&
-          currencies[Field.OUTPUT]?.hasOwnProperty('decimals')
-          && chainId
-        ) {
-          // if (currencyAmount.currency === ETHER) return new TokenAmount(WETH[chainId], currencyAmount.raw)
-          if (currencies[Field.INPUT]!['symbol'] === "ETH") {
-            currencies[Field.INPUT] = WETH[chainId]
-          }
-          if (currencies[Field.OUTPUT]!['symbol'] === "ETH") {
-            currencies[Field.OUTPUT] = WETH[chainId]
-          }
-          if (!currencies[Field.INPUT] || !currencies[Field.INPUT]!['address'] || !currencies[Field.INPUT]!['chainId']) {
-            throw new Error(`Invalid`)
-          }
-
-          if (!currencies[Field.OUTPUT] || !currencies[Field.OUTPUT]!['address'] || !currencies[Field.OUTPUT]!['chainId']) {
-            throw new Error(`Invalid`)
-          }
-          const decimal = isExactIn ? currencies[Field.INPUT]?.decimals : currencies[Field.OUTPUT]?.decimals
-          const amount = new BigNumber(typedValue).shiftedBy(decimal!).toNumber()
-          const params: any = {
-            tokenInAddress: currencies[Field.INPUT]!['address'],
-            tokenInChainId: currencies[Field.INPUT]!['chainId'],
-            tokenOutAddress: currencies[Field.OUTPUT]!['address'],
-            tokenOutChainId: currencies[Field.OUTPUT]!['chainId'],
-            amount,
-            type: isExactIn ? 'exactIn' : 'exactOut',
-            protocols: 'v2',
-          }
-          // let volidatas = Object.keys(params).find((key) => {
-          //   return !!params[key] == false
-          // })
-          params['tokenInDecimals'] = currencies[Field.INPUT]!.decimals
-          params['tokenOutDecimals'] = currencies[Field.OUTPUT]!.decimals
-          params['recipient'] = ''
-          params['slippageTolerance'] = ''
-          params['deadline'] = ''
-          let response = await route(params)
-          if (response.data && response.data.hasOwnProperty('quoteDecimals')) {
-            const outputAmount = tryParseAmount(
-              response.data.quoteDecimals,
-              (isExactIn ? outputCurrency : inputCurrency) ?? undefined
-            )
-            response.data['inputAmount'] = parsedAmount
-            response.data['outputAmount'] = outputAmount
-            setRouteData(response.data)
-          }
+        if (!!timeout) {
+          clearTimeout(timeout)
         }
+        timeout = setTimeout(() => {
+          getData().then()
+        }, 1000)
       } catch (error) {
         console.error('useDerivedSwapInfo error', error)
       }
@@ -260,6 +214,62 @@ export function useDerivedSwapInfo(): any | {
   }, [typedValue])
   // inputName, outputName, isExactIn
 
+  const getData = async () => {
+    if (
+      typedValue &&
+      currencies[Field.INPUT] &&
+      currencies[Field.INPUT]?.hasOwnProperty('decimals') &&
+      currencies[Field.OUTPUT] &&
+      currencies[Field.OUTPUT]?.hasOwnProperty('decimals')
+      && chainId
+    ) {
+      // if (currencyAmount.currency === ETHER) return new TokenAmount(WETH[chainId], currencyAmount.raw)
+      if (currencies[Field.INPUT]!['symbol'] === "ETH") {
+        currencies[Field.INPUT] = WETH[chainId]
+      }
+      if (currencies[Field.OUTPUT]!['symbol'] === "ETH") {
+        currencies[Field.OUTPUT] = WETH[chainId]
+      }
+      if (!currencies[Field.INPUT] || !currencies[Field.INPUT]!['address'] || !currencies[Field.INPUT]!['chainId']) {
+        throw new Error(`Invalid`)
+      }
+
+      if (!currencies[Field.OUTPUT] || !currencies[Field.OUTPUT]!['address'] || !currencies[Field.OUTPUT]!['chainId']) {
+        throw new Error(`Invalid`)
+      }
+      const decimal = isExactIn ? currencies[Field.INPUT]?.decimals : currencies[Field.OUTPUT]?.decimals
+      const amount = new BigNumber(typedValue).shiftedBy(decimal!).toNumber()
+      const params: any = {
+        tokenInAddress: currencies[Field.INPUT]!['address'],
+        tokenInChainId: currencies[Field.INPUT]!['chainId'],
+        tokenOutAddress: currencies[Field.OUTPUT]!['address'],
+        tokenOutChainId: currencies[Field.OUTPUT]!['chainId'],
+        amount,
+        type: isExactIn ? 'exactIn' : 'exactOut',
+        protocols: 'v2',
+      }
+      // let volidatas = Object.keys(params).find((key) => {
+      //   return !!params[key] == false
+      // })
+      params['tokenInDecimals'] = currencies[Field.INPUT]!.decimals
+      params['tokenOutDecimals'] = currencies[Field.OUTPUT]!.decimals
+      params['tokenInSymbol'] = currencies[Field.INPUT]!.symbol
+      params['tokenOutSymbol'] = currencies[Field.OUTPUT]!.symbol
+      params['recipient'] = ''
+      params['slippageTolerance'] = ''
+      params['deadline'] = ''
+      let response = await route(params)
+      if (response.data && response.data.hasOwnProperty('quoteDecimals')) {
+        const outputAmount = tryParseAmount(
+          response.data.quoteDecimals,
+          (isExactIn ? outputCurrency : inputCurrency) ?? undefined
+        )
+        response.data['inputAmount'] = parsedAmount
+        response.data['outputAmount'] = outputAmount
+        setRouteData(response.data)
+      }
+    }
+  }
   return {
     currencies,
     currencyBalances,
