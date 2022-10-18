@@ -1,4 +1,5 @@
 import { BigNumber } from '@ethersproject/bignumber';
+import { Pair as SDKPair, Token as SDKToken } from '@teleswap/sdk';
 import { Pair } from '@teleswap/v2-sdk';
 import { Token } from '@uniswap/sdk-core';
 import retry, { Options as RetryOptions } from 'async-retry';
@@ -95,7 +96,6 @@ export class V2PoolProvider implements IV2PoolProvider {
         tokenB,
         stable
       );
-
       if (poolAddressSet.has(poolAddress)) {
         continue;
       }
@@ -114,8 +114,6 @@ export class V2PoolProvider implements IV2PoolProvider {
       'getReserves',
       providerConfig
     );
-
-    console.log('debug jjooooyy!!!!!!', reservesResults)
 
     log.info(
       `Got reserves for ${poolAddressSet.size} pools ${
@@ -197,7 +195,10 @@ export class V2PoolProvider implements IV2PoolProvider {
       return { poolAddress: cachedAddress, token0, token1 };
     }
 
-    const poolAddress = Pair.getAddress(token0, token1, stable);
+    const poolAddress = SDKPair.getAddress(
+      new SDKToken(token0.chainId, token0.address, token0.decimals, token0.symbol, token0.name),
+      new SDKToken(token1.chainId, token1.address, token1.decimals, token1.symbol, token1.name),
+      stable);
 
     this.POOL_ADDRESS_CACHE[cacheKey] = poolAddress;
 

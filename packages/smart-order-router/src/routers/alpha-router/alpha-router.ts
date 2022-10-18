@@ -973,6 +973,8 @@ export class AlphaRouter
       return null;
     }
 
+    console.log('allRoutesWithValidQuotes', allRoutesWithValidQuotes)
+
     // Given all the quotes for all the amounts for all the routes, find the best combination.
     const beforeBestSwap = Date.now();
 

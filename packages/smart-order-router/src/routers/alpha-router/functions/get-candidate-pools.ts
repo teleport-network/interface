@@ -501,8 +501,6 @@ export async function getV3CandidatePools({
     .uniqBy((pool) => pool.id)
     .value();
 
-  console.log('debug joy', 'subgraphPools for all', subgraphPools)
-
   const tokenAddresses = _(subgraphPools)
     .flatMap((subgraphPool) => [subgraphPool.token0.id, subgraphPool.token1.id])
     .compact()
@@ -635,9 +633,6 @@ export async function getV2CandidatePools({
     blockNumber,
   });
 
-  console.log(tokenIn, tokenOut)
-  console.log('debug joy', 'alPoolsRaw', allPoolsRaw)
-
   const allPools = _.map(allPoolsRaw, (pool) => {
     return {
       ...pool,
@@ -651,8 +646,6 @@ export async function getV2CandidatePools({
       },
     };
   });
-
-  console.log('debug joy', 'allPools', allPools)
 
   metric.putMetric(
     'V2SubgraphPoolsLoad',
@@ -940,8 +933,6 @@ export async function getV2CandidatePools({
     `V2 Candidate pools`
   );
 
-  console.log('debug joy', "subgraphPools", subgraphPools)
-
   const tokenPairsRaw = _.map<V2SubgraphPool, [Token, Token, boolean] | undefined>(
     subgraphPools,
     (subgraphPool) => {
@@ -954,8 +945,6 @@ export async function getV2CandidatePools({
         );
         return undefined;
       }
-
-      console.log('debug joy', 'tokenPairsRaw', subgraphPool.token0.id, subgraphPool.token1.id, subgraphPool.stable)
 
       return [tokenA, tokenB, subgraphPool.stable];
     }

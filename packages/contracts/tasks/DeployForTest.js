@@ -7,7 +7,7 @@
  */
 
 
-task("deploy", "deploy proxy")
+task("deploy", "deploy test contracts")
     .setAction(async (args, hre) => {
         console.log("your blockchain network:", hre.network.name)
         let [signer,] = await ethers.getSigners()
@@ -19,12 +19,12 @@ task("deploy", "deploy proxy")
 
         // deploy factory
         let teleFactory = await ethers.getContractFactory("TeleswapV2Factory");
-        let pFa = await upgrades.deployProxy(teleFactory, [signer.address])
+        let pFa = await teleFactory.deploy(signer.address)
         await pFa.deployed()
         ins.factory = pFa
         // deploy router
         const factory = await ethers.getContractFactory("TeleswapV2Router02");
-        const proxy = await upgrades.deployProxy(factory, [ins.factory.address, ins.weth.address]);
+        const proxy = await factory.deploy(ins.factory.address, ins.weth.address);
         await proxy.deployed()
         ins.router = proxy
 
@@ -39,12 +39,6 @@ task("deploy", "deploy proxy")
         //USDT
         ins.usdt = await hre.run("deployToken", {"cname": "TT", "name": "Tether USD", "symbol": "USDT"})
 
-        //Multicall deploy
-        let multicallFactory = await ethers.getContractFactory("Multicall2")
-        let multicall = await multicallFactory.deploy()
-        await multicall.deployed()
-
-        ins.multicall = multicall
 
 
         let deployed = {
@@ -55,7 +49,6 @@ task("deploy", "deploy proxy")
             usdt: ins.usdt.address,
             router: ins.router.address,
             factory: ins.factory.address,
-            multicall:ins.multicall.address
         }
         console.log(deployed)
         // weth=ins.weth.address
@@ -66,36 +59,10 @@ task("deploy", "deploy proxy")
         console.log(`usdt=${deployed.usdt}`)
         console.log(`router=${deployed.router}`)
         console.log(`factory=${deployed.factory}`)
-        console.log(`multicall=${deployed.multicall}`)
 
         return ins
     })
 
-// upgrade
-task("upgradeRouter", "upgrade router")
-    .addParam("prouter", "proxy address of factory")
-    .setAction(async (args) => {
-        const factory = await ethers.getContractFactory("TeleswapV2Router02");
-        await upgrades.upgradeProxy(args.prouter, factory);
-        console.log("router implement upgraded");
-    })
-
-task("upgradeFactory", "upgrade factory")
-    .addParam("pfactory", "proxy address of factory")
-    .setAction(async (args) => {
-        const factory = await ethers.getContractFactory("TeleswapV2Factory");
-        await upgrades.upgradeProxy(args.pfactory, factory);
-        console.log("factory implement upgraded");
-    })
-
-// upgrade factory & router
-task("upgrade", "upgrade proxy & router")
-    .addParam("pfactory", "proxy address of factory")
-    .addParam("prouter", "router address of factory")
-    .setAction(async (args, hre) => {
-        await hre.run("upgradeFactory", {"pfactory": args.pfactory})
-        await hre.run("upgradeRouter", {"prouter": args.prouter})
-    })
 
 
 // deploy contract

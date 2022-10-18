@@ -1,5 +1,6 @@
 import useThemedContext from 'hooks/useThemedContext'
 import { useRef, useState } from 'react'
+import { isMobile } from 'react-device-detect'
 import { X } from 'react-feather'
 // Settings
 import { Text } from 'rebass'
@@ -148,7 +149,7 @@ export default function SettingsTab() {
 
   return (
     // https://github.com/DefinitelyTyped/DefinitelyTyped/issues/30451
-    <StyledMenu ref={node as any}>
+    <StyledMenu ref={isMobile ? null : (node as any)}>
       <Modal isOpen={showConfirmation} onDismiss={() => setShowConfirmation(false)} maxHeight={100}>
         <ModalContentWrapper>
           <AutoColumn gap="lg">
@@ -202,7 +203,7 @@ export default function SettingsTab() {
           </EmojiWrapper>
         ) : null}
       </StyledMenuButton>
-      {open && (
+      {!isMobile && open && (
         <MenuFlyout>
           <AutoColumn gap="1.2rem" style={{ padding: '1.6rem' }}>
             <Text fontWeight={600} className="secondary-title" color="#FFFFFF" sx={{ fontFamily: 'Poppins' }}>
@@ -261,6 +262,21 @@ export default function SettingsTab() {
             </RowBetween> */}
           </AutoColumn>
         </MenuFlyout>
+      )}
+      {isMobile && (
+        <Modal isOpen={open} maxHeight="20rem">
+          <AutoColumn gap="1.2rem" style={{ padding: '1.6rem' }} ref={isMobile ? node : null}>
+            <Text fontWeight={600} className="secondary-title" color="#FFFFFF" sx={{ fontFamily: 'Poppins' }}>
+              Swap Settings
+            </Text>
+            <TransactionSettings
+              rawSlippage={userSlippageTolerance}
+              setRawSlippage={setUserslippageTolerance}
+              deadline={ttl}
+              setDeadline={setTtl}
+            />
+          </AutoColumn>
+        </Modal>
       )}
     </StyledMenu>
   )

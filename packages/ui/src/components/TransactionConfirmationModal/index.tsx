@@ -2,6 +2,7 @@ import { ChainId, Currency } from '@teleswap/sdk'
 import useAddTokenToMetamask from 'hooks/useAddTokenToMetamask'
 import useThemedContext from 'hooks/useThemedContext'
 import React from 'react'
+import { isMobile } from 'react-device-detect'
 import { AlertTriangle, ArrowUpCircle, CheckCircle } from 'react-feather'
 import { Text } from 'rebass'
 import styled from 'styled-components'
@@ -91,7 +92,7 @@ function TransactionSubmittedContent({
 
   return (
     <Wrapper>
-      <Section>
+      <Section height={isMobile ? '100%' : 'unset'}>
         <RowBetween>
           <div />
           <CloseIcon onClick={onDismiss} />
@@ -260,7 +261,7 @@ export default function TransactionConfirmationModal({
 
   // confirmation screen
   return (
-    <Modal isOpen={isOpen} onDismiss={onDismiss} maxHeight={90}>
+    <Modal isOpen={isOpen} onDismiss={onDismiss} maxHeight={isMobile ? 75 : 90}>
       {attemptingTxn ? (
         <ConfirmationPendingContent onDismiss={onDismiss} pendingText={pendingText} />
       ) : hash ? (

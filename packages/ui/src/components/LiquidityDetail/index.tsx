@@ -6,12 +6,12 @@ import Bn from 'bignumber.js'
 import { ButtonPrimary } from 'components/Button'
 import CurrencyLogo from 'components/CurrencyLogo'
 import DoubleCurrencyLogoHorizontal from 'components/DoubleLogo'
+import { MobileBottomShadowContainer } from 'components/MobileBottomShadowContainer'
 import { useTotalSupply } from 'data/TotalSupply'
 // import TransactionConfirmationModal, { ConfirmationModalContent } from 'components/TransactionConfirmationModal'
 import gql from 'graphql-tag'
 import { useActiveWeb3React } from 'hooks'
 import { useCurrency } from 'hooks/Tokens'
-import { MobileBottomShadowContainer } from 'pages/AddLiquidity'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { isMobile } from 'react-device-detect'
 import { Link, useHistory, useParams } from 'react-router-dom'
@@ -21,7 +21,6 @@ import { useTokenBalance } from 'state/wallet/hooks'
 import styled from 'styled-components'
 import { client } from 'utils/apolloClient'
 import { currencyId } from 'utils/currencyId'
-import { wrappedCurrency } from 'utils/wrappedCurrency'
 
 import { useDerivedMintInfo, useMintActionHandlers } from '../../state/mint/hooks'
 
@@ -52,28 +51,12 @@ const StyledLink = styled(ButtonPrimary)`
 export default function LiquidityDetail() {
   const { currencyIdA, currencyIdB, stable } = useParams<{ currencyIdA: string; currencyIdB: string; stable: string }>()
   const [currencyA, currencyB] = [useCurrency(currencyIdA) ?? undefined, useCurrency(currencyIdB) ?? undefined]
-  const { account, chainId, library } = useActiveWeb3React()
-  const {
-    dependentField,
-    currencies,
-    pair,
-    pairState,
-    currencyBalances,
-    parsedAmounts,
-    price,
-    noLiquidity,
-    liquidityMinted,
-    poolTokenPercentage,
-    error
-  } = useDerivedMintInfo(
+  const { account } = useActiveWeb3React()
+  const pairModeStable = stable?.toLowerCase() === 'true' ? true : false
+  const { currencies, pair, parsedAmounts, noLiquidity } = useDerivedMintInfo(
     currencyA ?? undefined,
     currencyB ?? undefined,
-    `${stable}`.toLowerCase() === 'true' ? true : `${stable}`.toLowerCase() === 'false' ? false : undefined
-  )
-  const pairModeStable = stable?.toLowerCase() === 'true' ? true : false
-  const [tokenA, tokenB] = useMemo(
-    () => [wrappedCurrency(currencyA, chainId), wrappedCurrency(currencyB, chainId)],
-    [currencyA, currencyB, chainId]
+    pairModeStable
   )
   const userPoolBalance = useTokenBalance(account ?? undefined, pair?.liquidityToken)
 
@@ -84,7 +67,7 @@ export default function LiquidityDetail() {
       return userPoolBalance?.divide(totalPoolTokens!)
     }
     return '-'
-  }, [pair?.liquidityToken, totalPoolTokens, userPoolBalance])
+  }, [totalPoolTokens, userPoolBalance])
 
   const userToken0AmountInPool = useMemo(() => {
     if (userHoldingPercentage instanceof Fraction) {
@@ -203,7 +186,7 @@ export default function LiquidityDetail() {
       if (!pair || !pair.token0 || !pair.token1 || ethPrice || fullInfoPair) {
         return
       }
-      const pairAddress = Pair.getAddress(pair.token0, pair.token1).toLowerCase()
+      const pairAddress = Pair.getAddress(pair.token0, pair.token1, pairModeStable).toLowerCase()
       const [
         {
           data: {
@@ -269,7 +252,14 @@ export default function LiquidityDetail() {
       setFullInfoPair(fullPair)
       setEthPrice(new Bn(ep))
     })()
-  }, [ethPrice, fullInfoPair, pair])
+  }, [ethPrice, fullInfoPair, pair, pairModeStable])
+
+  const displayPercentage = useMemo(() => {
+    if (userHoldingPercentage instanceof Fraction) {
+      return (+userHoldingPercentage.toSignificant(18) * 100).toFixed(4)
+    }
+    return userHoldingPercentage
+  }, [userHoldingPercentage])
 
   return (
     <>
@@ -283,7 +273,7 @@ export default function LiquidityDetail() {
                 marginBottom: '2rem'
               }
             : {
-                width: '40rem',
+                width: '60rem',
                 display: 'flex',
                 alignItems: 'flex-start',
                 marginBottom: '2rem',
@@ -331,7 +321,7 @@ export default function LiquidityDetail() {
       /> */}
       <Flex
         flexDirection={'column'}
-        width="40rem"
+        width="60rem"
         maxWidth={'90vw'}
         sx={{
           maxHeight: '100%',
@@ -502,12 +492,7 @@ export default function LiquidityDetail() {
               >
                 {userToken0AmountInPool?.toSignificant(12)}
               </Box>
-              <Box sx={{ justifySelf: 'end' }}>
-                {userHoldingPercentage instanceof Fraction
-                  ? +userHoldingPercentage.toSignificant(4) * 100
-                  : userHoldingPercentage}
-                %
-              </Box>
+              <Box sx={{ justifySelf: 'end' }}>{displayPercentage}%</Box>
               <Box
                 sx={{
                   gridRow: '3 / 5',
@@ -548,12 +533,7 @@ export default function LiquidityDetail() {
               >
                 {userToken1AmountInPool?.toSignificant(12)}
               </Box>
-              <Box sx={{ justifySelf: 'end' }}>
-                {userHoldingPercentage instanceof Fraction
-                  ? +userHoldingPercentage.toSignificant(4) * 100
-                  : userHoldingPercentage}
-                %
-              </Box>
+              <Box sx={{ justifySelf: 'end' }}>{displayPercentage}%</Box>
             </Box>
           ) : (
             <Box
@@ -614,12 +594,7 @@ export default function LiquidityDetail() {
               >
                 {userToken0AmountInPool?.toSignificant(12)}
               </Box>
-              <Box sx={{ justifySelf: 'end' }}>
-                {userHoldingPercentage instanceof Fraction
-                  ? +userHoldingPercentage.toSignificant(4) * 100
-                  : userHoldingPercentage}
-                %
-              </Box>
+              <Box sx={{ justifySelf: 'end' }}>{displayPercentage}%</Box>
               <Flex sx={{ gap: '0.5rem' }} alignItems="center">
                 <CurrencyLogo currency={currencyB} size="1rem" />
                 <Text
@@ -659,12 +634,7 @@ export default function LiquidityDetail() {
               >
                 {userToken1AmountInPool?.toSignificant(12)}
               </Box>
-              <Box sx={{ justifySelf: 'end' }}>
-                {userHoldingPercentage instanceof Fraction
-                  ? +userHoldingPercentage.toFixed(4) * 100
-                  : userHoldingPercentage}
-                %
-              </Box>
+              <Box sx={{ justifySelf: 'end' }}>{displayPercentage}%</Box>
             </Box>
           )}
           {/* <BorderVerticalContainer>
@@ -849,7 +819,6 @@ export default function LiquidityDetail() {
           >
             {currencyA && currencyB && (
               <>
-                (
                 <StyledLink as={Link} to={`/add/${currencyId(currencyA!)}/${currencyId(currencyB!)}/${pairModeStable}`}>
                   Increase
                 </StyledLink>
@@ -859,7 +828,6 @@ export default function LiquidityDetail() {
                 >
                   Remove
                 </StyledLink>
-                )
               </>
             )}
           </Box>

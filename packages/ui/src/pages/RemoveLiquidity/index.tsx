@@ -6,9 +6,9 @@ import { TransactionResponse } from '@ethersproject/providers'
 import Slider from '@mui/material/Slider'
 import { Currency, currencyEquals, ETHER, Percent, WETH } from '@teleswap/sdk'
 import { BackToMyLiquidity } from 'components/LiquidityDetail'
+import { MobileBottomShadowContainer } from 'components/MobileBottomShadowContainer'
 import Settings from 'components/Settings'
 import { usePresetPeripheryAddress } from 'hooks/usePresetContractAddress'
-import { MobileBottomShadowContainer } from 'pages/AddLiquidity'
 // import AppBody from 'pages/AppBody'
 import { useCallback, useMemo, useState } from 'react'
 import { isMobile } from 'react-device-detect'
@@ -819,7 +819,7 @@ export default function RemoveLiquidity() {
           </>
         )}
         {pair && (
-          <div style={{ padding: '10px 20px', fontSize: '.7rem' }}>
+          <div style={{ padding: '10px 20px' /* , fontSize: '.7rem' */ }}>
             <div
               style={{
                 width: '100%',

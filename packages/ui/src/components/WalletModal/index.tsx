@@ -42,9 +42,13 @@ const Wrapper = styled.div`
   margin: 0;
   padding: 1rem;
   width: 100%;
-  * {
-    background: #19242f !important;
-  }
+  ${() =>
+    !isMobile &&
+    `
+    * {
+      background: #19242f;
+    }
+  `}
 `
 
 const HeaderRow = styled.div`
@@ -64,7 +68,7 @@ const HeaderRow = styled.div`
 `
 
 const ContentWrapper = styled.div`
-  background-color: ${({ theme }) => theme.bg2};
+  background-color: ${({ theme }) => (isMobile ? theme.bg2 : 'unset')};
   padding: 1rem 2rem;
   border-bottom-left-radius: 20px;
   border-bottom-right-radius: 20px;
