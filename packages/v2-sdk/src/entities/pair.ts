@@ -181,7 +181,7 @@ export class Pair {
     const inputReserve = this.reserveOf(inputAmount.currency)
     const outputReserve = this.reserveOf(inputAmount.currency.equals(this.token0) ? this.token1 : this.token0)
     if (this.stable) {
-      let inputAmountWithFee = JSBI.divide(JSBI.multiply(inputAmount.numerator, _9999), _10000)
+      let inputAmountWithFee = JSBI.divide(JSBI.multiply(inputAmount.quotient, _9999), _10000)
       const decimalIn = JSBI.BigInt(10**(inputReserve.currency.equals(this.token0) ? this.token0.decimals : this.token1.decimals))
       const decimalOut = JSBI.BigInt(10**(outputReserve.currency.equals(this.token0) ? this.token0.decimals : this.token1.decimals))
       const xy = this.getStableK(inputReserve.numerator, outputReserve.numerator, decimalIn, decimalOut)
@@ -192,7 +192,7 @@ export class Pair {
       outputAmount = JSBI.divide(JSBI.multiply(outputAmount, decimalOut), _1e18)
       const out = CurrencyAmount.fromRawAmount(
           inputAmount.currency.equals(this.token0) ? this.token1 : this.token0,
-          JSBI.divide(outputAmount, inputAmount.denominator),
+          outputAmount,
       )
       return [out, new Pair(inputReserve.add(inputAmount), outputReserve.subtract(out), this.stable)]
     }else {
@@ -223,7 +223,7 @@ export class Pair {
     const outputReserve = this.reserveOf(outputAmount.currency)
     const inputReserve = this.reserveOf(outputAmount.currency.equals(this.token0) ? this.token1 : this.token0)
     if (this.stable) {
-      let outputAmountWithFee = JSBI.divide(JSBI.multiply(outputAmount.numerator, _9999), _10000)
+      let outputAmountWithFee = JSBI.divide(JSBI.multiply(outputAmount.quotient, _9999), _10000)
       const decimalIn = JSBI.BigInt(10**(inputReserve.currency.equals(this.token0) ? this.token0.decimals : this.token1.decimals))
       const decimalOut = JSBI.BigInt(10**(outputReserve.currency.equals(this.token0) ? this.token0.decimals : this.token1.decimals))
       const xy = this.getStableK(inputReserve.numerator, outputReserve.numerator, decimalIn, decimalOut)
@@ -234,7 +234,7 @@ export class Pair {
       inputAmount = JSBI.divide(JSBI.multiply(inputAmount, decimalIn), _1e18)
       const input = CurrencyAmount.fromRawAmount(
           outputAmount.currency.equals(this.token0) ? this.token1 : this.token0,
-          JSBI.divide(inputAmount, outputAmount.denominator),
+          inputAmount,
       )
       return [
         input, new Pair(inputReserve.add(input), outputReserve.subtract(outputAmount), this.stable)

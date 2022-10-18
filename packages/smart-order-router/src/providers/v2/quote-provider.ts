@@ -70,33 +70,28 @@ export class V2QuoteProvider implements IV2QuoteProvider {
       let insufficientInputAmountErrorCount = 0;
       let insufficientReservesErrorCount = 0;
       for (const amount of amounts) {
-        console.log('debug joy', 'amoutn-!!!!!', amount.numerator.toString(), amount.denominator.toString())
         try {
           if (tradeType == TradeType.EXACT_INPUT) {
+            let inputAmount = amount.wrapped;
+            for (const pair of route.pairs) {
+              const [outputAmountNew] = pair.getOutputAmount(inputAmount);
+              inputAmount = outputAmountNew;
+            }
+            amountQuotes.push({
+              amount,
+              quote: BigNumber.from(inputAmount.quotient.toString()),
+            });
+          } else {
             let outputAmount = amount.wrapped;
 
-            console.log('debug joy', "outputAmount", outputAmount.numerator.toString(), outputAmount.denominator.toString())
-            for (const pair of route.pairs) {
-              const [outputAmountNew] = pair.getOutputAmount(outputAmount);
-              outputAmount = outputAmountNew;
+            for (let i = route.pairs.length - 1; i >= 0; i--) {
+              const pair = route.pairs[i]!;
+              [outputAmount] = pair.getInputAmount(outputAmount);
             }
-            console.log('debug joy', "outputAmount", outputAmount.numerator.toString(), outputAmount.denominator.toString())
 
             amountQuotes.push({
               amount,
               quote: BigNumber.from(outputAmount.quotient.toString()),
-            });
-          } else {
-            let inputAmount = amount.wrapped;
-
-            for (let i = route.pairs.length - 1; i >= 0; i--) {
-              const pair = route.pairs[i]!;
-              [inputAmount] = pair.getInputAmount(inputAmount);
-            }
-
-            amountQuotes.push({
-              amount,
-              quote: BigNumber.from(inputAmount.quotient.toString()),
             });
           }
         } catch (err) {
