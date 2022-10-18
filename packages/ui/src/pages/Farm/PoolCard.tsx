@@ -1,25 +1,19 @@
+import Tooltip, { tooltipClasses, TooltipProps } from '@mui/material/Tooltip'
 import { Token, TokenAmount } from '@teleswap/sdk'
 import { ReactComponent as AddIcon } from 'assets/svg/action/add.svg'
 import { ReactComponent as ArrowDown } from 'assets/svg/action/arrowDown.svg'
 import { ReactComponent as ArrowUp } from 'assets/svg/action/arrowUp.svg'
+import { ReactComponent as QuestionIcon } from 'assets/svg/action/question.svg'
 import { ReactComponent as RemoveIcon } from 'assets/svg/minus.svg'
 import { ButtonPrimary } from 'components/Button'
-// import { BIG_INT_SECONDS_IN_WEEK } from '../../constants'
-// import { AutoColumn } from 'components/Column'
 import DoubleCurrencyLogo from 'components/DoubleLogo'
 import ClaimRewardModal from 'components/masterchef/ClaimRewardModal'
-// import { Break } from 'components/earn/styled'
-// import { RowBetween } from 'components/Row'
 import StakingModal from 'components/masterchef/StakingModal'
 import UnstakingModal from 'components/masterchef/UnstakingModal'
-// import { Chef } from 'constants/farm/chef.enum'
-// import { Chef } from 'constants/farm/chef.enum'
-import { CHAINID_TO_FARMING_CONFIG, LiquidityAsset } from 'constants/farming.config'
+import { LiquidityAsset } from 'constants/farming.config'
 import { UNI } from 'constants/index'
 import { useActiveWeb3React } from 'hooks'
 import { useChefContractForCurrentChain } from 'hooks/farm/useChefContract'
-// import { useChefContract } from 'hooks/farm/useChefContract'
-// import { useChefPositions } from 'hooks/farm/useChefPositions'
 import { ChefStakingInfo } from 'hooks/farm/useChefStakingInfo'
 import { useChefPoolAPR } from 'hooks/farm/useFarmAPR'
 import { ApprovalState, useApproveCallback } from 'hooks/useApproveCallback'
@@ -30,14 +24,17 @@ import { useHistory } from 'react-router-dom'
 import styled from 'styled-components'
 import useUSDCPrice from 'utils/useUSDCPrice'
 
-// import { currencyId } from '../../utils/currencyId'
-// import { unwrappedToken } from '../../utils/wrappedCurrency'
 import { useTotalSupply } from '../../data/TotalSupply'
-// import { StakingInfo } from '../../state/stake/hooks'
 import { useColor } from '../../hooks/useColor'
 import { TYPE } from '../../theme'
-// import { Token } from '@teleswap/sdk'
-// import { useMasterChefPoolInfo } from 'hooks/farm/useMasterChefPoolInfo'
+
+const HelpTextToolTip = styled(({ className, ...props }: TooltipProps) => (
+  <Tooltip {...props} classes={{ popper: className }} />
+))(() => ({
+  [`& .${tooltipClasses.tooltip}`]: {
+    fontSize: '0.9rem'
+  }
+}))
 
 const StatContainer = styled.div`
   display: flex;
@@ -159,6 +156,20 @@ const MobilePoolDetailSection = styled.div`
   }
 `
 
+const LPTag = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  width: 4.5rem;
+  height: 1.62rem;
+
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 0.5rem;
+
+  margin-left: 0.75rem;
+`
+
 const StakingColumnTitle = ({ children }: { children: React.ReactNode }) => (
   <TYPE.gray fontSize="0.9rem" width="100%" className="stakingColTitle">
     {children}
@@ -167,14 +178,8 @@ const StakingColumnTitle = ({ children }: { children: React.ReactNode }) => (
 
 export default function PoolCard({ pid, stakingInfo }: { pid: number; stakingInfo: ChefStakingInfo }) {
   const { chainId } = useActiveWeb3React()
-  const farmingConfig = CHAINID_TO_FARMING_CONFIG[chainId || 420]
   const mchefContract = useChefContractForCurrentChain()
-  // const masterChef = useMasterChef(Chef.MINICHEF)
-  // const positions = useChefPositions(mchefContract, undefined, chainId)
   const history = useHistory()
-  // const poolInfos = useMasterChefPoolInfo(farmingConfig?.chefType || Chef.MINICHEF)
-  // const token0 = stakingInfo.tokens[0]
-  // const token1 = stakingInfo.tokens[1]
 
   const currency0: Token | undefined = (stakingInfo.stakingAsset as LiquidityAsset).tokenA
   const currency1: Token | undefined = (stakingInfo.stakingAsset as LiquidityAsset).tokenB
@@ -203,22 +208,6 @@ export default function PoolCard({ pid, stakingInfo }: { pid: number; stakingInf
     }
   }, [pid, stakingTokenPair, totalSupplyOfStakingToken, stakingTokenPairStatus])
 
-  // // let returnOverMonth: Percent = new Percent('0')
-  // let valueOfTotalStakedAmountInWETH: TokenAmount | undefined
-  // if (totalSupplyOfStakingToken && stakingTokenPair) {
-  //   // take the total amount of LP tokens staked, multiply by ETH value of all LP tokens, divide by all LP tokens
-  //   valueOfTotalStakedAmountInWETH = new TokenAmount(
-  //     WETH,
-  //     JSBI.divide(
-  //       JSBI.multiply(
-  //         JSBI.multiply(stakingInfo.totalStakedAmount.raw, stakingTokenPair.reserveOf(WETH).raw),
-  //         JSBI.BigInt(2) // this is b/c the value of LP shares are ~double the value of the WETH they entitle owner to
-  //       ),
-  //       totalSupplyOfStakingToken.raw
-  //     )
-  //   )
-  // }
-
   const isStaking = true
   const rewardToken = UNI[chainId || 420]
   const [isMobileActionExpanded, setMobileActionExpansion] = useState(false)
@@ -235,12 +224,11 @@ export default function PoolCard({ pid, stakingInfo }: { pid: number; stakingInf
     stakingTokenPair,
     new TokenAmount(stakingInfo.stakingToken, stakingInfo.stakedAmount.raw || '0')
   )
-  const poolInfo = farmingConfig?.pools[pid]
 
   const StakeManagementPanel = ({ isMobile, isHideInMobile }: { isMobile: boolean; isHideInMobile?: boolean }) => {
     return (
       <StakingColumn isMobile={isMobile} isHideInMobile={isHideInMobile}>
-        <StakingColumnTitle>Staked {poolInfo?.stakingAsset.isLpToken ? 'LP' : 'Token'}</StakingColumnTitle>
+        <StakingColumnTitle>Staked {stakingInfo.stakingAsset.isLpToken ? 'LP' : 'Token'}</StakingColumnTitle>
         <TYPE.white fontSize="1.2rem" marginRight="1.5rem">
           {stakingInfo.stakedAmount.toSignificant(6)}
         </TYPE.white>
@@ -312,34 +300,60 @@ export default function PoolCard({ pid, stakingInfo }: { pid: number; stakingInf
     )
   }
 
+  const MultiplierStatus = ({ isHideInMobile }: { isHideInMobile?: boolean }) => (
+    <StakingColumn isMobile={isMobile} isHideInMobile={isHideInMobile} style={{ maxWidth: '5.5rem' }}>
+      <TYPE.gray fontSize="0.9rem" width="100%" className="stakingColTitle" display="flex" alignItems="center">
+        <span>Multiplier</span>
+        <HelpTextToolTip
+          placeholder="top-right"
+          title={`The Multiplier represents the proportion of TELE rewards each farm receives, as a proportion of the TELE rebased each epoch.
+For example, if a 1x farm received 1 TELE per epoch, a 40x farm would receive 40 TELE per epoch.
+This amount is already included in all APR calculations for the farm`}
+        >
+          <QuestionIcon style={{ marginLeft: '0.3rem' }} />
+        </HelpTextToolTip>
+      </TYPE.gray>
+      <TYPE.white fontSize="1.2rem">1X</TYPE.white>
+    </StakingColumn>
+  )
+
   return (
     <Wrapper showBackground={isStaking} bgColor={backgroundColor}>
       <TopSection>
         <DoubleCurrencyLogo currency0={currency0} currency1={currency1} size={24} />
-        <TYPE.white fontWeight={600} fontSize={18} style={{ marginLeft: '0.26rem' }} width="12rem">
-          {poolInfo?.stakingAsset.name}
+        <TYPE.white
+          fontWeight={600}
+          fontSize={18}
+          style={{ marginLeft: '0.26rem', alignItems: 'center' }}
+          width="14rem"
+          display="flex"
+        >
+          {stakingInfo.stakingAsset.name}
+          {stakingInfo.stakingAsset.isLpToken && (
+            <LPTag>{stakingInfo.stakingAsset.isStable ? 'Stable' : 'Volatile'}</LPTag>
+          )}
         </TYPE.white>
-        {poolInfo?.stakingAsset.isLpToken && (
+        {stakingInfo.stakingAsset.isLpToken && (
           <TYPE.green01
             marginLeft={isMobile ? 'auto' : 32}
             fontSize={14}
             onClick={() =>
               history.push(
                 `/add/${currency0?.address}/${currency1?.address}/${
-                  poolInfo.stakingAsset.isLpToken && poolInfo.stakingAsset.isStable
+                  stakingInfo.stakingAsset.isLpToken && stakingInfo.stakingAsset.isStable
                 }`
               )
             }
             style={{ cursor: 'pointer' }}
           >
-            Get {poolInfo?.stakingAsset.name} LP
+            Get {stakingInfo.stakingAsset.name} LP
           </TYPE.green01>
         )}
       </TopSection>
       <StatContainer>
         <StakeManagementPanel isMobile={isMobile} isHideInMobile />
         <EarningManagement isMobile={isMobile} isHideInMobile />
-        <StakingColumn isMobile={isMobile}>
+        <StakingColumn isMobile={isMobile} style={{ maxWidth: '6rem' }}>
           <StakingColumnTitle>APR</StakingColumnTitle>
           <TYPE.white fontSize="1.2rem">
             {calculatedApr && calculatedApr !== Infinity ? calculatedApr.toFixed(2) : '--.--'}%
@@ -351,6 +365,7 @@ export default function PoolCard({ pid, stakingInfo }: { pid: number; stakingInf
             $ {totalValueLockedInUSD ? totalValueLockedInUSD.toSignificant(6) : '--.--'}
           </TYPE.white>
         </StakingColumn>
+        <MultiplierStatus isHideInMobile />
         <StakingColumn isMobile={isMobile} isHideInDesktop className="mobile-details-button">
           <TYPE.green01
             fontSize="0.97rem"
@@ -358,7 +373,6 @@ export default function PoolCard({ pid, stakingInfo }: { pid: number; stakingInf
             style={{ cursor: 'pointer', display: 'flex' }}
           >
             Details
-            {/* {!isMobileActionExpanded ? <ArrowDown width="0.9rem" /> : <ArrowUp width="0.9rem" />} */}
             {!isMobileActionExpanded ? <StyledArrowDown /> : <StyledArrowUp />}
           </TYPE.green01>
         </StakingColumn>
@@ -367,28 +381,9 @@ export default function PoolCard({ pid, stakingInfo }: { pid: number; stakingInf
         <MobilePoolDetailSection>
           <StakeManagementPanel isMobile />
           <EarningManagement isMobile marginTop="1.28rem" />
+          <MultiplierStatus />
         </MobilePoolDetailSection>
       )}
-      {/* {isStaking && (
-        <>
-          <BottomSection showBackground={true}>
-            <TYPE.black color={'white'} fontWeight={500}>
-              <span>You earned</span>
-            </TYPE.black>
-
-            <TYPE.black style={{ textAlign: 'right' }} color={'white'} fontWeight={500}>
-              {stakingInfo
-                ? stakingInfo.active
-                  ? `${stakingInfo.rewardRate
-                      ?.multiply(BIG_INT_SECONDS_IN_WEEK)
-                      ?.toSignificant(4, { groupSeparator: ',' })} UNI / week`
-                  : '0 UNI / week'
-                : '-'}
-              810.1919 UNI
-            </TYPE.black>
-          </BottomSection>
-        </>
-      )} */}
       <>
         <StakingModal
           stakingInfo={stakingInfo}
