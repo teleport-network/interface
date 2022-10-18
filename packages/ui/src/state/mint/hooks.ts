@@ -1,6 +1,6 @@
 import type { Currency, Pair, TokenAmount } from '@teleswap/sdk'
 import { CurrencyAmount, ETHER, JSBI, Percent, Price } from '@teleswap/sdk'
-import { useCallback, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { PairState, usePair } from '../../data/Reserves'
@@ -24,17 +24,22 @@ export function useMintActionHandlers(noLiquidity: boolean | undefined): {
 } {
   const dispatch = useDispatch<AppDispatch>()
 
+  const noLiquidityRef = useRef<boolean>()
+  useEffect(() => {
+    noLiquidityRef.current = noLiquidity
+  }, [noLiquidityRef, noLiquidity])
+
   const onFieldAInput = useCallback(
     (typedValue: string) => {
       dispatch(
         typeInput({
           field: Field.CURRENCY_A,
           typedValue: typedValue.replace(/,/g, ''),
-          noLiquidity: noLiquidity === true
+          noLiquidity: !!noLiquidityRef.current
         })
       )
     },
-    [dispatch, noLiquidity]
+    [dispatch]
   )
   const onFieldBInput = useCallback(
     (typedValue: string) => {
@@ -42,11 +47,11 @@ export function useMintActionHandlers(noLiquidity: boolean | undefined): {
         typeInput({
           field: Field.CURRENCY_B,
           typedValue: typedValue.replace(/,/g, ''),
-          noLiquidity: noLiquidity === true
+          noLiquidity: !!noLiquidityRef.current
         })
       )
     },
-    [dispatch, noLiquidity]
+    [dispatch]
   )
 
   return {
