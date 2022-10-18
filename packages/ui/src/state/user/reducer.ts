@@ -54,8 +54,8 @@ export interface UserState {
   URLWarningVisible: boolean
 }
 
-function pairKey(token0Address: string, token1Address: string) {
-  return `${token0Address};${token1Address}`
+function pairKey(token0Address: string, token1Address: string, stable: string) {
+  return `${token0Address};${token1Address};${stable}`
 }
 
 export const initialState: UserState = {
@@ -134,15 +134,15 @@ export default createReducer(initialState, (builder) =>
       ) {
         const chainId = serializedPair.token0.chainId
         state.pairs[chainId] = state.pairs[chainId] || {}
-        state.pairs[chainId][pairKey(serializedPair.token0.address, serializedPair.token1.address)] = serializedPair
+        state.pairs[chainId][pairKey(serializedPair.token0.address, serializedPair.token1.address, String(serializedPair.stable))] = serializedPair
       }
       state.timestamp = currentTimestamp()
     })
-    .addCase(removeSerializedPair, (state, { payload: { chainId, tokenAAddress, tokenBAddress } }) => {
+    .addCase(removeSerializedPair, (state, { payload: { chainId, tokenAAddress, tokenBAddress, stable } }) => {
       if (state.pairs[chainId]) {
         // just delete both keys if either exists
-        delete state.pairs[chainId][pairKey(tokenAAddress, tokenBAddress)]
-        delete state.pairs[chainId][pairKey(tokenBAddress, tokenAAddress)]
+        delete state.pairs[chainId][pairKey(tokenAAddress, tokenBAddress, stable)]
+        delete state.pairs[chainId][pairKey(tokenBAddress, tokenAAddress, stable)]
       }
       state.timestamp = currentTimestamp()
     })

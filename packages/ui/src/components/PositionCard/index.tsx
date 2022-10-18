@@ -110,7 +110,7 @@ export function MinimalPositionCard({ pair, showUnwrapped = false, ...boxProps }
                   size={'1.25rem'}
                 />
                 <Text className="text-emphasize" fontWeight={400}>
-                  {currency0.symbol}/{currency1.symbol}
+                  {currency0.symbol}/{currency1.symbol}/{pair?.stable === false ? "Volatile" : "Stable"}
                 </Text>
               </RowFixed>
               <RowFixed>
