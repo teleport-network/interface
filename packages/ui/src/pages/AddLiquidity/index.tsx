@@ -165,7 +165,7 @@ export default function AddLiquidity() {
   // check whether the user has approved the router on the tokens
   const [approvalA, approveACallback] = useApproveCallback(parsedAmounts[Field.CURRENCY_A], ROUTER_ADDRESS)
   const [approvalB, approveBCallback] = useApproveCallback(parsedAmounts[Field.CURRENCY_B], ROUTER_ADDRESS)
-  
+
   const addTransaction = useTransactionAdder()
 
   const onAdd = useCallback(async () => {
@@ -206,7 +206,8 @@ export default function AddLiquidity() {
         // (tokenBIsETH ? parsedAmountB : parsedAmountA).raw.toString(), // token desired
         // amountsMin[tokenBIsETH ? Field.CURRENCY_A : Field.CURRENCY_B].toString(), // token min
         // amountsMin[tokenBIsETH ? Field.CURRENCY_B : Field.CURRENCY_A].toString(), // eth min
-        0,0,
+        0,
+        0,
         account,
         // deadline.toHexString()
         deadline.toNumber()

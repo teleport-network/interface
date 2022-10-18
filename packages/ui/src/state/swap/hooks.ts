@@ -5,6 +5,7 @@ import { ParsedQs } from 'qs'
 import { useCallback, useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
+import { route } from 'state/routing/slice'
 import { useActiveWeb3React } from '../../hooks'
 import { useCurrency } from '../../hooks/Tokens'
 import { useTradeExactIn, useTradeExactOut } from '../../hooks/Trades'
@@ -17,9 +18,8 @@ import { useUserSlippageTolerance } from '../user/hooks'
 import { useCurrencyBalances } from '../wallet/hooks'
 import { Field, replaceSwapState, selectCurrency, setRecipient, switchCurrencies, typeInput } from './actions'
 import { SwapState } from './reducer'
-import { route } from 'state/routing/slice'
 
-var timeout
+let timeout
 export function useSwapState(): AppState['swap'] {
   return useSelector<AppState, AppState['swap']>((state) => state.swap)
 }
@@ -107,14 +107,16 @@ function involvesAddress(trade: Trade, checksummedAddress: string): boolean {
 }
 
 // from the current swap inputs, compute the best trade and return it.
-export function useDerivedSwapInfo(): any | {
-  currencies: { [field in Field]?: Currency }
-  currencyBalances: { [field in Field]?: CurrencyAmount }
-  parsedAmount: CurrencyAmount | undefined
-  v2Trade: Trade | undefined
-  inputError?: string
-  routeData?: any
-} {
+export function useDerivedSwapInfo():
+  | any
+  | {
+      currencies: { [field in Field]?: Currency }
+      currencyBalances: { [field in Field]?: CurrencyAmount }
+      parsedAmount: CurrencyAmount | undefined
+      v2Trade: Trade | undefined
+      inputError?: string
+      routeData?: any
+    } {
   const { account, chainId } = useActiveWeb3React()
 
   const {
@@ -199,7 +201,7 @@ export function useDerivedSwapInfo(): any | {
   const inputName = (currencies && currencies[Field.INPUT]?.name) || ''
   const outputName = (currencies && currencies[Field.OUTPUT]?.name) || ''
   useEffect(() => {
-    ; (async () => {
+    ;(async () => {
       try {
         if (!!timeout) {
           clearTimeout(timeout)
@@ -220,14 +222,14 @@ export function useDerivedSwapInfo(): any | {
       currencies[Field.INPUT] &&
       currencies[Field.INPUT]?.hasOwnProperty('decimals') &&
       currencies[Field.OUTPUT] &&
-      currencies[Field.OUTPUT]?.hasOwnProperty('decimals')
-      && chainId
+      currencies[Field.OUTPUT]?.hasOwnProperty('decimals') &&
+      chainId
     ) {
       // if (currencyAmount.currency === ETHER) return new TokenAmount(WETH[chainId], currencyAmount.raw)
-      if (currencies[Field.INPUT]!['symbol'] === "ETH") {
+      if (currencies[Field.INPUT]!['symbol'] === 'ETH') {
         currencies[Field.INPUT] = WETH[chainId]
       }
-      if (currencies[Field.OUTPUT]!['symbol'] === "ETH") {
+      if (currencies[Field.OUTPUT]!['symbol'] === 'ETH') {
         currencies[Field.OUTPUT] = WETH[chainId]
       }
       if (!currencies[Field.INPUT] || !currencies[Field.INPUT]!['address'] || !currencies[Field.INPUT]!['chainId']) {
@@ -246,7 +248,7 @@ export function useDerivedSwapInfo(): any | {
         tokenOutChainId: currencies[Field.OUTPUT]!['chainId'],
         amount,
         type: isExactIn ? 'exactIn' : 'exactOut',
-        protocols: 'v2',
+        protocols: 'v2'
       }
       // let volidatas = Object.keys(params).find((key) => {
       //   return !!params[key] == false
@@ -258,7 +260,7 @@ export function useDerivedSwapInfo(): any | {
       params['recipient'] = ''
       params['slippageTolerance'] = ''
       params['deadline'] = ''
-      let response = await route(params)
+      const response = await route(params)
       if (response.data && response.data.hasOwnProperty('quoteDecimals')) {
         const outputAmount = tryParseAmount(
           response.data.quoteDecimals,

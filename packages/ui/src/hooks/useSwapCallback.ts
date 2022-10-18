@@ -5,16 +5,15 @@ import { useMemo } from 'react'
 import { getTradeVersion } from 'utils/tradeVersion'
 
 import { BIPS_BASE, INITIAL_ALLOWED_SLIPPAGE } from '../constants'
+import ERC20_ABI from '../constants/abis/erc20.json'
+import WETH_ABI from '../constants/abis/weth.json'
 import { useTransactionAdder } from '../state/transactions/hooks'
 import { calculateGasMargin, getContract, getRouterContract, isAddress, shortenAddress } from '../utils'
 import isZero from '../utils/isZero'
 import { useActiveWeb3React } from './index'
-import { useTokenContract, useWETHContract } from './useContract'
 import useENS from './useENS'
 import { Version } from './useToggledVersion'
 import useTransactionDeadline from './useTransactionDeadline'
-import ERC20_ABI from '../constants/abis/erc20.json'
-import WETH_ABI from '../constants/abis/weth.json'
 
 export enum SwapCallbackState {
   INVALID,
@@ -134,20 +133,22 @@ export function useSwapCallback(
             } = call
             const options = !value || isZero(value) ? {} : { value }
             if (multiParams && multiParams.length > 0) {
-              let routerContract = contract
-              let multiFinalParams: any = []
+              const routerContract = contract
+              const multiFinalParams: any = []
               for (let m = 0; m < multiParams.length; m++) {
-                let routeItem = multiParams[m]
-                let inputTokenAddress = routeItem[1] && Array.isArray(routeItem[1]) ? routeItem[1][0][0] : routeItem[2][0][0]
-                let inputTokenAmount = routeItem[0]
+                const routeItem = multiParams[m]
+                const inputTokenAddress =
+                  routeItem[1] && Array.isArray(routeItem[1]) ? routeItem[1][0][0] : routeItem[2][0][0]
+                const inputTokenAmount = routeItem[0]
                 let tokenInContract = getContract(inputTokenAddress, ERC20_ABI, library)
-                if (inputTokenAddress && (inputTokenAddress === WETH[chainId]['address'])) {
+                if (inputTokenAddress && inputTokenAddress === WETH[chainId]['address']) {
                   tokenInContract = getContract(WETH[chainId].address, WETH_ABI, library)
                 }
-                let step1 = routerContract!.interface.encodeFunctionData(methodName, routeItem)
+                const step1 = routerContract!.interface.encodeFunctionData(methodName, routeItem)
                 multiFinalParams.push(step1)
               }
-              return contract.estimateGas.multicall(deadline, multiFinalParams, options)
+              return contract.estimateGas
+                .multicall(deadline, multiFinalParams, options)
                 .then((gasEstimate) => {
                   call.parameters.multiParams = multiFinalParams
                   call.parameters.methodName = 'multicall'
@@ -212,16 +213,13 @@ export function useSwapCallback(
                     })
                 })
             }
-
           })
         )
 
         // a successful estimation is a bignumber gas estimate and the next call is also a bignumber gas estimate
-        const successfulEstimation = estimatedCalls.find(
-          (el, ix, list): el is SuccessfulCall => {
-            return 'gasEstimate' in el && (ix === list.length - 1 || 'gasEstimate' in list[ix + 1])
-          }
-        )
+        const successfulEstimation = estimatedCalls.find((el, ix, list): el is SuccessfulCall => {
+          return 'gasEstimate' in el && (ix === list.length - 1 || 'gasEstimate' in list[ix + 1])
+        })
 
         if (!successfulEstimation) {
           const errorCalls = estimatedCalls.filter((call): call is FailedCall => 'error' in call)
@@ -249,13 +247,16 @@ export function useSwapCallback(
               const withRecipient =
                 recipient === account
                   ? base
-                  : `${base} to ${recipientAddressOrName && isAddress(recipientAddressOrName)
-                    ? shortenAddress(recipientAddressOrName)
-                    : recipientAddressOrName
-                  }`
+                  : `${base} to ${
+                      recipientAddressOrName && isAddress(recipientAddressOrName)
+                        ? shortenAddress(recipientAddressOrName)
+                        : recipientAddressOrName
+                    }`
 
               const withVersion =
-                tradeVersion === Version.v2 ? withRecipient : `${withRecipient} on ${(tradeVersion as any).toUpperCase()}`
+                tradeVersion === Version.v2
+                  ? withRecipient
+                  : `${withRecipient} on ${(tradeVersion as any).toUpperCase()}`
 
               addTransaction(response, {
                 summary: withVersion
@@ -288,13 +289,16 @@ export function useSwapCallback(
               const withRecipient =
                 recipient === account
                   ? base
-                  : `${base} to ${recipientAddressOrName && isAddress(recipientAddressOrName)
-                    ? shortenAddress(recipientAddressOrName)
-                    : recipientAddressOrName
-                  }`
+                  : `${base} to ${
+                      recipientAddressOrName && isAddress(recipientAddressOrName)
+                        ? shortenAddress(recipientAddressOrName)
+                        : recipientAddressOrName
+                    }`
 
               const withVersion =
-                tradeVersion === Version.v2 ? withRecipient : `${withRecipient} on ${(tradeVersion as any).toUpperCase()}`
+                tradeVersion === Version.v2
+                  ? withRecipient
+                  : `${withRecipient} on ${(tradeVersion as any).toUpperCase()}`
 
               addTransaction(response, {
                 summary: withVersion

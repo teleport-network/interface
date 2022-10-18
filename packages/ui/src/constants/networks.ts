@@ -109,10 +109,12 @@ export const RPC_URLS: { [key in SupportedChainId]: string[] } = {
   ],
   [SupportedChainId.GOERLI]: [
     // `https://goerli.infura.io/v3/${INFURA_KEY}`,
-    ...FALLBACK_URLS[SupportedChainId.GOERLI]],
+    ...FALLBACK_URLS[SupportedChainId.GOERLI]
+  ],
   [SupportedChainId.KOVAN]: [
     // `https://kovan.infura.io/v3/${INFURA_KEY}`,
-    ...FALLBACK_URLS[SupportedChainId.KOVAN]],
+    ...FALLBACK_URLS[SupportedChainId.KOVAN]
+  ],
   [SupportedChainId.OPTIMISM]: [
     // `https://optimism-mainnet.infura.io/v3/${INFURA_KEY}`,
     ...FALLBACK_URLS[SupportedChainId.OPTIMISM]
