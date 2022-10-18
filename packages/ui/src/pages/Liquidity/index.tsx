@@ -599,7 +599,7 @@ export default function Liquidity() {
               <HeaderItem>TVL</HeaderItem>
               <HeaderItem></HeaderItem>
               {pools.map((v2Pair, index) => {
-                return <TopPairRow v2Pair={v2Pair} key={v2Pair.id} index={index} ethPrice={ethPrice} />
+                return <TopPairRow v2Pair={v2Pair} key={index} index={index} ethPrice={ethPrice} />
               })}
             </TopPoolsGrid>
             <AutoColumn justify={'center'} gap="md">
