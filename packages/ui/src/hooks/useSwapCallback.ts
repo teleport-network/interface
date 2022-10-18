@@ -129,7 +129,7 @@ export function useSwapCallback(
         const estimatedCalls: EstimatedSwapCall[] = await Promise.all(
           swapCalls.map((call) => {
             const {
-              parameters: { methodName, args, value, multiParams },
+              parameters: { methodName, args, value, multiParams, deadline },
               contract
             } = call
             const options = !value || isZero(value) ? {} : { value }
@@ -138,21 +138,20 @@ export function useSwapCallback(
               let multiFinalParams: any = []
               for (let m = 0; m < multiParams.length; m++) {
                 let routeItem = multiParams[m]
-                let inputTokenAddress = routeItem[2][0][0]
+                let inputTokenAddress = routeItem[1] && Array.isArray(routeItem[1]) ? routeItem[1][0][0] : routeItem[2][0][0]
                 let inputTokenAmount = routeItem[0]
                 let tokenInContract = getContract(inputTokenAddress, ERC20_ABI, library)
                 if (inputTokenAddress && (inputTokenAddress === WETH[chainId]['address'])) {
                   tokenInContract = getContract(WETH[chainId].address, WETH_ABI, library)
                 }
-                let step0 = tokenInContract!.interface.encodeFunctionData("approve", [routerContract.address, inputTokenAmount])
-                console.log('step0 approve', step0)
-                let step1 = routerContract!.interface.encodeFunctionData("swapExactTokensForTokens", routeItem)
-                multiFinalParams.push([step1])
+                let step1 = routerContract!.interface.encodeFunctionData(methodName, routeItem)
+                multiFinalParams.push(step1)
               }
-              // let gas = await ans.multicall.estimateGas.aggregate(params)
-              // await ans.router.multicall(getDeadline(),params)
-              return contract.multicall.estimateGas(...multiFinalParams)
+              return contract.estimateGas.multicall(deadline, multiFinalParams, options)
                 .then((gasEstimate) => {
+                  call.parameters.multiParams = multiFinalParams
+                  call.parameters.methodName = 'multicall'
+                  call.parameters.deadline = deadline
                   return {
                     call,
                     gasEstimate
@@ -161,7 +160,7 @@ export function useSwapCallback(
                 .catch((gasError) => {
                   console.debug('Gas estimate failed, trying eth_call to extract error', call)
 
-                  return contract.callStatic[methodName](...args, options)
+                  return contract.callStatic[methodName](...multiParams, options)
                     .then((result) => {
                       console.debug('Unexpected successful call after failed estimate gas', call, gasError, result)
                       return { call, error: new Error('Unexpected issue with estimating the gas. Please try again.') }
@@ -233,49 +232,87 @@ export function useSwapCallback(
         const {
           call: {
             contract,
-            parameters: { methodName, args, value }
+            parameters: { methodName, args, value, multiParams, deadline }
           },
           gasEstimate
         } = successfulEstimation
+        if (multiParams && multiParams.length > 0) {
+          const options = !value || isZero(value) ? {} : { value }
+          return contract[methodName](deadline, multiParams, options)
+            .then((response: any) => {
+              const inputSymbol = trade.inputAmount.currency.symbol
+              const outputSymbol = trade.outputAmount.currency.symbol
+              const inputAmount = trade.inputAmount.toSignificant(3)
+              const outputAmount = trade.outputAmount.toSignificant(3)
 
-        return contract[methodName](...args, {
-          gasLimit: calculateGasMargin(gasEstimate),
-          ...(value && !isZero(value) ? { value, from: account } : { from: account })
-        })
-          .then((response: any) => {
-            const inputSymbol = trade.inputAmount.currency.symbol
-            const outputSymbol = trade.outputAmount.currency.symbol
-            const inputAmount = trade.inputAmount.toSignificant(3)
-            const outputAmount = trade.outputAmount.toSignificant(3)
+              const base = `Swap ${inputAmount} ${inputSymbol} for ${outputAmount} ${outputSymbol}`
+              const withRecipient =
+                recipient === account
+                  ? base
+                  : `${base} to ${recipientAddressOrName && isAddress(recipientAddressOrName)
+                    ? shortenAddress(recipientAddressOrName)
+                    : recipientAddressOrName
+                  }`
 
-            const base = `Swap ${inputAmount} ${inputSymbol} for ${outputAmount} ${outputSymbol}`
-            const withRecipient =
-              recipient === account
-                ? base
-                : `${base} to ${recipientAddressOrName && isAddress(recipientAddressOrName)
-                  ? shortenAddress(recipientAddressOrName)
-                  : recipientAddressOrName
-                }`
+              const withVersion =
+                tradeVersion === Version.v2 ? withRecipient : `${withRecipient} on ${(tradeVersion as any).toUpperCase()}`
 
-            const withVersion =
-              tradeVersion === Version.v2 ? withRecipient : `${withRecipient} on ${(tradeVersion as any).toUpperCase()}`
+              addTransaction(response, {
+                summary: withVersion
+              })
 
-            addTransaction(response, {
-              summary: withVersion
+              return response.hash
             })
+            .catch((error: any) => {
+              // if the user rejected the tx, pass this along
+              if (error?.code === 4001) {
+                throw new Error('Transaction rejected.')
+              } else {
+                // otherwise, the error was unexpected and we need to convey that
+                console.error(`Swap failed`, error, methodName, args, value)
+                throw new Error(`Swap failed: ${error.message}`)
+              }
+            })
+        } else {
+          return contract[methodName](...args, {
+            gasLimit: calculateGasMargin(gasEstimate),
+            ...(value && !isZero(value) ? { value, from: account } : { from: account })
+          })
+            .then((response: any) => {
+              const inputSymbol = trade.inputAmount.currency.symbol
+              const outputSymbol = trade.outputAmount.currency.symbol
+              const inputAmount = trade.inputAmount.toSignificant(3)
+              const outputAmount = trade.outputAmount.toSignificant(3)
 
-            return response.hash
-          })
-          .catch((error: any) => {
-            // if the user rejected the tx, pass this along
-            if (error?.code === 4001) {
-              throw new Error('Transaction rejected.')
-            } else {
-              // otherwise, the error was unexpected and we need to convey that
-              console.error(`Swap failed`, error, methodName, args, value)
-              throw new Error(`Swap failed: ${error.message}`)
-            }
-          })
+              const base = `Swap ${inputAmount} ${inputSymbol} for ${outputAmount} ${outputSymbol}`
+              const withRecipient =
+                recipient === account
+                  ? base
+                  : `${base} to ${recipientAddressOrName && isAddress(recipientAddressOrName)
+                    ? shortenAddress(recipientAddressOrName)
+                    : recipientAddressOrName
+                  }`
+
+              const withVersion =
+                tradeVersion === Version.v2 ? withRecipient : `${withRecipient} on ${(tradeVersion as any).toUpperCase()}`
+
+              addTransaction(response, {
+                summary: withVersion
+              })
+
+              return response.hash
+            })
+            .catch((error: any) => {
+              // if the user rejected the tx, pass this along
+              if (error?.code === 4001) {
+                throw new Error('Transaction rejected.')
+              } else {
+                // otherwise, the error was unexpected and we need to convey that
+                console.error(`Swap failed`, error, methodName, args, value)
+                throw new Error(`Swap failed: ${error.message}`)
+              }
+            })
+        }
       },
       error: null
     }

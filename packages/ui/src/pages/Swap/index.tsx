@@ -105,15 +105,11 @@ export default function Swap({ history }: RouteComponentProps) {
     inputError: swapInputError,
     routeData
   } = useDerivedSwapInfo()
-  if(v2Trade){
-    console.log(v2Trade)
-  }
   if (routeData && v2Trade) {
     v2Trade['routeData'] = routeData
-    // v2Trade['inputAmount'] = routeData['inputAmount']
-    // v2Trade['outputAmount'] = routeData['inputAmount']
+    v2Trade['inputAmount'] = routeData['inputAmount']
+    v2Trade['outputAmount'] = routeData['outputAmount']
     // v2Trade['priceImpact'] = routeData['priceImpactWithoutFee']
-
   }
   const {
     wrapType,
@@ -584,7 +580,7 @@ export default function Swap({ history }: RouteComponentProps) {
                       }
                     }}
                     id="swap-button"
-                    disabled={!isValid || (priceImpactSeverity > 3 && !isExpertMode) || !!swapCallbackError}
+                    // disabled={!isValid || (priceImpactSeverity > 3 && !isExpertMode) || !!swapCallbackError}
                     error={isValid && priceImpactSeverity > 2 && !swapCallbackError}
                   >
                     <Text className="secondary-title" fontWeight={500}>
