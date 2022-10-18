@@ -13,31 +13,72 @@ const NetHeadStyle = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #fff;
-  border: 2px solid #fff;
-  color: #000000;
+  color: #FFFFFF;
   border-radius: 16px;
   box-sizing: border-box;
   height: 30px;
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 600;
+  font-size: 1.5rem;
+  line-height: 26px;
+  text-align: center;
+  text-transform: capitalize;
+  color: #FFFFFF;
+
   .tokenIcon {
-    width: 22px;
-    height: 22px;
-    margin-right: 5px;
+    width: 2.2rem;
+    height: 2.2rem;
+  }
+  .networkLabelText {
+    margin-left: 1rem;
+    margin-right: .5rem;
   }
 `
-const NetBodyStyle = styled.div`
+const NetBodyWrapStyle = styled.div`
   position: absolute;
-  top: 30px;
-  background-color: #fff;
-  padding: 10px;
-  color: #000000;
-  border-radius: 16px;
-  border: 2px solid #fff;
-  width: 200px;
+  top: 2rem;
+  padding-top: 1rem;
+`
+
+const NetBodyStyle = styled.div`
+  padding: 1rem;
+  color: #FFFFFF;
+  width: 19rem;
+  background: #19242F;
+  border-radius: 1.7rem;
+  font-weight: 500;
+  font-size: 1rem;
+  font-family: 'Poppins';
+  .selectNetworkText {
+    color: rgba(255, 255, 255, 0.4);
+    font-weight: 500;
+    font-size: 12px;
+    margin-bottom: .9rem;
+  }
 `
 const NetBodyRowStyle = styled.div`
+  padding: 0.9rem 1.1rem;
+  position: relative;
+  display: flex;
+  align-items: center;
   &:hover {
-    color: red;
+    background: rgba(57, 225, 186, 0.1);
+    border-radius: 0.9rem;
+  }
+  &:hover::after {
+    content: '';
+    width: .5rem;
+    height: .5rem;
+    background: #20B26C;
+    box-shadow: 0px 0px 10px #01E676;
+    position: absolute;
+    right: 1.8rem;
+  }
+  >img {
+    width: 2rem;
+    height: 2rem;
+    margin-right: 1.1rem;
   }
 `
 
@@ -70,7 +111,7 @@ export default function Network() {
   const info = getChainInfo(chainId)
 
   const switchNet = (chainIdNumber) => {
-    ;(async () => {
+    ; (async () => {
       if (connector) {
         const chainIdHex = Number(chainIdNumber).toString(16)
         const chainId = `0x${chainIdHex}`
@@ -106,7 +147,7 @@ export default function Network() {
         {info ? (
           <>
             <img className="tokenIcon" src={info.logoUrl} alt="" />
-            <span>{info.label}</span>
+            <span className="networkLabelText">{info.label}</span>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="24"
@@ -143,17 +184,20 @@ export default function Network() {
         )}
       </NetHeadStyle>
       {showNetSelect && (
-        <NetBodyStyle>
-          <div>Select a network</div>
-          {NETWORK_SELECTOR_CHAINS.map((chainIdNumber) => {
-            const info = getChainInfo(chainIdNumber)
-            return (
-              <NetBodyRowStyle key={chainIdNumber} onClick={() => switchNet(chainIdNumber)}>
-                {info.label}
-              </NetBodyRowStyle>
-            )
-          })}
-        </NetBodyStyle>
+        <NetBodyWrapStyle>
+          <NetBodyStyle>
+            <div className="selectNetworkText">Select a network</div>
+            {NETWORK_SELECTOR_CHAINS.map((chainIdNumber) => {
+              const info = getChainInfo(chainIdNumber)
+              return (
+                <NetBodyRowStyle key={chainIdNumber} onClick={() => switchNet(chainIdNumber)}>
+                  <img src={info.logoUrl} alt="" />
+                  <span>{info.label}</span>
+                </NetBodyRowStyle>
+              )
+            })}
+          </NetBodyStyle>
+        </NetBodyWrapStyle>
       )}
     </NetworkStyled>
   )
