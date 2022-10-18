@@ -149,7 +149,7 @@ export default function SettingsTab() {
 
   return (
     // https://github.com/DefinitelyTyped/DefinitelyTyped/issues/30451
-    <StyledMenu ref={node as any}>
+    <StyledMenu ref={isMobile ? null : (node as any)}>
       <Modal isOpen={showConfirmation} onDismiss={() => setShowConfirmation(false)} maxHeight={100}>
         <ModalContentWrapper>
           <AutoColumn gap="lg">
@@ -265,7 +265,7 @@ export default function SettingsTab() {
       )}
       {isMobile && (
         <Modal isOpen={open} maxHeight="20rem">
-          <AutoColumn gap="1.2rem" style={{ padding: '1.6rem' }}>
+          <AutoColumn gap="1.2rem" style={{ padding: '1.6rem' }} ref={isMobile ? node : null}>
             <Text fontWeight={600} className="secondary-title" color="#FFFFFF" sx={{ fontFamily: 'Poppins' }}>
               Swap Settings
             </Text>
