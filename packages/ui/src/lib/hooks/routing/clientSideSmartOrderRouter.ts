@@ -1,5 +1,6 @@
 // This file is lazy-loaded, so the import of smart-order-router is intentional.
 // eslint-disable-next-line no-restricted-imports
+import { Fraction } from '@teleswap/sdk'
 import { AlphaRouter, AlphaRouterConfig, ChainId, SwapOptions } from '@teleswap/smart-order-router'
 import { BigintIsh, CurrencyAmount, Percent, Token, TradeType } from '@uniswap/sdk-core'
 import { SupportedChainId } from 'constants/chains'
@@ -48,7 +49,32 @@ async function getQuote(
     config
   )
 
-  if (!swapRoute) throw new Error('Failed to generate client side quote')
+  if (!swapRoute) {
+    return {
+      data: {
+        invalidRoute: true,
+        blockNumber: '',
+        amount: '',
+        amountDecimals: '',
+        gasPriceWei: '',
+        gasUseEstimate: '',
+        gasUseEstimateQuote: '',
+        gasUseEstimateQuoteDecimals: '',
+        gasUseEstimateUSD: '',
+        quote: '',
+        quoteDecimals: '',
+        quoteGasAdjusted: '',
+        quoteGasAdjustedDecimals: '',
+        route: [],
+        percents: [],
+        routeString: '',
+        priceImpactWithoutFee: new Fraction('0'),
+        realizedLPFee: new Fraction('0'),
+        minOut: amount,
+        maxIn: amount
+      }
+    }
+  }
 
   return { data: transformSwapRouteToGetQuoteResult(type, amount, swapRoute, swapConfig) }
 }

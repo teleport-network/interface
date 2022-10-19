@@ -3,15 +3,15 @@ import { route } from './slice'
 
 test('routing', async () => {
   const result = await route({
-    tokenInAddress: '0x53b1c6025e3f9b149304cf1b39ee7c577d76c6ca',
+    tokenInAddress: '0x4200000000000000000000000000000000000006',
     tokenInChainId: ChainId.OPTIMISTIC_GOERLI,
-    tokenInSymbol: 'USDC',
+    tokenInSymbol: 'WETH',
     tokenInDecimals: 18,
-    tokenOutAddress: '0x5986c8ffadca9cee5c28a85cc3d4f335aab5dc90',
+    tokenOutAddress: '0x0537139Ca66C4ccd2a3ED16D7414EF0F9d9bf320',
     tokenOutChainId: ChainId.OPTIMISTIC_GOERLI,
     tokenOutSymbol: 'USDT',
     tokenOutDecimals: 18,
-    amount: '8000000000000000000000',
+    amount: '80000000000000000000',
     type: 'exactIn',
     slippageTolerance: '50'
   })
