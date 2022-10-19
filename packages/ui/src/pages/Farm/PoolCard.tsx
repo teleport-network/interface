@@ -66,8 +66,9 @@ const Wrapper = styled.div<{ showBackground: boolean; bgColor: any }>`
   color: ${({ theme, showBackground }) => (showBackground ? theme.white : theme.text1)} !important;
 
   :not(:last-child) {
-    padding-bottom: 1rem;
+    padding-bottom: 1.7rem;
     &:after {
+      /** trick: i use persudo element to add a bottom line **/
       content: '';
       background-color: rgba(255, 255, 255, 0.2);
       height: 1px;
@@ -76,20 +77,9 @@ const Wrapper = styled.div<{ showBackground: boolean; bgColor: any }>`
       bottom: 0;
       left: 0;
 
-      margin-top: 1rem;
+      margin-top: 1.7rem;
     }
   }
-  // :not(:last-child):after {
-  //   content: '';
-  //   background-color: rgba(255, 255, 255, 0.2);
-  //   height: 1px;
-  //   width: 100%;
-  //   position: relative;
-  //   bottom: 0;
-  //   left: 0;
-
-  //   margin-top: 1rem;
-  // }
 `
 
 const TopSection = styled.div`
