@@ -12,7 +12,8 @@ import { TYPE } from '../../theme'
 import PoolCard from './PoolCard'
 
 const PageWrapper = styled(AutoColumn)`
-  max-width: 60rem;
+  // 1920x1080, this page designed width is 1120, 1120 / 14 = 80rem
+  max-width: 80rem;
   width: 100%;
   ${({ theme }) => theme.mediaWidth.upToSmall`
   width: 100%;
@@ -31,7 +32,7 @@ const PoolSection = styled.div`
   width: 100%;
   justify-self: center;
   background: rgba(25, 36, 47, 1);
-  padding: 3.5vw
+  padding: 3.4rem;
   color: #39e1ba;
 
   font-size: 1rem;

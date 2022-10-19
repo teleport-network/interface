@@ -41,9 +41,7 @@ const StatContainer = styled.div`
   width: 100%;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 0.4rem;
-
-  align-items: center;
+  gap: 7rem;
 };
 `
 
@@ -68,8 +66,9 @@ const Wrapper = styled.div<{ showBackground: boolean; bgColor: any }>`
   color: ${({ theme, showBackground }) => (showBackground ? theme.white : theme.text1)} !important;
 
   :not(:last-child) {
-    padding-bottom: 1rem;
+    padding-bottom: 1.7rem;
     &:after {
+      /** trick: i use persudo element to add a bottom line **/
       content: '';
       background-color: rgba(255, 255, 255, 0.2);
       height: 1px;
@@ -78,20 +77,9 @@ const Wrapper = styled.div<{ showBackground: boolean; bgColor: any }>`
       bottom: 0;
       left: 0;
 
-      margin-top: 1rem;
+      margin-top: 1.7rem;
     }
   }
-  // :not(:last-child):after {
-  //   content: '';
-  //   background-color: rgba(255, 255, 255, 0.2);
-  //   height: 1px;
-  //   width: 100%;
-  //   position: relative;
-  //   bottom: 0;
-  //   left: 0;
-
-  //   margin-top: 1rem;
-  // }
 `
 
 const TopSection = styled.div`
@@ -115,7 +103,7 @@ const StakingColumn = styled.div<{ isMobile: boolean; isHideInMobile?: boolean; 
     width: auto;
   }
   .stakingColTitle {
-    margin-bottom: 0.46rem;
+    margin-bottom: 1rem;
   }
   .actions {
     margin-left: auto;
@@ -127,7 +115,7 @@ const StakingColumn = styled.div<{ isMobile: boolean; isHideInMobile?: boolean; 
   .estimated-staked-lp-value {
     font-family: 'Poppins';
     font-size: 0.9rem;
-    margin-top: 0.33rem;
+    margin-top: 0.7rem;
     width: 100%;
     color: rgba(255, 255, 255, 0.8);
   }
@@ -274,12 +262,12 @@ export default function PoolCard({ pid, stakingInfo }: { pid: number; stakingInf
         <StakingColumnTitle>Earned Rewards</StakingColumnTitle>
         <TYPE.white
           title={parsedPendingAmount}
-          fontSize="1.2rem"
+          fontSize="1.1rem"
           style={{
             textOverflow: 'ellipsis',
             overflow: 'hidden',
             whiteSpace: 'nowrap',
-            maxWidth: isMobile ? '50%' : '70%'
+            maxWidth: isMobile ? '50%' : '60%'
           }}
         >
           {stakingInfo.pendingReward.toSignificant(6)} {rewardToken.symbol}
@@ -289,7 +277,7 @@ export default function PoolCard({ pid, stakingInfo }: { pid: number; stakingInf
             height={28}
             width="auto"
             fontSize="0.9rem"
-            padding="0.166rem 0.4rem"
+            padding="0.57rem"
             borderRadius="0.6rem"
             onClick={() => setShowClaimRewardModal(true)}
           >
@@ -313,13 +301,15 @@ This amount is already included in all APR calculations for the farm`}
           <QuestionIcon style={{ marginLeft: '0.3rem' }} />
         </HelpTextToolTip>
       </TYPE.gray>
-      <TYPE.white fontSize="1.2rem">1X</TYPE.white>
+      <TYPE.white fontSize="1.2rem" style={{ marginLeft: 'auto' }}>
+        1X
+      </TYPE.white>
     </StakingColumn>
   )
 
   return (
     <Wrapper showBackground={isStaking} bgColor={backgroundColor}>
-      <TopSection>
+      <TopSection style={{ marginBottom: '1.7rem' }}>
         <DoubleCurrencyLogo currency0={currency0} currency1={currency1} size={24} />
         <TYPE.white
           fontWeight={600}
@@ -353,14 +343,14 @@ This amount is already included in all APR calculations for the farm`}
       <StatContainer>
         <StakeManagementPanel isMobile={isMobile} isHideInMobile />
         <EarningManagement isMobile={isMobile} isHideInMobile />
-        <StakingColumn isMobile={isMobile} style={{ maxWidth: '6rem' }}>
+        <StakingColumn isMobile={isMobile} style={{ maxWidth: '4.5rem' }}>
           <StakingColumnTitle>APR</StakingColumnTitle>
           <TYPE.white fontSize="1.2rem">
             {calculatedApr && calculatedApr !== Infinity ? calculatedApr.toFixed(2) : '--.--'}%
           </TYPE.white>
         </StakingColumn>
-        <StakingColumn isMobile={isMobile}>
-          <StakingColumnTitle>Liquidity TVL</StakingColumnTitle>
+        <StakingColumn isMobile={isMobile} style={{ maxWidth: '9rem' }}>
+          <StakingColumnTitle>Liquidity</StakingColumnTitle>
           <TYPE.white fontSize="1.2rem">
             $ {totalValueLockedInUSD ? totalValueLockedInUSD.toSignificant(6) : '--.--'}
           </TYPE.white>
