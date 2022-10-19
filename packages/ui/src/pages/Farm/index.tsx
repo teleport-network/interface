@@ -32,7 +32,7 @@ const PoolSection = styled.div`
   width: 100%;
   justify-self: center;
   background: rgba(25, 36, 47, 1);
-  padding: 3.5vw
+  padding: 3.4rem;
   color: #39e1ba;
 
   font-size: 1rem;
