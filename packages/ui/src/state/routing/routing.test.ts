@@ -1,11 +1,5 @@
 import { ChainId } from '@teleswap/smart-order-router'
-
-import JSBI from 'jsbi'
-import { getY, route } from './slice'
-
-test('calc', () => {
-  const re = getY(JSBI.BigInt(18000 * 1e18), JSBI.BigInt(2 * 1e34))
-}, 100000)
+import { route } from './slice'
 
 test('routing', async () => {
   const result = await route({
