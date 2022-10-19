@@ -41,7 +41,7 @@ const StatContainer = styled.div`
   width: 100%;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 0.4rem;
+  gap: 7rem;
 };
 `
 
@@ -113,7 +113,7 @@ const StakingColumn = styled.div<{ isMobile: boolean; isHideInMobile?: boolean; 
     width: auto;
   }
   .stakingColTitle {
-    margin-bottom: 0.46rem;
+    margin-bottom: 1rem;
   }
   .actions {
     margin-left: auto;
@@ -311,13 +311,15 @@ This amount is already included in all APR calculations for the farm`}
           <QuestionIcon style={{ marginLeft: '0.3rem' }} />
         </HelpTextToolTip>
       </TYPE.gray>
-      <TYPE.white fontSize="1.2rem">1X</TYPE.white>
+      <TYPE.white fontSize="1.2rem" style={{ marginLeft: 'auto' }}>
+        1X
+      </TYPE.white>
     </StakingColumn>
   )
 
   return (
     <Wrapper showBackground={isStaking} bgColor={backgroundColor}>
-      <TopSection>
+      <TopSection style={{ marginBottom: '1.7rem' }}>
         <DoubleCurrencyLogo currency0={currency0} currency1={currency1} size={24} />
         <TYPE.white
           fontWeight={600}
@@ -351,13 +353,13 @@ This amount is already included in all APR calculations for the farm`}
       <StatContainer>
         <StakeManagementPanel isMobile={isMobile} isHideInMobile />
         <EarningManagement isMobile={isMobile} isHideInMobile />
-        <StakingColumn isMobile={isMobile} style={{ maxWidth: '6rem' }}>
+        <StakingColumn isMobile={isMobile} style={{ maxWidth: '4.5rem' }}>
           <StakingColumnTitle>APR</StakingColumnTitle>
           <TYPE.white fontSize="1.2rem">
             {calculatedApr && calculatedApr !== Infinity ? calculatedApr.toFixed(2) : '--.--'}%
           </TYPE.white>
         </StakingColumn>
-        <StakingColumn isMobile={isMobile}>
+        <StakingColumn isMobile={isMobile} style={{ maxWidth: '12rem' }}>
           <StakingColumnTitle>Liquidity TVL</StakingColumnTitle>
           <TYPE.white fontSize="1.2rem">
             $ {totalValueLockedInUSD ? totalValueLockedInUSD.toSignificant(6) : '--.--'}
