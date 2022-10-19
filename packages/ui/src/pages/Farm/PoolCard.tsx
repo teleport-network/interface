@@ -115,7 +115,7 @@ const StakingColumn = styled.div<{ isMobile: boolean; isHideInMobile?: boolean; 
   .estimated-staked-lp-value {
     font-family: 'Poppins';
     font-size: 0.9rem;
-    margin-top: 0.33rem;
+    margin-top: 0.7rem;
     width: 100%;
     color: rgba(255, 255, 255, 0.8);
   }
@@ -277,7 +277,7 @@ export default function PoolCard({ pid, stakingInfo }: { pid: number; stakingInf
             height={28}
             width="auto"
             fontSize="0.9rem"
-            padding="0.166rem 0.4rem"
+            padding="0.57rem"
             borderRadius="0.6rem"
             onClick={() => setShowClaimRewardModal(true)}
           >
@@ -349,8 +349,8 @@ This amount is already included in all APR calculations for the farm`}
             {calculatedApr && calculatedApr !== Infinity ? calculatedApr.toFixed(2) : '--.--'}%
           </TYPE.white>
         </StakingColumn>
-        <StakingColumn isMobile={isMobile} style={{ maxWidth: '12rem' }}>
-          <StakingColumnTitle>Liquidity TVL</StakingColumnTitle>
+        <StakingColumn isMobile={isMobile} style={{ maxWidth: '9rem' }}>
+          <StakingColumnTitle>Liquidity</StakingColumnTitle>
           <TYPE.white fontSize="1.2rem">
             $ {totalValueLockedInUSD ? totalValueLockedInUSD.toSignificant(6) : '--.--'}
           </TYPE.white>
