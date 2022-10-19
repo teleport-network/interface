@@ -55,6 +55,7 @@ export type V2PoolInRoute = {
 export interface GetQuoteResult {
   reqParams?: QuoteArguments
   quoteId?: string
+  invalidRoute?: boolean
   blockNumber: string
   amount: string
   amountDecimals: string

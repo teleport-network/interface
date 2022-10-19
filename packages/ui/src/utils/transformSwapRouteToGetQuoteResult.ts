@@ -154,6 +154,7 @@ export function transformSwapRouteToGetQuoteResult(
 
   const result: GetQuoteResult = {
     methodParameters,
+    invalidRoute: false,
     blockNumber: blockNumber.toString(),
     amount: amount.quotient.toString(),
     amountDecimals: amount.toExact(),
