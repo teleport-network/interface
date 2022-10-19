@@ -12,7 +12,8 @@ import { TYPE } from '../../theme'
 import PoolCard from './PoolCard'
 
 const PageWrapper = styled(AutoColumn)`
-  max-width: 60rem;
+  // 1920x1080, this page designed width is 1120, 1120 / 14 = 80rem
+  max-width: 80rem;
   width: 100%;
   ${({ theme }) => theme.mediaWidth.upToSmall`
   width: 100%;
