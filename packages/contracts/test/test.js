@@ -1,7 +1,7 @@
-const {expect} = require("chai");
+const { expect } = require("chai");
 const hre = require("hardhat");
-const {loadFixture} = require("@nomicfoundation/hardhat-network-helpers");
-const {sign} = require("ethereumjs-util/dist/secp256k1v3-adapter");
+const { loadFixture } = require("@nomicfoundation/hardhat-network-helpers");
+const { sign } = require("ethereumjs-util/dist/secp256k1v3-adapter");
 
 const ethers = hre.ethers
 const BigNumber = ethers.BigNumber
@@ -400,7 +400,7 @@ describe('Router02', function () {
 
 
                 // swapExactTokensForTokens
-                let amountIn = BigNumber.from(10).pow(16), amountOutMin = 1
+                let amountIn = ethers.utils.parseUnits("1",16), amountOutMin = 1
                 let route = [
                     ans.weth.address,
                     ans.tt.address,
@@ -410,13 +410,14 @@ describe('Router02', function () {
                 await addLiquidity(ans, ans.weth, ans.tt, expandTo18Decimals(1), expandTo18Decimals(18), stable, 0)
 
                 let args = [
+                    amountIn,
                     amountOutMin,
                     [route],
                     ans.signer.address,
                     getDeadline()
                 ]
                 console.log()
-                await ans.router.swapExactETHForTokens(...args, {value: amountIn})
+                await ans.router.swapExactETHForTokens(...args, { value: amountIn })
 
             }
 
@@ -488,13 +489,17 @@ describe('Router02', function () {
                 await addLiquidity(ans, ans.usdt, ans.weth, tokenAmt, ethAmt, stable, ethAmt)
 
                 await ans.usdt.approve(ans.router.address, tokenAmt)
+
+                let amountIn = ethers.utils.parseUnits("1", 18)
                 let args = [
+                    amountIn,
                     ethAmt,
                     route,
                     ans.signer.address,
                     getDeadline()
                 ]
-                await ans.router.swapETHForExactTokens(...args, {value: ethAmt})
+                // function swapETHForExactTokens(uint256 amountIn, uint amountOut, route[] calldata routes, address to, uint deadline)
+                await ans.router.swapETHForExactTokens(...args, { value: amountIn })
             }
 
         })
@@ -526,21 +531,23 @@ describe('Router02', function () {
             for (let i = 0; i < 2; i++) {
                 let stable = i === 0
                 let ans = await loadFixture(deployContracts)
-                let ethAmt = ethers.utils.parseUnits("1", 16)
-                let tokenAmt = ethers.utils.parseUnits("18", 18)
+                let ethAmt = ethers.utils.parseUnits("1", 18)
+                let tokenAmt = ethers.utils.parseUnits("1800", 18)
                 //usdt-weth  addliquidityETH
                 let route = [[ans.weth.address, ans.usdt.address, stable]]
                 await addLiquidity(ans, ans.usdt, ans.weth, tokenAmt, ethAmt, stable, ethAmt)
                 //approve
                 await ans.usdt.approve(ans.router.address, tokenAmt)
-
+                
+                let amountIn = ethers.utils.parseUnits("1", 16)
                 let args = [
+                    amountIn,
                     0,
                     route,
                     ans.signer.address,
                     getDeadline()
                 ]
-                await ans.router.swapExactETHForTokensSupportingFeeOnTransferTokens(...args, {value: ethAmt})
+                await ans.router.swapExactETHForTokensSupportingFeeOnTransferTokens(...args, { value: ethAmt })
             }
         })
         it("swapExactTokensForETHSupportingFeeOnTransferTokens", async () => {
@@ -614,11 +621,48 @@ describe('Router02', function () {
             //
             console.log("\nprev weth balance", await ans.weth.balanceOf(ans.signer.address))
             // call multicall
-            await ans.router.multicall(getDeadline(),params)
+            await ans.router.multicall(getDeadline(), params)
             console.log("after weth balance", await ans.weth.balanceOf(ans.signer.address))
 
         })
 
+        it("multicallWithEth", async () => {
+
+
+            // the difference of using multicall between this testcase and FE code
+            // is the FE code's swap amount get from router-sdk
+
+            let ans = await loadFixture(deployContracts)
+
+            // eth -> usdt
+            // eth -> usdc
+            let lEthAmt = 100
+            let lUsdtAmt = 130000
+            let lUsdcAmt = lUsdtAmt
+            let swap1EthAmt = 10
+            let swap2EthAmt = 10
+            let swapEthAmt = swap1EthAmt + swap2EthAmt
+
+            // addLiquidity for eth-usdt
+            await addLiquidity(ans, ans.weth, ans.usdt, lEthAmt, lUsdtAmt, false, 0)
+            // addLiquidity for eth-usdc
+            await addLiquidity(ans, ans.weth, ans.usdc, lEthAmt, lUsdcAmt, false, 0)
+
+            // pack tx swap eth for usdt
+            let routerIface = ans.router.interface
+            let step1 = routerIface.encodeFunctionData("swapExactETHForTokens", [swap1EthAmt, 0, [[ans.weth.address, ans.usdt.address, false]], ans.signer.address, getDeadline()])
+            // pack tx swap eth for usdc
+            let step2 = routerIface.encodeFunctionData("swapExactETHForTokens", [swap2EthAmt, 0, [[ans.weth.address, ans.usdc.address, false]], ans.signer.address, getDeadline()])
+            // construct multicall tx
+            let params = [
+                step1, step2
+            ]
+
+            // multicall
+            console.log("\nprev usdt balance", await ans.usdt.balanceOf(ans.signer.address))
+            await ans.router.multicall(getDeadline(), params, { value: swapEthAmt })
+            console.log("prev usdc balance", await ans.usdc.balanceOf(ans.signer.address))
+        })
 
     })
 
@@ -661,10 +705,10 @@ async function addLiquidity(ans, tokenA, tokenB, aAmount, bAmount, stable, value
     // get Token
     if (tokenA.address === ans.weth.address) {
         // deposit
-        if (value === 0) await tokenA.deposit({value: aAmount})
+        if (value === 0) await tokenA.deposit({ value: aAmount })
         await tokenB.mint()
     } else if (tokenB.address === ans.weth.address) {
-        if (value === 0) await tokenB.deposit({value: bAmount})
+        if (value === 0) await tokenB.deposit({ value: bAmount })
         await tokenA.mint()
     } else {
         await tokenA.mint()
@@ -706,7 +750,7 @@ async function addLiquidity(ans, tokenA, tokenB, aAmount, bAmount, stable, value
             ans.signer.address,
             getDeadline()
         ]
-        await ans.router.addLiquidityETH(...args, {value: value})
+        await ans.router.addLiquidityETH(...args, { value: value })
     }
 
 
@@ -758,7 +802,7 @@ function getRoutes(ans, stable) {
 
 
 async function getSig(pair, signer, router, stable, dl, approveVal) {
-    const {chainId} = await ethers.provider.getNetwork();
+    const { chainId } = await ethers.provider.getNetwork();
     const domain = {
         name: 'Teleswap V2',
         version: '1',
@@ -768,11 +812,11 @@ async function getSig(pair, signer, router, stable, dl, approveVal) {
     //Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)
     const types = {
         Permit: [
-            {name: 'owner', type: 'address'},
-            {name: 'spender', type: 'address'},
-            {name: 'value', type: 'uint256'},
-            {name: 'nonce', type: 'uint256'},
-            {name: 'deadline', type: 'uint256'},
+            { name: 'owner', type: 'address' },
+            { name: 'spender', type: 'address' },
+            { name: 'value', type: 'uint256' },
+            { name: 'nonce', type: 'uint256' },
+            { name: 'deadline', type: 'uint256' },
         ]
     };
     // The data to sign
@@ -786,6 +830,6 @@ async function getSig(pair, signer, router, stable, dl, approveVal) {
     };
     let signert = await ethers.getSigner(signer)
     let signature = await signert._signTypedData(domain, types, value);
-    let {v, r, s} = await ethers.utils.splitSignature(signature)
+    let { v, r, s } = await ethers.utils.splitSignature(signature)
     return [v, r, s]
 }

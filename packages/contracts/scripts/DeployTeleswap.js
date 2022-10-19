@@ -17,8 +17,8 @@ async function main() {
     await teleswapRouter.deployed();
 
 
-    console.log("router", teleswapFactory.address);
-    console.log("factory", teleswapRouter.address);
+    console.log("router", teleswapRouter.address);
+    console.log("factory", teleswapFactory.address);
 }
 
 main()

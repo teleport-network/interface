@@ -84,7 +84,7 @@ interface ITeleswapV2Router01 {
         address to,
         uint deadline
     )external returns (uint[] memory amounts);
-    function swapExactETHForTokens(uint amountOutMin, route[] calldata routes, address to, uint deadline)
+    function swapExactETHForTokens(uint256 amountIn, uint amountOutMin, route[] calldata routes, address to, uint deadline)
         external
         payable
         returns (uint[] memory amounts);
