@@ -1,7 +1,9 @@
 import { Currency, ETHER, JSBI, TokenAmount } from '@teleswap/sdk'
+import QuestionHelper from 'components/QuestionHelper'
 import { useCallback, useEffect, useState } from 'react'
 import { Plus } from 'react-feather'
-import { Text } from 'rebass'
+import { Box, Flex, Text } from 'rebass'
+import styled from 'styled-components'
 
 import { ButtonDropdownLight } from '../../components/Button'
 import { BlueCard, LightCard } from '../../components/Card'
@@ -20,6 +22,34 @@ import { currencyId } from '../../utils/currencyId'
 import AppBody from '../AppBody'
 import { Dots } from '../Liquidity/styles'
 
+const CustomizedRadio = styled.input`
+  appearance: none;
+  border: 0.0875rem solid #4ed7b6;
+  width: 0.875rem;
+  height: 0.875rem;
+  margin: 0;
+  border-radius: 50%;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  :before {
+    content: '';
+    width: 0.4rem !important;
+    height: 0.4rem !important;
+    border-radius: 50%;
+    background-color: #4ed7b6;
+    transition: 120ms all ease-in-out;
+    box-shadow: inset 0.35rem 0.35rem #4ed7b6;
+    transform: scale(0);
+  }
+  :checked {
+    :before {
+      transform: scale(1);
+    }
+  }
+`
+
 enum Fields {
   TOKEN0 = 0,
   TOKEN1 = 1
@@ -33,8 +63,9 @@ export default function PoolFinder() {
 
   const [currency0, setCurrency0] = useState<Currency | null>(ETHER)
   const [currency1, setCurrency1] = useState<Currency | null>(null)
+  const [pairModeStable, setPairModeStable] = useState(false)
 
-  const [pairState, pair] = usePair(currency0 ?? undefined, currency1 ?? undefined)
+  const [pairState, pair] = usePair(currency0 ?? undefined, currency1 ?? undefined, pairModeStable)
   const addPair = usePairAdder()
   useEffect(() => {
     if (pair) {
@@ -131,6 +162,36 @@ export default function PoolFinder() {
             </Text>
           )}
         </ButtonDropdownLight>
+
+        <Box sx={{ marginTop: '1.5rem' }}>
+          <Box sx={{ fontWeight: 400, marginBottom: '.5rem' }} className={'secondary-title'}>
+            Pair Mode
+          </Box>
+          <Box sx={{ display: 'flex', fontWeight: 100, /* fontSize: '.5rem', */ alignItems: 'center' }}>
+            <Flex alignItems={'center'} sx={{ flex: 1 }} onClick={() => setPairModeStable(false)}>
+              <CustomizedRadio type="radio" name="pairMode" id="Volatile" checked={!pairModeStable} />
+              <label
+                className={'text-small'}
+                style={{ margin: '0 0 0 .7rem', fontWeight: !pairModeStable ? '400' : '200' }}
+                htmlFor="Volatile"
+              >
+                Volatile
+              </label>
+              <QuestionHelper text="Volatile mode, using non-stable currency algorithm curve, mainly designed for uncorrelated pools, like WETH+USDC or OP+WETH." />
+            </Flex>
+            <Flex alignItems={'center'} sx={{ flex: 1 }} onClick={() => setPairModeStable(true)}>
+              <CustomizedRadio type="radio" name="pairMode" id="Stable" checked={pairModeStable} />
+              <label
+                htmlFor="Stable"
+                className={'text-small'}
+                style={{ margin: '0 0 0 .7rem', fontWeight: pairModeStable ? '400' : '200' }}
+              >
+                Stable
+              </label>
+              <QuestionHelper text="Stable mode, using stable token algorithm curve, mainly designed for 1:1 or approximately equivalent trading pairs, like USDC+DAI or WETH+sETH." />
+            </Flex>
+          </Box>
+        </Box>
 
         {hasPosition && (
           <ColumnCenter

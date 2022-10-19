@@ -109,6 +109,8 @@ export class Trade {
    * The route of the trade, i.e. which pairs the trade goes through.
    */
   public readonly route: Route
+  public readonly routeData: any
+  
   /**
    * The type of the trade, either exact in or exact out.
    */

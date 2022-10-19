@@ -107,6 +107,9 @@ export default function Swap({ history }: RouteComponentProps) {
   } = useDerivedSwapInfo()
   if (routeData && v2Trade) {
     v2Trade['routeData'] = routeData
+    v2Trade['inputAmount'] = routeData['inputAmount']
+    v2Trade['outputAmount'] = routeData['outputAmount']
+    // v2Trade['priceImpact'] = routeData['priceImpactWithoutFee']
   }
   const {
     wrapType,
@@ -125,24 +128,16 @@ export default function Swap({ history }: RouteComponentProps) {
   const betterTradeLinkV2: Version | undefined =
     /* toggledVersion === Version.v1 && isTradeBetter(v1Trade, v2Trade) ?  */ Version.v2 /* : undefined */
 
-  // const parsedAmounts = showWrap
-  //   ? {
-  //     [Field.INPUT]: parsedAmount,
-  //     [Field.OUTPUT]: parsedAmount
-  //   }
-  //   : {
-  //     [Field.INPUT]: independentField === Field.INPUT ? parsedAmount : trade?.inputAmount,
-  //     [Field.OUTPUT]: independentField === Field.OUTPUT ? parsedAmount : trade?.outputAmount
-  //   }
   const parsedAmounts = showWrap
     ? {
         [Field.INPUT]: parsedAmount,
         [Field.OUTPUT]: parsedAmount
       }
     : {
-        [Field.INPUT]: independentField === Field.INPUT ? parsedAmount : routeData?.parsedOutAmount,
-        [Field.OUTPUT]: independentField === Field.OUTPUT ? parsedAmount : routeData?.parsedOutAmount
+        [Field.INPUT]: independentField === Field.INPUT ? parsedAmount : trade?.inputAmount,
+        [Field.OUTPUT]: independentField === Field.OUTPUT ? parsedAmount : trade?.outputAmount
       }
+
   const { onSwitchTokens, onCurrencySelection, onUserInput, onChangeRecipient } = useSwapActionHandlers()
   const isValid = !swapInputError
   const dependentField: Field = independentField === Field.INPUT ? Field.OUTPUT : Field.INPUT
@@ -481,7 +476,7 @@ export default function Swap({ history }: RouteComponentProps) {
               </Card>
             )}
             {!swapIsUnsupported ? (
-              <AdvancedSwapDetailsDropdown trade={trade} />
+              routeData && <AdvancedSwapDetailsDropdown trade={trade} />
             ) : (
               <UnsupportedCurrencyFooter show={swapIsUnsupported} currencies={[currencies.INPUT, currencies.OUTPUT]} />
             )}
@@ -585,7 +580,7 @@ export default function Swap({ history }: RouteComponentProps) {
                       }
                     }}
                     id="swap-button"
-                    disabled={!isValid || (priceImpactSeverity > 3 && !isExpertMode) || !!swapCallbackError}
+                    // disabled={!isValid || (priceImpactSeverity > 3 && !isExpertMode) || !!swapCallbackError}
                     error={isValid && priceImpactSeverity > 2 && !swapCallbackError}
                   >
                     <Text className="secondary-title" fontWeight={500}>
