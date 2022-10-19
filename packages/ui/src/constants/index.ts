@@ -37,7 +37,7 @@ export const AMPL = new Token(ChainId.MAINNET, '0xD46bA6D942050d489DBd938a2C909A
 export const DAI = new Token(ChainId.MAINNET, '0x6B175474E89094C44Da98b954EedeAC495271d0F', 18, 'DAI', 'Dai Stablecoin')
 export const USDC = new Token(
   ChainId.OP_GOERLI,
-  '0xe26f24d4ed34e138c5b52755ddc9614f5949ef95',
+  '0x4603cff6498c46583300fc5f1c31f872f5514182',
   18,
   'USDC',
   'Test USD Coin'

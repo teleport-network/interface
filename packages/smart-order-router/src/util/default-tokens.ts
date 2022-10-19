@@ -759,7 +759,7 @@ export const DEFAULT_TOKENS = {
     },
     {
       "name": "USDCoin",
-      "address": "0xe26f24d4ed34e138c5b52755ddc9614f5949ef95",
+      "address": "0x4603cff6498c46583300fc5f1c31f872f5514182",
       "symbol": "USDC",
       "decimals": 18,
       "chainId": 420,
