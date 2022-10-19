@@ -267,7 +267,7 @@ export default function PoolCard({ pid, stakingInfo }: { pid: number; stakingInf
             textOverflow: 'ellipsis',
             overflow: 'hidden',
             whiteSpace: 'nowrap',
-            maxWidth: isMobile ? '50%' : '70%'
+            maxWidth: isMobile ? '50%' : '60%'
           }}
         >
           {stakingInfo.pendingReward.toSignificant(6)} {rewardToken.symbol}
