@@ -262,7 +262,7 @@ export default function PoolCard({ pid, stakingInfo }: { pid: number; stakingInf
         <StakingColumnTitle>Earned Rewards</StakingColumnTitle>
         <TYPE.white
           title={parsedPendingAmount}
-          fontSize="1.2rem"
+          fontSize="1.1rem"
           style={{
             textOverflow: 'ellipsis',
             overflow: 'hidden',
