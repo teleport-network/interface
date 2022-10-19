@@ -134,7 +134,9 @@ export default createReducer(initialState, (builder) =>
       ) {
         const chainId = serializedPair.token0.chainId
         state.pairs[chainId] = state.pairs[chainId] || {}
-        state.pairs[chainId][pairKey(serializedPair.token0.address, serializedPair.token1.address, String(serializedPair.stable))] = serializedPair
+        state.pairs[chainId][
+          pairKey(serializedPair.token0.address, serializedPair.token1.address, String(serializedPair.stable))
+        ] = serializedPair
       }
       state.timestamp = currentTimestamp()
     })

@@ -13,7 +13,7 @@ const NetHeadStyle = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  color: #FFFFFF;
+  color: #ffffff;
   border-radius: 16px;
   box-sizing: border-box;
   height: 30px;
@@ -24,7 +24,7 @@ const NetHeadStyle = styled.div`
   line-height: 26px;
   text-align: center;
   text-transform: capitalize;
-  color: #FFFFFF;
+  color: #ffffff;
 
   .tokenIcon {
     width: 2.2rem;
@@ -32,7 +32,7 @@ const NetHeadStyle = styled.div`
   }
   .networkLabelText {
     margin-left: 1rem;
-    margin-right: .5rem;
+    margin-right: 0.5rem;
   }
 `
 const NetBodyWrapStyle = styled.div`
@@ -43,9 +43,9 @@ const NetBodyWrapStyle = styled.div`
 
 const NetBodyStyle = styled.div`
   padding: 1rem;
-  color: #FFFFFF;
+  color: #ffffff;
   width: 19rem;
-  background: #19242F;
+  background: #19242f;
   border-radius: 1.7rem;
   font-weight: 500;
   font-size: 1rem;
@@ -54,7 +54,7 @@ const NetBodyStyle = styled.div`
     color: rgba(255, 255, 255, 0.4);
     font-weight: 500;
     font-size: 12px;
-    margin-bottom: .9rem;
+    margin-bottom: 0.9rem;
   }
 `
 const NetBodyRowStyle = styled.div`
@@ -68,14 +68,14 @@ const NetBodyRowStyle = styled.div`
   }
   &:hover::after {
     content: '';
-    width: .5rem;
-    height: .5rem;
-    background: #20B26C;
-    box-shadow: 0px 0px 10px #01E676;
+    width: 0.5rem;
+    height: 0.5rem;
+    background: #20b26c;
+    box-shadow: 0px 0px 10px #01e676;
     position: absolute;
     right: 1.8rem;
   }
-  >img {
+  > img {
     width: 2rem;
     height: 2rem;
     margin-right: 1.1rem;
@@ -111,7 +111,7 @@ export default function Network() {
   const info = getChainInfo(chainId)
 
   const switchNet = (chainIdNumber) => {
-    ; (async () => {
+    ;(async () => {
       if (connector) {
         const chainIdHex = Number(chainIdNumber).toString(16)
         const chainId = `0x${chainIdHex}`

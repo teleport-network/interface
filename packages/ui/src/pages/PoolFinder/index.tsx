@@ -22,8 +22,6 @@ import { currencyId } from '../../utils/currencyId'
 import AppBody from '../AppBody'
 import { Dots } from '../Liquidity/styles'
 
-
-
 const CustomizedRadio = styled.input`
   appearance: none;
   border: 0.0875rem solid #4ed7b6;
@@ -79,9 +77,9 @@ export default function PoolFinder() {
     pairState === PairState.NOT_EXISTS ||
     Boolean(
       pairState === PairState.EXISTS &&
-      pair &&
-      JSBI.equal(pair.reserve0.raw, JSBI.BigInt(0)) &&
-      JSBI.equal(pair.reserve1.raw, JSBI.BigInt(0))
+        pair &&
+        JSBI.equal(pair.reserve0.raw, JSBI.BigInt(0)) &&
+        JSBI.equal(pair.reserve1.raw, JSBI.BigInt(0))
     )
 
   const position: TokenAmount | undefined = useTokenBalance(account ?? undefined, pair?.liquidityToken)
