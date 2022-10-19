@@ -48,7 +48,7 @@ async function getQuote(
     config
   )
 
-  if (!swapRoute) throw new Error('Failed to generate client side quote')
+  if (!swapRoute) throw new Error('Empty route')
 
   return { data: transformSwapRouteToGetQuoteResult(type, amount, swapRoute, swapConfig) }
 }
