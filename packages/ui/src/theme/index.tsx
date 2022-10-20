@@ -306,13 +306,13 @@ body {
   font-size: 1rem !important;
 }
 .text-small {
-  font-size: 0.875rem !important;
+  /* font-size: 0.875rem !important; */
+  font-size: max(0.875rem, 12px) !important;
 }
 .text-detail {
-  font-size: 0.75rem !important;
+  /* font-size: 0.75rem !important; */
+  font-size: max(0.75rem, 12px) !important;
 }
-
-
 .primary-button-text {
   font-size: 1.5rem !important;
 }

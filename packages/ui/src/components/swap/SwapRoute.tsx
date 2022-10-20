@@ -25,7 +25,10 @@ export default memo(function SwapRoute({ trade }: { trade: Trade }) {
               </Flex>
               {isLastItem ? null : <ChevronRight size={12} color={theme.text2} />}
               {isLastItem && <ChevronRight size={12} color={theme.text2} />}
-              {isLastItem && token?.tokenOut?.symbol}
+              {isLastItem && <TYPE.black className="text-detail" color={theme.text1} ml="0.125rem" mr="0.125rem">
+                {token?.tokenOut?.symbol}
+              </TYPE.black>
+              }
             </Fragment>
           )
         })}

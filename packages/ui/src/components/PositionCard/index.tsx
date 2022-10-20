@@ -194,7 +194,8 @@ export function MinimalPositionCard({ pair, showUnwrapped = false, ...boxProps }
 const YourPisitonCardPart = styled(Box)`
   /* border: 1px solid ${({ theme }) => theme.common3}; */
   /* border-radius: 0.8rem; */
-  font-size: 0.7rem;
+  /* font-size: 0.7rem; */
+  font-size: max(0.7rem, 12px);
   color: #ffffff;
 `
 export function MinimalPositionCardPart({ pair, showUnwrapped = false, border }: PositionCardProps) {
