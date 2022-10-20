@@ -148,7 +148,7 @@ const LPTag = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.75rem;
+  font-size: 0.85rem;
   width: 5.14rem;
   height: 1.85rem;
 
