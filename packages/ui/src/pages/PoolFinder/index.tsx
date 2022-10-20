@@ -1,17 +1,18 @@
 import { Currency, ETHER, JSBI, TokenAmount } from '@teleswap/sdk'
+import { ReactComponent as ArrowDown } from 'assets/svg/arrowdown.svg'
+import LiquidityPlusIcon from 'assets/svg/liquidityPlusIcon.svg'
 import QuestionHelper from 'components/QuestionHelper'
 import { useCallback, useEffect, useState } from 'react'
-import { Plus } from 'react-feather'
-import { Box, Flex, Text } from 'rebass'
+import { Box, ButtonProps, Flex, Text } from 'rebass'
 import styled from 'styled-components'
 
-import { ButtonDropdownLight } from '../../components/Button'
+import { ButtonOutlined } from '../../components/Button'
 import { BlueCard, LightCard } from '../../components/Card'
 import { AutoColumn, ColumnCenter } from '../../components/Column'
 import CurrencyLogo from '../../components/CurrencyLogo'
 import { FindPoolTabs } from '../../components/NavigationTabs'
 import { MinimalPositionCard } from '../../components/PositionCard'
-import Row from '../../components/Row'
+import Row, { RowBetween } from '../../components/Row'
 import CurrencySearchModal from '../../components/SearchModal/CurrencySearchModal'
 import { PairState, usePair } from '../../data/Reserves'
 import { useActiveWeb3React } from '../../hooks'
@@ -101,7 +102,7 @@ export default function PoolFinder() {
   }, [setShowSearch])
 
   const prerequisiteMessage = (
-    <LightCard padding="45px 10px">
+    <LightCard padding="0.5rem 0px">
       <Text textAlign="center" className="text">
         {!account ? 'Connect to a wallet to find pools' : 'Select a token to find your liquidity.'}
       </Text>
@@ -119,83 +120,105 @@ export default function PoolFinder() {
             </TYPE.link>
           </AutoColumn>
         </BlueCard>
-        <ButtonDropdownLight
-          onClick={() => {
-            setShowSearch(true)
-            setActiveField(Fields.TOKEN0)
-          }}
-        >
-          {currency0 ? (
-            <Row>
-              <CurrencyLogo currency={currency0} />
+        <Box sx={{ position: 'relative' }}>
+          <ButtonDropdownLight
+            sx={{
+              marginBottom: '1.25rem',
+              background: 'rgba(5, 5, 14, 0.5)!important',
+              border: 'unset!important'
+            }}
+            onClick={() => {
+              setShowSearch(true)
+              setActiveField(Fields.TOKEN0)
+            }}
+          >
+            {currency0 ? (
+              <Row>
+                <CurrencyLogo currency={currency0} />
+                <Text fontWeight={500} fontSize={20} marginLeft={'12px'}>
+                  {currency0.symbol}
+                </Text>
+              </Row>
+            ) : (
               <Text fontWeight={500} fontSize={20} marginLeft={'12px'}>
-                {currency0.symbol}
+                Select a Token
               </Text>
-            </Row>
-          ) : (
-            <Text fontWeight={500} fontSize={20} marginLeft={'12px'}>
-              Select a Token
-            </Text>
-          )}
-        </ButtonDropdownLight>
+            )}
+          </ButtonDropdownLight>
 
-        <ColumnCenter>
-          <Plus size="16" color="#888D9B" />
-        </ColumnCenter>
+          <ColumnCenter sx={{ position: 'absolute', top: '5rem', zIndex: 2, width: '100%', height: 0 }}>
+            {/* <Plus size="16" color="#888D9B" /> */}
+            <img src={LiquidityPlusIcon} alt="import-pool-plus-icon" style={{ width: '3rem', height: '3rem' }} />
+          </ColumnCenter>
 
-        <ButtonDropdownLight
-          onClick={() => {
-            setShowSearch(true)
-            setActiveField(Fields.TOKEN1)
-          }}
-        >
-          {currency1 ? (
-            <Row>
-              <CurrencyLogo currency={currency1} />
+          <ButtonDropdownLight
+            sx={{
+              background: 'rgba(5, 5, 14, 0.5)!important',
+              border: 'unset!important'
+            }}
+            onClick={() => {
+              setShowSearch(true)
+              setActiveField(Fields.TOKEN1)
+            }}
+          >
+            {currency1 ? (
+              <Row>
+                <CurrencyLogo currency={currency1} />
+                <Text fontWeight={500} fontSize={20} marginLeft={'12px'}>
+                  {currency1.symbol}
+                </Text>
+              </Row>
+            ) : (
               <Text fontWeight={500} fontSize={20} marginLeft={'12px'}>
-                {currency1.symbol}
+                Select a Token
               </Text>
-            </Row>
-          ) : (
-            <Text fontWeight={500} fontSize={20} marginLeft={'12px'}>
-              Select a Token
-            </Text>
-          )}
-        </ButtonDropdownLight>
-
-        <Box sx={{ marginTop: '1.5rem' }}>
-          <Box sx={{ fontWeight: 400, marginBottom: '.5rem' }} className={'secondary-title'}>
-            Pair Mode
-          </Box>
-          <Box sx={{ display: 'flex', fontWeight: 100, /* fontSize: '.5rem', */ alignItems: 'center' }}>
-            <Flex alignItems={'center'} sx={{ flex: 1 }} onClick={() => setPairModeStable(false)}>
-              <CustomizedRadio type="radio" name="pairMode" id="Volatile" checked={!pairModeStable} />
-              <label
-                className={'text-small'}
-                style={{ margin: '0 0 0 .7rem', fontWeight: !pairModeStable ? '400' : '200' }}
-                htmlFor="Volatile"
-              >
-                Volatile
-              </label>
-              <QuestionHelper text="Volatile mode, using non-stable currency algorithm curve, mainly designed for uncorrelated pools, like WETH+USDC or OP+WETH." />
-            </Flex>
-            <Flex alignItems={'center'} sx={{ flex: 1 }} onClick={() => setPairModeStable(true)}>
-              <CustomizedRadio type="radio" name="pairMode" id="Stable" checked={pairModeStable} />
-              <label
-                htmlFor="Stable"
-                className={'text-small'}
-                style={{ margin: '0 0 0 .7rem', fontWeight: pairModeStable ? '400' : '200' }}
-              >
-                Stable
-              </label>
-              <QuestionHelper text="Stable mode, using stable token algorithm curve, mainly designed for 1:1 or approximately equivalent trading pairs, like USDC+DAI or WETH+sETH." />
-            </Flex>
-          </Box>
+            )}
+          </ButtonDropdownLight>
         </Box>
-
+        {!hasPosition && (
+          <>
+            <Box sx={{ marginTop: '1.5rem' }}>
+              <Box sx={{ fontWeight: 400, marginBottom: '.5rem' }} className={'secondary-title'}>
+                Pair Mode
+              </Box>
+              <Box sx={{ display: 'flex', fontWeight: 100, /* fontSize: '.5rem', */ alignItems: 'center' }}>
+                <Flex alignItems={'center'} sx={{ flex: 1 }} onClick={() => setPairModeStable(false)}>
+                  <CustomizedRadio type="radio" name="pairMode" id="Volatile" checked={!pairModeStable} />
+                  <label
+                    className={'text-small'}
+                    style={{ margin: '0 0 0 .7rem', fontWeight: !pairModeStable ? '400' : '200' }}
+                    htmlFor="Volatile"
+                  >
+                    Volatile
+                  </label>
+                  <QuestionHelper text="Volatile mode, using non-stable currency algorithm curve, mainly designed for uncorrelated pools, like WETH+USDC or OP+WETH." />
+                </Flex>
+                <Flex alignItems={'center'} sx={{ flex: 1 }} onClick={() => setPairModeStable(true)}>
+                  <CustomizedRadio type="radio" name="pairMode" id="Stable" checked={pairModeStable} />
+                  <label
+                    htmlFor="Stable"
+                    className={'text-small'}
+                    style={{ margin: '0 0 0 .7rem', fontWeight: pairModeStable ? '400' : '200' }}
+                  >
+                    Stable
+                  </label>
+                  <QuestionHelper text="Stable mode, using stable token algorithm curve, mainly designed for 1:1 or approximately equivalent trading pairs, like USDC+DAI or WETH+sETH." />
+                </Flex>
+              </Box>
+            </Box>
+            <Box
+              sx={{
+                width: '100%',
+                borderTop: '1px solid rgba(255,255,255,0.2)',
+                height: '0',
+                margin: '0.5rem 0'
+              }}
+            ></Box>
+          </>
+        )}
         {hasPosition && (
           <ColumnCenter
-            style={{ justifyItems: 'center', backgroundColor: '', padding: '1rem 0px', borderRadius: '1rem' }}
+            style={{ justifyItems: 'center', backgroundColor: '', padding: '0.5rem 0px', borderRadius: '1rem' }}
           >
             <Text textAlign="center" className="text" fontWeight={500}>
               Pool Found!
@@ -205,13 +228,16 @@ export default function PoolFinder() {
             </StyledInternalLink>
           </ColumnCenter>
         )}
-
         {currency0 && currency1 ? (
           pairState === PairState.EXISTS ? (
             hasPosition && pair ? (
-              <MinimalPositionCard pair={pair} border="1px solid #CED0D9" />
+              <MinimalPositionCard
+                pair={pair}
+                border="1px solid #CED0D9"
+                sx={{ border: 'unset', background: 'rgba(0, 0, 0, 0.1)' }}
+              />
             ) : (
-              <LightCard padding="45px 10px">
+              <LightCard padding="0.5rem 0px">
                 <AutoColumn gap="sm" justify="center">
                   <Text textAlign="center">You don’t have liquidity in this pool yet.</Text>
                   <StyledInternalLink to={`/add/${currencyId(currency0)}/${currencyId(currency1)}`}>
@@ -221,7 +247,7 @@ export default function PoolFinder() {
               </LightCard>
             )
           ) : validPairNoLiquidity ? (
-            <LightCard padding="45px 10px">
+            <LightCard padding="0.5rem 0px">
               <AutoColumn gap="sm" justify="center" className="text">
                 <Text textAlign="center">No pool found.</Text>
                 <StyledInternalLink to={`/add/${currencyId(currency0)}/${currencyId(currency1)}`}>
@@ -230,7 +256,7 @@ export default function PoolFinder() {
               </AutoColumn>
             </LightCard>
           ) : pairState === PairState.INVALID ? (
-            <LightCard padding="45px 10px">
+            <LightCard padding="0.5rem 0px">
               <AutoColumn gap="sm" justify="center" className="text">
                 <Text textAlign="center" fontWeight={500}>
                   Invalid pair.
@@ -238,7 +264,7 @@ export default function PoolFinder() {
               </AutoColumn>
             </LightCard>
           ) : pairState === PairState.LOADING ? (
-            <LightCard padding="45px 10px">
+            <LightCard padding="0.5rem 0px">
               <AutoColumn gap="sm" justify="center" className="text">
                 <Text textAlign="center">
                   Loading
@@ -260,5 +286,26 @@ export default function PoolFinder() {
         selectedCurrency={(activeField === Fields.TOKEN0 ? currency1 : currency0) ?? undefined}
       />
     </AppBody>
+  )
+}
+
+const StyledDropDown = styled(ArrowDown)<{ selected: boolean }>`
+  margin: 0;
+  height: 35%;
+
+  /* path {
+    stroke: ${({ selected, theme }) => (selected ? theme.text1 : theme.white)};
+    stroke-width: 1.5px;
+  } */
+`
+
+function ButtonDropdownLight({ disabled = false, children, ...rest }: { disabled?: boolean } & ButtonProps) {
+  return (
+    <ButtonOutlined {...rest} disabled={disabled} height={'6rem'}>
+      <RowBetween>
+        <div style={{ display: 'flex', alignItems: 'center' }}>{children}</div>
+        <StyledDropDown width={'2rem'} selected={false} />
+      </RowBetween>
+    </ButtonOutlined>
   )
 }
