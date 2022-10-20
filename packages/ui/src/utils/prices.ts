@@ -148,6 +148,7 @@ export function warningSeverity(priceImpact: Percent | undefined): 0 | 1 | 2 | 3
   return 0
 }
 
+/*
 export function formatExecutionPrice(trade?: Trade, inverted?: boolean): string {
   if (!trade) {
     return ''
@@ -160,3 +161,4 @@ export function formatExecutionPrice(trade?: Trade, inverted?: boolean): string 
         trade.inputAmount.currency.symbol
       }`
 }
+*/
