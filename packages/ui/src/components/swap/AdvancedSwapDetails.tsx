@@ -184,7 +184,7 @@ export function AdvancedSwapDetails({ trade }: AdvancedSwapDetailsProps) {
           <TradeSummary trade={trade} allowedSlippage={allowedSlippage} />
           {showRoute && (
             <>
-              <RowBetween style={{ padding: '0 16px' }}>
+              <RowBetween style={{ padding: '0 16px' }} className="text-detail">
                 <span style={{ display: 'flex', alignItems: 'center' }}>
                   <TYPE.black className="text-detail" fontWeight={400} color={theme.text2}>
                     Route
@@ -217,7 +217,7 @@ export function AdvancedSwapDetails({ trade }: AdvancedSwapDetailsProps) {
                     routeData &&
                       routeData.hasOwnProperty('route') &&
                       routeData.route.map((item, index) => (
-                        <RouteCellStyled key={index}>
+                        <RouteCellStyled key={index} className="text-detail">
                           {item.map((routeItem, routeItemIndex) => (
                             <>
                               <div

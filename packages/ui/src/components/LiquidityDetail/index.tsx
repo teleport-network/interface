@@ -42,7 +42,7 @@ const StyledLink = styled(ButtonPrimary)`
     font-weight: 600;
     padding: 0.5rem;
     height: 2rem !important;
-    font-size: 0.8rem;
+    font-size: max(0.8rem, 12px);
     border-radius: 0.5rem !important;
     color: #000000;
   }
@@ -924,7 +924,7 @@ const HeaderText = styled(Text).attrs((props) => {
   font-style: normal;
   font-weight: 400;
   line-height: 0.8rem;
-  font-size: 0.8rem;
+  font-size: max(0.8rem, 12px);
   color: rgba(255, 255, 255, 0.6);
   white-space: nowrap;
 `
