@@ -119,7 +119,7 @@ export function useDerivedSwapInfo():
       routeData?: any
     } {
   const { account, chainId } = useActiveWeb3React()
-
+  const [loading, setLoading] = useState(false)
   const {
     independentField,
     typedValue,
@@ -199,7 +199,6 @@ export function useDerivedSwapInfo():
 
   // api route
   const [routeData, setRouteData] = useState({})
-
   const inputName = (currencies && currencies[Field.INPUT]?.name) || ''
   const outputName = (currencies && currencies[Field.OUTPUT]?.name) || ''
   useEffect(() => {
@@ -217,70 +216,113 @@ export function useDerivedSwapInfo():
     })()
   }, [typedValue, inputName, outputName, isExactIn])
 
-  const getData = async () => {
-    if (
-      typedValue &&
-      currencies &&
-      currencies[Field.INPUT] &&
-      currencies[Field.INPUT]?.hasOwnProperty('decimals') &&
-      currencies[Field.OUTPUT] &&
-      currencies[Field.OUTPUT]?.hasOwnProperty('decimals') &&
-      chainId
-    ) {
-      // if (currencyAmount.currency === ETHER) return new TokenAmount(WETH[chainId], currencyAmount.raw)
-      if (currencies[Field.INPUT]!['symbol'] === 'ETH') {
-        currencies[Field.INPUT] = WETH[chainId]
-      }
-      if (currencies[Field.OUTPUT]!['symbol'] === 'ETH') {
-        currencies[Field.OUTPUT] = WETH[chainId]
-      }
-      if (!currencies[Field.INPUT] || !currencies[Field.INPUT]!['address'] || !currencies[Field.INPUT]!['chainId']) {
-        throw new Error(`Invalid`)
-      }
-
-      if (!currencies[Field.OUTPUT] || !currencies[Field.OUTPUT]!['address'] || !currencies[Field.OUTPUT]!['chainId']) {
-        throw new Error(`Invalid`)
-      }
-      const decimal = isExactIn ? currencies[Field.INPUT]?.decimals : currencies[Field.OUTPUT]?.decimals
-      if (!decimal) {
-        throw new Error(`Invalid decimal`)
-      }
-      const amount = new BigNumber(typedValue).shiftedBy(decimal!).toString()
-      const params: QuoteArguments = {
-        tokenInAddress: currencies[Field.INPUT]!['address']!,
-        tokenInChainId: currencies[Field.INPUT]!['chainId'],
-        tokenOutAddress: currencies[Field.OUTPUT]!['address']!,
-        tokenOutChainId: currencies[Field.OUTPUT]!['chainId'],
-        amount,
-        type: isExactIn ? 'exactIn' : 'exactOut',
-        tokenInSymbol: currencies[Field.INPUT]!.symbol,
-        tokenOutSymbol: currencies[Field.OUTPUT]!.symbol,
-        slippageTolerance: allowedSlippage ? String(allowedSlippage) : '',
-        tokenInDecimals: currencies[Field.INPUT]!.decimals,
-        tokenOutDecimals: currencies[Field.OUTPUT]!.decimals
-      }
-      params['recipient'] = ''
-      if (ttl) {
-        params['deadline'] = String(ttl)
-      }
-      const response = await route(params)
-      if (response.data && response.data.hasOwnProperty('quoteDecimals')) {
-        const outputAmount = tryParseAmount(
-          response.data.quoteDecimals,
-          (isExactIn ? outputCurrency : inputCurrency) ?? undefined
-        )
-        const exactType = response.data && response.data.reqParams && response.data.reqParams.type
-        switch (exactType) {
-          case 'exactIn':
-            response.data['inputAmount'] = parsedAmount
-            response.data['outputAmount'] = outputAmount
-            break
-          case 'exactOut':
-            response.data['inputAmount'] = outputAmount
-            response.data['outputAmount'] = parsedAmount
-            break
+  const alertMsg = (msg: string) => {
+    let divTemp = document.createElement('div')
+    divTemp.className = 'toastMessageWrap'
+    divTemp.innerHTML = `
+          <div class="toastMessageContent">
+                ${msg}
+          </div> 
+    `
+    // @ts-ignore
+    document.querySelector('body').append(divTemp)
+    setTimeout(() => {
+      const nodeTags = document.getElementsByClassName('toastMessageWrap')
+      for (let k = 0; k < nodeTags.length; k++) {
+        if (nodeTags[k] != null) {
+          // @ts-ignore
+          nodeTags[k].parentNode.removeChild(nodeTags[k])
         }
-        setRouteData(response.data)
+      }
+    }, 2000)
+  }
+  const getData = async () => {
+    try {
+      if (
+        typedValue &&
+        currencies &&
+        currencies[Field.INPUT] &&
+        currencies[Field.INPUT]?.hasOwnProperty('decimals') &&
+        currencies[Field.OUTPUT] &&
+        currencies[Field.OUTPUT]?.hasOwnProperty('decimals') &&
+        chainId
+      ) {
+        // if (currencyAmount.currency === ETHER) return new TokenAmount(WETH[chainId], currencyAmount.raw)
+        if (currencies[Field.INPUT]!['symbol'] === 'ETH') {
+          currencies[Field.INPUT] = WETH[chainId]
+        }
+        if (currencies[Field.OUTPUT]!['symbol'] === 'ETH') {
+          currencies[Field.OUTPUT] = WETH[chainId]
+        }
+        if (!currencies[Field.INPUT] || !currencies[Field.INPUT]!['address'] || !currencies[Field.INPUT]!['chainId']) {
+          throw new Error(`Invalid`)
+        }
+
+        if (
+          !currencies[Field.OUTPUT] ||
+          !currencies[Field.OUTPUT]!['address'] ||
+          !currencies[Field.OUTPUT]!['chainId']
+        ) {
+          throw new Error(`Invalid`)
+        }
+        const decimal = isExactIn ? currencies[Field.INPUT]?.decimals : currencies[Field.OUTPUT]?.decimals
+        if (!decimal) {
+          throw new Error(`Invalid decimal`)
+        }
+        const amount = new BigNumber(typedValue).shiftedBy(decimal).toNumber().toLocaleString().replace(/,/g, '')
+        const params: QuoteArguments = {
+          tokenInAddress: currencies[Field.INPUT]!['address']!,
+          tokenInChainId: currencies[Field.INPUT]!['chainId'],
+          tokenOutAddress: currencies[Field.OUTPUT]!['address']!,
+          tokenOutChainId: currencies[Field.OUTPUT]!['chainId'],
+          amount,
+          type: isExactIn ? 'exactIn' : 'exactOut',
+          tokenInSymbol: currencies[Field.INPUT]!.symbol,
+          tokenOutSymbol: currencies[Field.OUTPUT]!.symbol,
+          slippageTolerance: allowedSlippage ? String(allowedSlippage) : '',
+          tokenInDecimals: currencies[Field.INPUT]!.decimals,
+          tokenOutDecimals: currencies[Field.OUTPUT]!.decimals
+        }
+        params['recipient'] = ''
+        if (ttl) {
+          params['deadline'] = String(ttl)
+        }
+        setLoading(true)
+        const response = await route(params)
+        setLoading(false)
+        if (response.data.hasOwnProperty('invalidRoute') && response.data.invalidRoute === true) {
+          if (document && document.querySelector('body')) {
+            alertMsg('No valid route matched')
+          } else {
+            alert('No valid route matched')
+          }
+          setRouteData({})
+        } else {
+          if (response.data && response.data.hasOwnProperty('quoteDecimals')) {
+            const outputAmount = tryParseAmount(
+              response.data.quoteDecimals,
+              (isExactIn ? outputCurrency : inputCurrency) ?? undefined
+            )
+            const exactType = response.data && response.data.reqParams && response.data.reqParams.type
+            switch (exactType) {
+              case 'exactIn':
+                response.data['inputAmount'] = parsedAmount
+                response.data['outputAmount'] = outputAmount
+                break
+              case 'exactOut':
+                response.data['inputAmount'] = outputAmount
+                response.data['outputAmount'] = parsedAmount
+                break
+            }
+            setRouteData(response.data)
+          }
+        }
+      }
+    } catch (error: any) {
+      if (document && document.querySelector('body')) {
+        alertMsg(error?.message || error)
+      } else {
+        alert(error?.message || error)
       }
     }
   }
@@ -291,7 +333,8 @@ export function useDerivedSwapInfo():
     v2Trade: Object.keys(routeData).length > 0 ? v2Trade : undefined,
     // v2Trade: v2Trade ?? undefined,
     inputError,
-    routeData
+    routeData,
+    loading
   }
 }
 

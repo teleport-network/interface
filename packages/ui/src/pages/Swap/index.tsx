@@ -12,6 +12,7 @@ import { RouteComponentProps } from 'react-router-dom'
 import { Text } from 'rebass'
 import { getTradeVersion } from 'utils/tradeVersion'
 
+import LoadingButton from '@mui/lab/LoadingButton'
 import AddressInputPanel from '../../components/AddressInputPanel'
 import { ButtonConfirmed, ButtonError, ButtonLight, ButtonPrimary } from '../../components/Button'
 import Card, { GreyCard } from '../../components/Card'
@@ -103,7 +104,8 @@ export default function Swap({ history }: RouteComponentProps) {
     parsedAmount,
     currencies,
     inputError: swapInputError,
-    routeData
+    routeData,
+    loading
   } = useDerivedSwapInfo()
   if (routeData && v2Trade) {
     v2Trade['testRoute'] = v2Trade['route']
@@ -142,8 +144,8 @@ export default function Swap({ history }: RouteComponentProps) {
   const trade = showWrap ? undefined : tradesByVersion[toggledVersion]
   const defaultTrade = showWrap ? undefined : tradesByVersion[DEFAULT_VERSION]
 
-  const betterTradeLinkV2: Version | undefined =
-    /* toggledVersion === Version.v1 && isTradeBetter(v1Trade, v2Trade) ?  */ Version.v2 /* : undefined */
+  // const betterTradeLinkV2: Version | undefined =
+  // toggledVersion === Version.v1 && isTradeBetter(v1Trade, v2Trade) ? Version.v2  : undefined
 
   const parsedAmounts = showWrap
     ? {
@@ -461,7 +463,23 @@ export default function Swap({ history }: RouteComponentProps) {
                 <AddressInputPanel id="recipient" value={recipient} onChange={onChangeRecipient} />
               </>
             ) : null}
-
+            {loading && (
+              <div style={{ marginTop: '20px' }}>
+                <div style={{ display: 'inline-block' }}>
+                  <LoadingButton
+                    sx={{
+                      backgroundColor: 'transparent !important',
+                      color: 'rgba(255, 255, 255, 0.8) !important',
+                      fontSize: '12px !important'
+                    }}
+                    loading={loading}
+                    loadingPosition="start"
+                    variant="contained"
+                  ></LoadingButton>
+                </div>
+                <span style={{ position: 'relative', left: '-10px' }}>Fetching best price...</span>
+              </div>
+            )}
             {showWrap ? null : (
               <Card
                 padding={showWrap ? '.25rem 1rem 0 1rem' : '0.5rem 0px'}
@@ -495,7 +513,7 @@ export default function Swap({ history }: RouteComponentProps) {
               </Card>
             )}
             {!swapIsUnsupported ? (
-              routeData && <AdvancedSwapDetailsDropdown trade={trade} />
+              routeData && !loading && <AdvancedSwapDetailsDropdown trade={trade} />
             ) : (
               <UnsupportedCurrencyFooter show={swapIsUnsupported} currencies={[currencies.INPUT, currencies.OUTPUT]} />
             )}
@@ -599,7 +617,7 @@ export default function Swap({ history }: RouteComponentProps) {
                       }
                     }}
                     id="swap-button"
-                    // disabled={!isValid || (priceImpactSeverity > 3 && !isExpertMode) || !!swapCallbackError}
+                    disabled={!isValid || (priceImpactSeverity > 3 && !isExpertMode) || !!swapCallbackError}
                     error={isValid && priceImpactSeverity > 2 && !swapCallbackError}
                   >
                     <Text className="secondary-title" fontWeight={500}>
@@ -651,7 +669,7 @@ export default function Swap({ history }: RouteComponentProps) {
             ) : noRoute && userHasSpecifiedInputOutput ? (
               <GreyCard style={{ textAlign: 'center' }}>
                 <TYPE.main className="secondary-title" mb="4px">
-                  Insufficient liquidity for this trade.
+                  Insufficient liquidity for this trade
                 </TYPE.main>
                 {singleHopOnly && (
                   <TYPE.main className="secondary-title" mb="4px">
