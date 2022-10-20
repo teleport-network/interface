@@ -111,13 +111,13 @@ function involvesAddress(trade: Trade, checksummedAddress: string): boolean {
 export function useDerivedSwapInfo():
   | any
   | {
-    currencies: { [field in Field]?: Currency }
-    currencyBalances: { [field in Field]?: CurrencyAmount }
-    parsedAmount: CurrencyAmount | undefined
-    v2Trade: Trade | undefined
-    inputError?: string
-    routeData?: any
-  } {
+      currencies: { [field in Field]?: Currency }
+      currencyBalances: { [field in Field]?: CurrencyAmount }
+      parsedAmount: CurrencyAmount | undefined
+      v2Trade: Trade | undefined
+      inputError?: string
+      routeData?: any
+    } {
   const { account, chainId } = useActiveWeb3React()
 
   const {
@@ -145,7 +145,7 @@ export function useDerivedSwapInfo():
   const bestTradeExactOut = useTradeExactOut(inputCurrency ?? undefined, !isExactIn ? parsedAmount : undefined)
 
   // const v2Trade = isExactIn ? bestTradeExactIn : bestTradeExactOut
-  let v2Trade = {}
+  const v2Trade: any = {}
   const currencyBalances = {
     [Field.INPUT]: relevantTokenBalances[0],
     [Field.OUTPUT]: relevantTokenBalances[1]
@@ -185,7 +185,6 @@ export function useDerivedSwapInfo():
   const [allowedSlippage] = useUserSlippageTolerance()
   const [ttl] = useUserTransactionTTL()
 
-
   const slippageAdjustedAmounts = v2Trade && allowedSlippage && computeSlippageAdjustedAmounts(v2Trade, allowedSlippage)
 
   // compare input balance to max input based on version
@@ -204,7 +203,7 @@ export function useDerivedSwapInfo():
   const inputName = (currencies && currencies[Field.INPUT]?.name) || ''
   const outputName = (currencies && currencies[Field.OUTPUT]?.name) || ''
   useEffect(() => {
-    ; (async () => {
+    ;(async () => {
       try {
         if (!!timeout) {
           clearTimeout(timeout)
@@ -272,14 +271,14 @@ export function useDerivedSwapInfo():
         )
         const exactType = response.data && response.data.reqParams && response.data.reqParams.type
         switch (exactType) {
-          case "exactIn":
+          case 'exactIn':
             response.data['inputAmount'] = parsedAmount
             response.data['outputAmount'] = outputAmount
-            break;
-          case "exactOut":
+            break
+          case 'exactOut':
             response.data['inputAmount'] = outputAmount
             response.data['outputAmount'] = parsedAmount
-            break;
+            break
         }
         setRouteData(response.data)
       }

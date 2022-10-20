@@ -1,11 +1,7 @@
 {
   "compilerOptions": {
     "target": "es5",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
@@ -25,22 +21,11 @@
     "jsx": "react-jsx",
     "downlevelIteration": true,
     "allowSyntheticDefaultImports": true,
-    "types": [
-      "react-spring",
-      "jest"
-    ],
+    "types": ["react-spring", "jest"],
     "baseUrl": "src",
     "isolatedModules": true
   },
-  "exclude": [
-    "node_modules",
-    "cypress"
-  ],
+  "exclude": ["node_modules", "cypress"],
   "extends": "./isolatedModules.json",
-  "include": [
-    "./src/**/*.ts",
-    "./src/**/*.tsx",
-    "src/components/Confetti/index.js",
-    "public"
-  ]
+  "include": ["./src/**/*.ts", "./src/**/*.tsx", "src/components/Confetti/index.js", "public"]
 }

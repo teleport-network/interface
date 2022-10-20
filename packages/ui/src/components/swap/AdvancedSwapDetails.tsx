@@ -53,10 +53,11 @@ function TradeSummary({ trade, allowedSlippage }: { trade: Trade; allowedSlippag
           <RowFixed>
             <TYPE.black color={theme.text1}>
               {isExactIn
-                ? `${slippageAdjustedAmounts[Field.OUTPUT]?.toSignificant(4)} ${trade?.outputAmount?.currency?.symbol}` ??
-                '-'
+                ? `${slippageAdjustedAmounts[Field.OUTPUT]?.toSignificant(4)} ${
+                    trade?.outputAmount?.currency?.symbol
+                  }` ?? '-'
                 : `${slippageAdjustedAmounts[Field.INPUT]?.toSignificant(4)} ${trade?.inputAmount?.currency?.symbol}` ??
-                '-'}
+                  '-'}
               {/* {isExactIn
                 ? `${slippageAdjustedAmounts && slippageAdjustedAmounts.toSignificant(4)} ${trade?.outputAmount?.currency?.symbol || ''}` ??
                 '-'
@@ -214,31 +215,35 @@ export function AdvancedSwapDetails({ trade }: AdvancedSwapDetailsProps) {
                   {
                     // @ts-ignore
                     routeData &&
-                    routeData.hasOwnProperty('route') &&
-                    routeData.route.map((item, index) => (
-                      <RouteCellStyled key={index}>
-                        {item.map((routeItem, routeItemIndex) => (
-                          <>
-                            <div key={routeItemIndex} className="routeCellBlock ColumnStartCenter" style={{ marginRight: '.5rem' }}>
-                              {routeItemIndex == 0 ? <span>{routeData.percents[index]}%</span> : <span>　</span>}
-                              <img className="ArrowHLoneLine" src={ArrowHLoneLine} alt="" />
-                              <span
-                                style={{
-                                  border: '1px solid rgba(255, 255, 255, 0.2)',
-                                  borderRadius: '4px',
-                                  padding: '.1rem .3rem'
-                                }}
+                      routeData.hasOwnProperty('route') &&
+                      routeData.route.map((item, index) => (
+                        <RouteCellStyled key={index}>
+                          {item.map((routeItem, routeItemIndex) => (
+                            <>
+                              <div
+                                key={routeItemIndex}
+                                className="routeCellBlock ColumnStartCenter"
+                                style={{ marginRight: '.5rem' }}
                               >
-                                {routeItem.stable ? 'Stable' : 'Volatile'}
-                              </span>
-                            </div>
-                            <div className="tokenImgWrap" style={{ marginRight: '.5rem' }}>
-                              <img src={TeleRouteIcon} alt="" />
-                              <img src={TeleRouteIcon} alt="" />
-                            </div>
-                          </>
-                        ))}
-                        {/* <div className="routeCellBlock ColumnStartCenter" style={{ marginRight: '.5rem' }}>
+                                {routeItemIndex == 0 ? <span>{routeData.percents[index]}%</span> : <span>　</span>}
+                                <img className="ArrowHLoneLine" src={ArrowHLoneLine} alt="" />
+                                <span
+                                  style={{
+                                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                                    borderRadius: '4px',
+                                    padding: '.1rem .3rem'
+                                  }}
+                                >
+                                  {routeItem.stable ? 'Stable' : 'Volatile'}
+                                </span>
+                              </div>
+                              <div className="tokenImgWrap" style={{ marginRight: '.5rem' }}>
+                                <img src={TeleRouteIcon} alt="" />
+                                <img src={TeleRouteIcon} alt="" />
+                              </div>
+                            </>
+                          ))}
+                          {/* <div className="routeCellBlock ColumnStartCenter" style={{ marginRight: '.5rem' }}>
                           <span>　</span>
                           <img className="ArrowHLoneLine" src={ArrowHLoneLine} alt="" />
                           <span>Stable</span>
@@ -247,9 +252,9 @@ export function AdvancedSwapDetails({ trade }: AdvancedSwapDetailsProps) {
                           <img src={TeleRouteIcon} alt="" />
                           <img src={TeleRouteIcon} alt="" />
                         </div> */}
-                        <img className="justArrowHead" src={ArrowHGreen} alt="" />
-                      </RouteCellStyled>
-                    ))
+                          <img className="justArrowHead" src={ArrowHGreen} alt="" />
+                        </RouteCellStyled>
+                      ))
                   }
                 </div>
                 <img className="LineVIcon" src={LineVIcon} alt="" />

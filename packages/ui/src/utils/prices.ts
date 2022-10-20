@@ -93,7 +93,6 @@ export function computeTradePriceBreakdown(trade?: Trade | null): {
   //   )
   const realizedLPFee = trade && trade.routeData && trade.routeData.realizedLPFee
 
-
   // remove lp fees from price impact
   // const priceImpactWithoutFeeFraction = trade && realizedLPFee ? trade.priceImpact.subtract(realizedLPFee) : undefined
   const priceImpactWithoutFeeFraction = trade && trade.routeData && trade.routeData.priceImpactWithoutFee
@@ -149,13 +148,17 @@ export function warningSeverity(priceImpact: Percent | undefined): 0 | 1 | 2 | 3
   return 0
 }
 
+/*
 export function formatExecutionPrice(trade?: Trade, inverted?: boolean): string {
   if (!trade) {
     return ''
   }
   return inverted
-    ? `${trade.executionPrice.invert().toSignificant(6)} ${trade.inputAmount.currency.symbol} / ${trade.outputAmount.currency.symbol
-    }`
-    : `${trade.executionPrice.toSignificant(6)} ${trade.outputAmount.currency.symbol} / ${trade.inputAmount.currency.symbol
-    }`
+    ? `${trade.executionPrice.invert().toSignificant(6)} ${trade.inputAmount.currency.symbol} / ${
+        trade.outputAmount.currency.symbol
+      }`
+    : `${trade.executionPrice.toSignificant(6)} ${trade.outputAmount.currency.symbol} / ${
+        trade.inputAmount.currency.symbol
+      }`
 }
+*/
