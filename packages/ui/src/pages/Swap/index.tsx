@@ -113,11 +113,11 @@ export default function Swap({ history }: RouteComponentProps) {
     v2Trade['routeData'] = routeData
     v2Trade['inputAmount'] = routeData['inputAmount']
     v2Trade['outputAmount'] = routeData['outputAmount']
-    if (routeData.reqParams && routeData.reqParams.type === "exactIn") {
+    if (routeData.reqParams && routeData.reqParams.type === 'exactIn') {
       v2Trade['tradeType'] = 0
-    }else if(routeData.reqParams && routeData.reqParams.type === "exactOut"){
+    } else if (routeData.reqParams && routeData.reqParams.type === 'exactOut') {
       v2Trade['tradeType'] = 1
-    }else{
+    } else {
       console.error('tradeType null:', routeData.reqParams)
     }
     delete v2Trade['executionPrice']
@@ -147,13 +147,13 @@ export default function Swap({ history }: RouteComponentProps) {
 
   const parsedAmounts = showWrap
     ? {
-      [Field.INPUT]: parsedAmount,
-      [Field.OUTPUT]: parsedAmount
-    }
+        [Field.INPUT]: parsedAmount,
+        [Field.OUTPUT]: parsedAmount
+      }
     : {
-      [Field.INPUT]: independentField === Field.INPUT ? parsedAmount : trade?.inputAmount,
-      [Field.OUTPUT]: independentField === Field.OUTPUT ? parsedAmount : trade?.outputAmount
-    }
+        [Field.INPUT]: independentField === Field.INPUT ? parsedAmount : trade?.inputAmount,
+        [Field.OUTPUT]: independentField === Field.OUTPUT ? parsedAmount : trade?.outputAmount
+      }
 
   const { onSwitchTokens, onCurrencySelection, onUserInput, onChangeRecipient } = useSwapActionHandlers()
   const isValid = !swapInputError
@@ -261,8 +261,8 @@ export default function Swap({ history }: RouteComponentProps) {
             recipient === null
               ? 'Swap w/o Send'
               : (recipientAddress ?? recipient) === account
-                ? 'Swap w/o Send + recipient'
-                : 'Swap w/ Send',
+              ? 'Swap w/o Send + recipient'
+              : 'Swap w/ Send',
           label: [
             trade?.inputAmount?.currency?.symbol,
             trade?.outputAmount?.currency?.symbol,
@@ -606,8 +606,8 @@ export default function Swap({ history }: RouteComponentProps) {
                       {swapInputError
                         ? swapInputError
                         : priceImpactSeverity > 3 && !isExpertMode
-                          ? `Price Impact Too High`
-                          : `Swap${priceImpactSeverity > 2 ? ' Anyway' : ''}`}
+                        ? `Price Impact Too High`
+                        : `Swap${priceImpactSeverity > 2 ? ' Anyway' : ''}`}
                     </Text>
                   </ButtonError>
                 )}
@@ -731,8 +731,8 @@ export default function Swap({ history }: RouteComponentProps) {
                   {swapInputError
                     ? swapInputError
                     : priceImpactSeverity > 3 && !isExpertMode
-                      ? `Price Impact Too High`
-                      : `Swap${priceImpactSeverity > 2 ? ' Anyway' : ''}`}
+                    ? `Price Impact Too High`
+                    : `Swap${priceImpactSeverity > 2 ? ' Anyway' : ''}`}
                 </Text>
               </ButtonError>
             )}
