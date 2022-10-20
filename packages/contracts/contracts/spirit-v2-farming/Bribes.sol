@@ -67,7 +67,7 @@ contract Bribe is ReentrancyGuard, Owned {
         public userRewardPerTokenPaid;
     mapping(address => mapping(address => uint256)) public rewards;
 
-    uint256 private _totalSupply;
+    uint256 private _totalSupply; // vote == bribe 1 vote = 1 bribe
     mapping(address => uint256) private _balances;
 
     /* ========== CONSTRUCTOR ========== */

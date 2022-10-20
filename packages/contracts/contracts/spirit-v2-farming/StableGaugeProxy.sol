@@ -6,14 +6,14 @@ import "./utils.sol";
 contract StableGauge is ReentrancyGuard {
     using SafeERC20 for IERC20;
 
-    IERC20 public rewardToken;
-    IERC20 public governanceToken;
+    IERC20 public rewardToken;  //SPIRIT
+    IERC20 public governanceToken; // inSPIRIT
 
-    IERC20 public immutable TOKEN;
-    address public immutable DISTRIBUTION;
-    uint256 public constant DURATION = 7 days;
+    IERC20 public immutable TOKEN; // LP token
+    address public immutable DISTRIBUTION; //  StableGaugeProxy  new StableGauge( address(rewardToken), address(governanceToken), _tokenLP, address(this))
+    uint256 public constant DURATION = 7 days; 
 
-    uint256 public periodFinish = 0;
+    uint256 public periodFinish = 0;  
     uint256 public rewardRate = 0;
     uint256 public lastUpdateTime;
     uint256 public rewardPerTokenStored;
@@ -34,10 +34,10 @@ contract StableGauge is ReentrancyGuard {
     mapping(address => uint256) public userRewardPerTokenPaid;
     mapping(address => uint256) public rewards;
 
-    uint256 private _totalSupply;
-    uint256 public derivedSupply;
-    mapping(address => uint256) private _balances;
-    mapping(address => uint256) public derivedBalances;
+    uint256 private _totalSupply; // LP token total supply
+    uint256 public derivedSupply;  
+    mapping(address => uint256) private _balances;  //LP token balance
+    mapping(address => uint256) public derivedBalances; 
     mapping(address => uint256) private _base;
 
     constructor(
@@ -123,6 +123,7 @@ contract StableGauge is ReentrancyGuard {
         derivedSupply = derivedSupply + _derivedBalance;
     }
 
+    // SPIRIT reward 
     function earned(address account) public view returns (uint256) {
         return (derivedBalances[account] * (rewardPerToken() - userRewardPerTokenPaid[account]) / 1e18) + rewards[account];
     }
@@ -248,9 +249,9 @@ contract StableGauge is ReentrancyGuard {
 contract StableGaugeProxy is ProtocolGovernance, ReentrancyGuard {
     using SafeERC20 for IERC20;
 
-    MasterChef public MASTER;
-    IERC20 public governanceToken;
-    IERC20 public rewardToken;
+    MasterChef public MASTER; // LP staking pools
+    IERC20 public governanceToken; // inSpirit
+    IERC20 public rewardToken;   // SPIRIT
     IERC20 public immutable TOKEN; // mInSpirit
 
     address public admin; //Admin address to manage gauges like add/deprecate/resurrect
@@ -261,7 +262,7 @@ contract StableGaugeProxy is ProtocolGovernance, ReentrancyGuard {
     uint256 public immutable MIN_INSPIRIT_FOR_VERIFY = 1e23; // 100k inSPIRIT
 
     uint256 public pid = type(uint256).max; // -1 means 0xFFF....F and hasn't been set yet
-    uint256 public totalWeight;
+    uint256 public totalWeight; // 
 
     // Time delays
     uint256 public voteDelay = 604800;
@@ -270,30 +271,30 @@ contract StableGaugeProxy is ProtocolGovernance, ReentrancyGuard {
     mapping(address => uint256) public lastVote; // msg.sender => time of users last vote
 
     // V2 added variables for pre-distribute
-    uint256 public lockedTotalWeight;
-    uint256 public lockedBalance;
-    uint256 public locktime;
+    uint256 public lockedTotalWeight; // depended on totalWeight
+    uint256 public lockedBalance; // SPIRIT amount of this contract that is locked for distribution
+    uint256 public locktime; 
     mapping(address => uint256) public lockedWeights; // token => weight
     mapping(address => bool) public hasDistributed; // LPtoken => bool
 
     // Variables verified tokens
-    mapping(address => bool) public verifiedTokens; // verified tokens
-    mapping(address => bool) public baseTokens; // Base tokens 
+    mapping(address => bool) public verifiedTokens; // verified tokens LP->bool
+    mapping(address => bool) public baseTokens; // Base tokens  LP->bool
     address public pairFactory;
 
     // VE bool
     bool public ve = false;
 
-    address[] internal _tokens;
-    address public feeDistAddr; // fee distributor address
-    mapping(address => address) public gauges; // token => gauge
-    mapping(address => bool) public gaugeStatus; // token => bool : false = deprecated
+    address[] internal _tokens; // lps
+    address public feeDistAddr; // fee distributor address -> VotingEscrow vyper contract
+    mapping(address => address) public gauges; // lp => gauge
+    mapping(address => bool) public gaugeStatus; // lp => bool : false = deprecated
 
     // Add Guage to Bribe Mapping
     mapping(address => address) public bribes; // gauge => bribes
-    mapping(address => uint256) public weights; // token => weight
-    mapping(address => mapping(address => uint256)) public votes; // msg.sender => votes
-    mapping(address => address[]) public tokenVote; // msg.sender => token
+    mapping(address => uint256) public weights; // lp => weight
+    mapping(address => mapping(address => uint256)) public votes; // msg.sender => LP => votes
+    mapping(address => address[]) public tokenVote; // msg.sender => voted LPs
     mapping(address => uint256) public usedWeights; // msg.sender => total voting weight of user
 
     // Modifiers
@@ -343,6 +344,9 @@ contract StableGaugeProxy is ProtocolGovernance, ReentrancyGuard {
         return bribes[_gauge];
     }
 
+
+    // USDC
+    //
     function setBaseToken(address _tokenLP, bool _flag) external {
         require(
             (msg.sender == governance || msg.sender == admin),
@@ -351,6 +355,10 @@ contract StableGaugeProxy is ProtocolGovernance, ReentrancyGuard {
         baseTokens[_tokenLP] = _flag;
     }
 
+//    AnyswapV3ERC20
+//    Dai
+//    alUSD
+//    ...
     function setVerifiedToken(address _tokenLP, bool _flag) external {
         require(
             (msg.sender == governance || msg.sender == admin),
@@ -365,6 +373,12 @@ contract StableGaugeProxy is ProtocolGovernance, ReentrancyGuard {
     }
 
     // Reset votes to 0
+
+    // dev
+    // 1. Reset all votes to 0
+    // 2. update totalWeight
+    // 3. update weights[_token]
+
     function _reset(address _owner) internal {
         address[] storage _tokenVote = tokenVote[_owner];
         uint256 _tokenVoteCnt = _tokenVote.length;
@@ -457,7 +471,7 @@ contract StableGaugeProxy is ProtocolGovernance, ReentrancyGuard {
     }
 
     // Add new token gauge
-    function addGaugeForOwner(address _tokenLP, address _token0, address _token1)
+        function addGaugeForOwner(address _tokenLP, address _token0, address _token1)
         external
         returns (address)
     {
@@ -568,6 +582,8 @@ contract StableGaugeProxy is ProtocolGovernance, ReentrancyGuard {
         return _tokens.length;
     }
 
+    //https://ftmscan.com/tx/0xd8d00a5f4771b49288331f11fac715a233894e9fe444ab45f5c651557c0ebce4
+    //
     function preDistribute() external nonReentrant hasDistribute {
         lockedTotalWeight = totalWeight;
         for (uint256 i = 0; i < _tokens.length; i++) {
@@ -593,6 +609,8 @@ contract StableGaugeProxy is ProtocolGovernance, ReentrancyGuard {
         emit PreDistributed(_inSpiritRewards);
     }
 
+//    https://ftmscan.com/tx/0x8d2bae03ce843ab0c588c5f2a8e409d632efaba749084c02ccb50b8d9f4ec65a
+    // 外部账号调用，分配SPIRIT（每周一次
     function distribute(uint256 _start, uint256 _end) external nonReentrant {
         require(_start < _end, "bad _start");
         require(_end <= _tokens.length, "bad _end");
