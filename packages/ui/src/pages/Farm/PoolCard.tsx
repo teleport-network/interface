@@ -149,8 +149,8 @@ const LPTag = styled.div`
   align-items: center;
   justify-content: center;
   font-size: 0.75rem;
-  width: 4.5rem;
-  height: 1.62rem;
+  width: 5.14rem;
+  height: 1.85rem;
 
   border: 1px solid rgba(255, 255, 255, 0.4);
   border-radius: 0.5rem;
@@ -315,7 +315,7 @@ This amount is already included in all APR calculations for the farm`}
           fontWeight={600}
           fontSize={18}
           style={{ marginLeft: '0.26rem', alignItems: 'center' }}
-          width="14rem"
+          width="15rem"
           display="flex"
         >
           {stakingInfo.stakingAsset.name}
@@ -325,7 +325,7 @@ This amount is already included in all APR calculations for the farm`}
         </TYPE.white>
         {stakingInfo.stakingAsset.isLpToken && (
           <TYPE.green01
-            marginLeft={isMobile ? 'auto' : 32}
+            marginLeft={isMobile ? 'auto' : '2.64rem'}
             fontSize={14}
             onClick={() =>
               history.push(
