@@ -1,6 +1,7 @@
 import { parseUnits } from '@ethersproject/units'
 import { Currency, CurrencyAmount, ETHER, JSBI, Token, TokenAmount, Trade, WETH } from '@teleswap/sdk'
 import BigNumber from 'bignumber.js'
+import { QuoteArguments } from 'lib/hooks/routing/clientSideSmartOrderRouter'
 import { ParsedQs } from 'qs'
 import { useCallback, useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
@@ -14,7 +15,7 @@ import useParsedQueryString from '../../hooks/useParsedQueryString'
 import { isAddress } from '../../utils'
 import { computeSlippageAdjustedAmounts } from '../../utils/prices'
 import { AppDispatch, AppState } from '../index'
-import { useUserSlippageTolerance } from '../user/hooks'
+import { useUserSlippageTolerance, useUserTransactionTTL } from '../user/hooks'
 import { useCurrencyBalances } from '../wallet/hooks'
 import { Field, replaceSwapState, selectCurrency, setRecipient, switchCurrencies, typeInput } from './actions'
 import { SwapState } from './reducer'
@@ -110,13 +111,13 @@ function involvesAddress(trade: Trade, checksummedAddress: string): boolean {
 export function useDerivedSwapInfo():
   | any
   | {
-      currencies: { [field in Field]?: Currency }
-      currencyBalances: { [field in Field]?: CurrencyAmount }
-      parsedAmount: CurrencyAmount | undefined
-      v2Trade: Trade | undefined
-      inputError?: string
-      routeData?: any
-    } {
+    currencies: { [field in Field]?: Currency }
+    currencyBalances: { [field in Field]?: CurrencyAmount }
+    parsedAmount: CurrencyAmount | undefined
+    v2Trade: Trade | undefined
+    inputError?: string
+    routeData?: any
+  } {
   const { account, chainId } = useActiveWeb3React()
 
   const {
@@ -143,8 +144,8 @@ export function useDerivedSwapInfo():
   const bestTradeExactIn = useTradeExactIn(isExactIn ? parsedAmount : undefined, outputCurrency ?? undefined)
   const bestTradeExactOut = useTradeExactOut(inputCurrency ?? undefined, !isExactIn ? parsedAmount : undefined)
 
-  const v2Trade = isExactIn ? bestTradeExactIn : bestTradeExactOut
-
+  // const v2Trade = isExactIn ? bestTradeExactIn : bestTradeExactOut
+  let v2Trade = {}
   const currencyBalances = {
     [Field.INPUT]: relevantTokenBalances[0],
     [Field.OUTPUT]: relevantTokenBalances[1]
@@ -182,6 +183,8 @@ export function useDerivedSwapInfo():
   }
 
   const [allowedSlippage] = useUserSlippageTolerance()
+  const [ttl] = useUserTransactionTTL()
+
 
   const slippageAdjustedAmounts = v2Trade && allowedSlippage && computeSlippageAdjustedAmounts(v2Trade, allowedSlippage)
 
@@ -201,24 +204,24 @@ export function useDerivedSwapInfo():
   const inputName = (currencies && currencies[Field.INPUT]?.name) || ''
   const outputName = (currencies && currencies[Field.OUTPUT]?.name) || ''
   useEffect(() => {
-    ;(async () => {
+    ; (async () => {
       try {
         if (!!timeout) {
           clearTimeout(timeout)
         }
         timeout = setTimeout(() => {
           getData().then()
-        }, 1000)
+        }, 500)
       } catch (error) {
         console.error('useDerivedSwapInfo error', error)
       }
     })()
-  }, [typedValue])
-  // inputName, outputName, isExactIn
+  }, [typedValue, inputName, outputName, isExactIn])
 
   const getData = async () => {
     if (
       typedValue &&
+      currencies &&
       currencies[Field.INPUT] &&
       currencies[Field.INPUT]?.hasOwnProperty('decimals') &&
       currencies[Field.OUTPUT] &&
@@ -240,34 +243,44 @@ export function useDerivedSwapInfo():
         throw new Error(`Invalid`)
       }
       const decimal = isExactIn ? currencies[Field.INPUT]?.decimals : currencies[Field.OUTPUT]?.decimals
-      const amount = new BigNumber(typedValue).shiftedBy(decimal!).toNumber()
-      const params: any = {
-        tokenInAddress: currencies[Field.INPUT]!['address'],
+      if (!decimal) {
+        throw new Error(`Invalid decimal`)
+      }
+      const amount = new BigNumber(typedValue).shiftedBy(decimal!).toString()
+      const params: QuoteArguments = {
+        tokenInAddress: currencies[Field.INPUT]!['address']!,
         tokenInChainId: currencies[Field.INPUT]!['chainId'],
-        tokenOutAddress: currencies[Field.OUTPUT]!['address'],
+        tokenOutAddress: currencies[Field.OUTPUT]!['address']!,
         tokenOutChainId: currencies[Field.OUTPUT]!['chainId'],
         amount,
         type: isExactIn ? 'exactIn' : 'exactOut',
-        protocols: 'v2'
+        tokenInSymbol: currencies[Field.INPUT]!.symbol,
+        tokenOutSymbol: currencies[Field.OUTPUT]!.symbol,
+        slippageTolerance: allowedSlippage ? String(allowedSlippage) : '',
+        tokenInDecimals: currencies[Field.INPUT]!.decimals,
+        tokenOutDecimals: currencies[Field.OUTPUT]!.decimals
       }
-      // let volidatas = Object.keys(params).find((key) => {
-      //   return !!params[key] == false
-      // })
-      params['tokenInDecimals'] = currencies[Field.INPUT]!.decimals
-      params['tokenOutDecimals'] = currencies[Field.OUTPUT]!.decimals
-      params['tokenInSymbol'] = currencies[Field.INPUT]!.symbol
-      params['tokenOutSymbol'] = currencies[Field.OUTPUT]!.symbol
       params['recipient'] = ''
-      params['slippageTolerance'] = ''
-      params['deadline'] = ''
+      if (ttl) {
+        params['deadline'] = String(ttl)
+      }
       const response = await route(params)
       if (response.data && response.data.hasOwnProperty('quoteDecimals')) {
         const outputAmount = tryParseAmount(
           response.data.quoteDecimals,
           (isExactIn ? outputCurrency : inputCurrency) ?? undefined
         )
-        response.data['inputAmount'] = parsedAmount
-        response.data['outputAmount'] = outputAmount
+        const exactType = response.data && response.data.reqParams && response.data.reqParams.type
+        switch (exactType) {
+          case "exactIn":
+            response.data['inputAmount'] = parsedAmount
+            response.data['outputAmount'] = outputAmount
+            break;
+          case "exactOut":
+            response.data['inputAmount'] = outputAmount
+            response.data['outputAmount'] = parsedAmount
+            break;
+        }
         setRouteData(response.data)
       }
     }

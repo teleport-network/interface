@@ -9,7 +9,7 @@ import { TYPE } from '../../theme'
 import {
   computeSlippageAdjustedAmounts,
   computeTradePriceBreakdown,
-  formatExecutionPrice,
+  // formatExecutionPrice,
   warningSeverity
 } from '../../utils/prices'
 import { ButtonError } from '../Button'
@@ -60,7 +60,7 @@ export default function SwapModalFooter({
               paddingLeft: '10px'
             }}
           >
-            {formatExecutionPrice(trade, showInverted)}
+            {/* {formatExecutionPrice(trade, showInverted)} */}
             <StyledBalanceMaxMini onClick={() => setShowInverted(!showInverted)}>
               <Repeat size={14} />
             </StyledBalanceMaxMini>

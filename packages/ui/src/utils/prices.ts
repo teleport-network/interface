@@ -83,17 +83,20 @@ export function computeTradePriceBreakdown(trade?: Trade | null): {
 } {
   // for each hop in our trade, take away the x*y=k price impact from 0.3% fees
   // e.g. for 3 tokens/2 hops: 1 - ((1 - .03) * (1-.03))
-  const realizedLPFee = !trade
-    ? undefined
-    : ONE_HUNDRED_PERCENT.subtract(
-        trade.route.pairs.reduce<Fraction>(
-          (currentFee: Fraction): Fraction => currentFee.multiply(INPUT_FRACTION_AFTER_VOLATILE_FEE),
-          ONE_HUNDRED_PERCENT
-        )
-      )
+  // const realizedLPFee = !trade
+  //   ? undefined
+  //   : ONE_HUNDRED_PERCENT.subtract(
+  //     trade.route.pairs.reduce<Fraction>(
+  //       (currentFee: Fraction): Fraction => currentFee.multiply(INPUT_FRACTION_AFTER_VOLATILE_FEE),
+  //       ONE_HUNDRED_PERCENT
+  //     )
+  //   )
+  const realizedLPFee = trade && trade.routeData && trade.routeData.realizedLPFee
+
 
   // remove lp fees from price impact
-  const priceImpactWithoutFeeFraction = trade && realizedLPFee ? trade.priceImpact.subtract(realizedLPFee) : undefined
+  // const priceImpactWithoutFeeFraction = trade && realizedLPFee ? trade.priceImpact.subtract(realizedLPFee) : undefined
+  const priceImpactWithoutFeeFraction = trade && trade.routeData && trade.routeData.priceImpactWithoutFee
 
   // the x*y=k impact
   const priceImpactWithoutFeePercent = priceImpactWithoutFeeFraction
@@ -127,10 +130,14 @@ export function computeSlippageAdjustedAmounts(
   trade: Trade | undefined,
   allowedSlippage: number
 ): { [field in Field]?: CurrencyAmount } {
-  const pct = basisPointsToPercent(allowedSlippage)
+  // const pct = basisPointsToPercent(allowedSlippage)
+  // return {
+  //   [Field.INPUT]: trade?.maximumAmountIn(pct),
+  //   [Field.OUTPUT]: trade?.minimumAmountOut(pct)
+  // }
   return {
-    [Field.INPUT]: trade?.maximumAmountIn(pct),
-    [Field.OUTPUT]: trade?.minimumAmountOut(pct)
+    [Field.INPUT]: trade && trade.routeData && trade?.routeData.maxIn,
+    [Field.OUTPUT]: trade && trade.routeData && trade.routeData.minOut
   }
 }
 
@@ -147,10 +154,8 @@ export function formatExecutionPrice(trade?: Trade, inverted?: boolean): string 
     return ''
   }
   return inverted
-    ? `${trade.executionPrice.invert().toSignificant(6)} ${trade.inputAmount.currency.symbol} / ${
-        trade.outputAmount.currency.symbol
-      }`
-    : `${trade.executionPrice.toSignificant(6)} ${trade.outputAmount.currency.symbol} / ${
-        trade.inputAmount.currency.symbol
-      }`
+    ? `${trade.executionPrice.invert().toSignificant(6)} ${trade.inputAmount.currency.symbol} / ${trade.outputAmount.currency.symbol
+    }`
+    : `${trade.executionPrice.toSignificant(6)} ${trade.outputAmount.currency.symbol} / ${trade.inputAmount.currency.symbol
+    }`
 }

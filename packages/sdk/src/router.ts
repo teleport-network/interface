@@ -88,7 +88,7 @@ export abstract class Router {
         })
         let amountInString = rowItem[0]['amountIn']
         let amountInHex = '0x' + Number(amountInString).toString(16)
-        let amountOutString = rowItem[0]['amountOut']
+        let amountOutString = rowItem[rowItem.length - 1]['amountOut']
         let amountOutHex = '0x' + Number(amountOutString).toString(16)
 
         let rowParams: Array<any> = []
@@ -164,7 +164,7 @@ export abstract class Router {
           multiParams = payload.tempMuitcallParams
           args = []
           // value = amountIn
-          value = payload && payload.tempAmountIn && payload['tempAmountIn'].length > 0 && payload.tempAmountIn.reduce((count, item) => new BigNumber(item).plus(count).toNumber())
+          value = payload && payload.tempAmountIn && payload['tempAmountIn'].length > 0 && payload.tempAmountIn.reduce((count, item) => new BigNumber(item).plus(count).toNumber()) || ZERO_HEX
         } else if (etherOut) {
           methodName = useFeeOnTransfer ? 'swapExactTokensForETHSupportingFeeOnTransferTokens' : 'swapExactTokensForETH'
           // for (let index = 0; index < routeDataRoute.length; index++) {
@@ -212,7 +212,7 @@ export abstract class Router {
           multiParams = payload.tempMuitcallParams
           args = []
           // value = amountIn
-          value = payload && payload.tempAmountIn && payload['tempAmountIn'].length > 0 && payload.tempAmountIn.reduce((count, item) => new BigNumber(item).plus(count).toNumber())
+          value = payload && payload.tempAmountIn && payload['tempAmountIn'].length > 0 && payload.tempAmountIn.reduce((count, item) => new BigNumber(item).plus(count).toNumber()) || ZERO_HEX
         } else if (etherOut) {
           methodName = 'swapTokensForExactETH'
           // (uint amountOut, uint amountInMax, address[] calldata path, address to, uint deadline)
