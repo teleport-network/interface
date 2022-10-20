@@ -492,7 +492,6 @@ describe('Router02', function () {
 
                 let amountIn = ethers.utils.parseUnits("1", 18)
                 let args = [
-                    amountIn,
                     ethAmt,
                     route,
                     ans.signer.address,
