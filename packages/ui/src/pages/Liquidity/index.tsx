@@ -8,7 +8,6 @@ import { ENABLED_NETWORK_LABELS } from 'constants/index'
 // import { BIG_INT_ZERO } from 'constants/index'
 import gql from 'graphql-tag'
 import useThemedContext from 'hooks/useThemedContext'
-import namor from 'namor'
 import { useEffect, useMemo, useState } from 'react'
 import { isMobile } from 'react-device-detect'
 import { Link } from 'react-router-dom'
@@ -394,30 +393,6 @@ export default function Liquidity() {
         fetchPolicy: 'cache-first'
       })
       setPools(pairsData)
-      /*   fetch('https://graph-goerli.qa.davionlabs.com/subgraphs/name/gop_subgraph', {
-      headers: {
-        accept: 'application/json',
-        'accept-language': 'zh-CN,zh-TW;q=0.9,zh;q=0.8,en-US;q=0.7,en;q=0.6',
-        'cache-control': 'no-cache',
-        'content-type': 'application/json',
-        pragma: 'no-cache',
-        'sec-ch-ua': '"Google Chrome";v="105", "Not)A;Brand";v="8", "Chromium";v="105"',
-        'sec-ch-ua-mobile': '?0',
-        'sec-ch-ua-platform': '"Windows"',
-        'sec-fetch-dest': 'empty',
-        'sec-fetch-mode': 'cors',
-        'sec-fetch-site': 'same-origin'
-      },
-      referrer:
-        'https://graph-goerli.qa.davionlabs.com/subgraphs/name/gop_subgraph/graphql?query=%7B%0A%20%20pairs(first%3A%2050%2C%20orderBy%3A%20trackedReserveETH%2C%20orderDirection%3A%20desc)%20%7B%0A%20%20%20%20id%0A%20%20%20%20trackedReserveETH%0A%20%20%20%20token0%20%7B%0A%20%20%20%20%20%20id%0A%20%20%20%20%20%20symbol%0A%20%20%20%20%20%20name%0A%20%20%20%20%7D%0A%20%20%20%20token1%20%7B%0A%20%20%20%20%20%20id%0A%20%20%20%20%20%20symbol%0A%20%20%20%20%20%20name%0A%20%20%20%20%7D%0A%20%20%20%20reserve0%0A%20%20%20%20reserve1%0A%20%20%20%20reserveUSD%0A%20%20%20%20totalSupply%0A%20%20%20%20trackedReserveETH%0A%20%20%20%20reserveETH%0A%20%20%20%20volumeUSD%0A%20%20%20%20untrackedVolumeUSD%0A%20%20%20%20token0Price%0A%20%20%20%20token1Price%0A%20%20%20%20createdAtTimestamp%0A%20%20%7D%0A%7D',
-      referrerPolicy: 'strict-origin-when-cross-origin',
-      body: '{"query":"{\\n  pairs(first: 50, orderBy: trackedReserveETH, orderDirection: desc) {\\n    id\\n    trackedReserveETH\\n    token0 {\\n      id\\n      symbol\\n      name\\n    }\\n    token1 {\\n      id\\n      symbol\\n      name\\n    }\\n    reserve0\\n    reserve1\\n    reserveUSD\\n    totalSupply\\n    trackedReserveETH\\n    reserveETH\\n    volumeUSD\\n    untrackedVolumeUSD\\n    token0Price\\n    token1Price\\n    createdAtTimestamp\\n  }\\n}","variables":null,"operationName":null}',
-      method: 'POST',
-      mode: 'cors',
-      credentials: 'include'
-    }).then((res) => {
-      console.log(res)
-    }) */
     })()
   }, [])
 
@@ -650,7 +625,12 @@ function TopPairRow({ v2Pair, index, ethPrice }: { v2Pair: any; index: number; e
       </Box>
       <Box
         key={`${v2Pair.id}-4`}
-        sx={{ display: 'flex', justifyContent: 'flex-end', width: 'max-content', justifySelf: 'end' }}
+        sx={{
+          display: 'flex',
+          justifyContent: 'flex-end',
+          width: isMobile ? 'max-content' : '10rem !important',
+          justifySelf: 'end'
+        }}
       >
         <StyledLink as={Link} to={`/add/${v2Pair.token0.id}/${v2Pair.token1.id}/${v2Pair.stable}`}>
           {isMobile ? '+' : 'Provide Liquidity'}
@@ -658,35 +638,4 @@ function TopPairRow({ v2Pair, index, ethPrice }: { v2Pair: any; index: number; e
       </Box>
     </>
   )
-}
-
-const range = (len) => {
-  const arr: number[] = []
-  for (let i = 0; i < len; i++) {
-    arr.push(i)
-  }
-  return arr
-}
-
-const newPerson = () => {
-  return {
-    Pool: namor.generate({ words: 1, numbers: 0 }),
-    Token: namor.generate({ words: 1, numbers: 0 }),
-    Amount: Math.floor(Math.random() * 30),
-    Value: Math.floor(Math.random() * 100),
-    'Unclaimed Earnings': Math.floor(Math.random() * 100)
-  }
-}
-
-function makeData(...lens) {
-  const makeDataLevel = (depth = 0) => {
-    const len = lens[depth]
-    return range(len).map((d) => {
-      return {
-        ...newPerson()
-      }
-    })
-  }
-
-  return makeDataLevel()
 }
