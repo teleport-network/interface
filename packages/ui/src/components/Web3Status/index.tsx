@@ -112,7 +112,7 @@ const Text = styled.p`
   margin: 0 0.5rem 0 0.25rem;
   width: fit-content;
   font-weight: 500;
-  // font-size: 0.8rem;
+  // font-size: max(0.8rem, 12px);
   line-height: 1rem;
   /* color: #000000; */
   color: #ffffff; ;

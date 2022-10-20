@@ -156,7 +156,7 @@ const MobileYourLiquidityCard = styled(Box)`
 const TopPoolsGrid = styled(Box)`
   // border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 1rem;
-  font-size: 0.8rem;
+  font-size: max(0.8rem, 12px);
   background-color: rgba(25, 36, 47, 1);
   padding: 1.5rem;
   display: grid;
@@ -184,7 +184,7 @@ const HeaderItem = styled(Box).attrs((props) => {
   font-style: normal;
   font-weight: 400;
   line-height: 0.8rem;
-  font-size: 0.8rem;
+  font-size: max(0.8rem, 12px);
   color: rgba(255, 255, 255, 0.6);
   white-space: nowrap;
 `
@@ -222,7 +222,7 @@ const StyledTableView = styled(Box)`
       > th {
         overflow: hidden;
         font-weight: 600;
-        font-size: 0.8rem;
+        font-size: max(0.8rem, 12px);
         color: rgba(255, 255, 255, 0.6);
         flex: 1;
         text-align: left;
@@ -250,7 +250,7 @@ const StyledTableView = styled(Box)`
       display: flex;
       justify-content: center;
       align-items: center;
-      font-size: 0.8rem;
+      font-size: max(0.8rem, 12px);
       margin-bottom: 0.6rem;
       > td {
         overflow: hidden;
