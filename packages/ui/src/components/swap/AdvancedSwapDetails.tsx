@@ -11,10 +11,10 @@ import { useState } from 'react'
 import { Box } from 'rebass'
 import styled from 'styled-components'
 
-// import { Field } from '../../state/swap/actions'
+import { Field } from '../../state/swap/actions'
 import { useUserSlippageTolerance } from '../../state/user/hooks'
 import { ExternalLink, TYPE } from '../../theme'
-// import { computeSlippageAdjustedAmounts, computeTradePriceBreakdown } from '../../utils/prices'
+import { computeSlippageAdjustedAmounts, computeTradePriceBreakdown } from '../../utils/prices'
 import { AutoColumn } from '../Column'
 import QuestionHelper from '../QuestionHelper'
 import { RowBetween, RowFixed } from '../Row'
@@ -33,13 +33,13 @@ const InfoLink = styled(ExternalLink)`
 
 function TradeSummary({ trade, allowedSlippage }: { trade: Trade; allowedSlippage: number }) {
   const theme = useThemedContext()
-  // const { priceImpactWithoutFee, realizedLPFee } = computeTradePriceBreakdown(trade)
-  const priceImpactWithoutFee = trade.routeData.priceImpactWithoutFee
-  const realizedLPFee = trade.routeData.realizedLPFee
+  const { priceImpactWithoutFee, realizedLPFee } = computeTradePriceBreakdown(trade)
+  // const priceImpactWithoutFee = trade.routeData.priceImpactWithoutFee
+  // const realizedLPFee = trade.routeData.realizedLPFee
   // const isExactIn = trade.tradeType === TradeType.EXACT_INPUT
   const isExactIn = trade?.routeData?.reqParams?.type === 'exactIn'
-  // const slippageAdjustedAmounts = computeSlippageAdjustedAmounts(trade, allowedSlippage)
-  const slippageAdjustedAmounts = isExactIn ? trade.routeData.minOut : trade.routeData.maxIn
+  const slippageAdjustedAmounts = computeSlippageAdjustedAmounts(trade, allowedSlippage)
+  // const slippageAdjustedAmounts = isExactIn ? trade.routeData.minOut : trade.routeData.maxIn
   return (
     <>
       <AutoColumn className="text-detail" style={{ padding: '0 16px', color: '#D7DCE0' }} gap="0.4rem">
@@ -52,18 +52,16 @@ function TradeSummary({ trade, allowedSlippage }: { trade: Trade; allowedSlippag
           </RowFixed>
           <RowFixed>
             <TYPE.black color={theme.text1}>
-              {/* {isExactIn
-                ? `${slippageAdjustedAmounts[Field.OUTPUT]?.toSignificant(4)} ${trade.outputAmount.currency.symbol}` ??
-                  '-'
-                : `${slippageAdjustedAmounts[Field.INPUT]?.toSignificant(4)} ${trade.inputAmount.currency.symbol}` ??
-                  '-'} */}
               {isExactIn
-                ? `${slippageAdjustedAmounts && slippageAdjustedAmounts.toSignificant(4)} ${
-                    trade?.outputAmount?.currency?.symbol || ''
-                  }` ?? '-'
-                : `${slippageAdjustedAmounts && slippageAdjustedAmounts.toSignificant(4)} ${
-                    trade?.inputAmount?.currency?.symbol || ''
-                  }` ?? '-'}
+                ? `${slippageAdjustedAmounts[Field.OUTPUT]?.toSignificant(4)} ${trade?.outputAmount?.currency?.symbol}` ??
+                '-'
+                : `${slippageAdjustedAmounts[Field.INPUT]?.toSignificant(4)} ${trade?.inputAmount?.currency?.symbol}` ??
+                '-'}
+              {/* {isExactIn
+                ? `${slippageAdjustedAmounts && slippageAdjustedAmounts.toSignificant(4)} ${trade?.outputAmount?.currency?.symbol || ''}` ??
+                '-'
+                : `${slippageAdjustedAmounts && slippageAdjustedAmounts.toSignificant(4)} ${trade?.inputAmount?.currency?.symbol || ''}` ??
+                '-'} */}
             </TYPE.black>
           </RowFixed>
         </RowBetween>
@@ -176,7 +174,7 @@ export function AdvancedSwapDetails({ trade }: AdvancedSwapDetailsProps) {
   const [showRouterDetail, setShowRouterDetail] = useState(false)
   const [allowedSlippage] = useUserSlippageTolerance()
   // const showRoute = Boolean(trade && trade.route.path.length > 2)
-  const showRoute = Boolean(trade && trade.route.path.length >= 2)
+  const showRoute = Boolean(trade && trade.routeData && trade.routeData.route.length > 0)
   const routeData = (trade && trade['routeData']) || null
   return (
     <AutoColumn gap="0.4rem">
@@ -216,35 +214,31 @@ export function AdvancedSwapDetails({ trade }: AdvancedSwapDetailsProps) {
                   {
                     // @ts-ignore
                     routeData &&
-                      routeData.hasOwnProperty('route') &&
-                      routeData.route.map((item, index) => (
-                        <RouteCellStyled key={index}>
-                          {item.map((routeItem, routeItemIndex) => (
-                            <>
-                              <div
-                                key={routeItemIndex}
-                                className="routeCellBlock ColumnStartCenter"
-                                style={{ marginRight: '.5rem' }}
+                    routeData.hasOwnProperty('route') &&
+                    routeData.route.map((item, index) => (
+                      <RouteCellStyled key={index}>
+                        {item.map((routeItem, routeItemIndex) => (
+                          <>
+                            <div key={routeItemIndex} className="routeCellBlock ColumnStartCenter" style={{ marginRight: '.5rem' }}>
+                              {routeItemIndex == 0 ? <span>{routeData.percents[index]}%</span> : <span>　</span>}
+                              <img className="ArrowHLoneLine" src={ArrowHLoneLine} alt="" />
+                              <span
+                                style={{
+                                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                                  borderRadius: '4px',
+                                  padding: '.1rem .3rem'
+                                }}
                               >
-                                {routeItemIndex == 0 ? <span>{routeData.percents[index]}%</span> : <span>　</span>}
-                                <img className="ArrowHLoneLine" src={ArrowHLoneLine} alt="" />
-                                <span
-                                  style={{
-                                    border: '1px solid rgba(255, 255, 255, 0.2)',
-                                    borderRadius: '4px',
-                                    padding: '.1rem .3rem'
-                                  }}
-                                >
-                                  {routeItem.stable ? 'Stable' : 'Volatile'}
-                                </span>
-                              </div>
-                              <div className="tokenImgWrap" style={{ marginRight: '.5rem' }}>
-                                <img src={TeleRouteIcon} alt="" />
-                                <img src={TeleRouteIcon} alt="" />
-                              </div>
-                            </>
-                          ))}
-                          {/* <div className="routeCellBlock ColumnStartCenter" style={{ marginRight: '.5rem' }}>
+                                {routeItem.stable ? 'Stable' : 'Volatile'}
+                              </span>
+                            </div>
+                            <div className="tokenImgWrap" style={{ marginRight: '.5rem' }}>
+                              <img src={TeleRouteIcon} alt="" />
+                              <img src={TeleRouteIcon} alt="" />
+                            </div>
+                          </>
+                        ))}
+                        {/* <div className="routeCellBlock ColumnStartCenter" style={{ marginRight: '.5rem' }}>
                           <span>　</span>
                           <img className="ArrowHLoneLine" src={ArrowHLoneLine} alt="" />
                           <span>Stable</span>
@@ -253,9 +247,9 @@ export function AdvancedSwapDetails({ trade }: AdvancedSwapDetailsProps) {
                           <img src={TeleRouteIcon} alt="" />
                           <img src={TeleRouteIcon} alt="" />
                         </div> */}
-                          <img className="justArrowHead" src={ArrowHGreen} alt="" />
-                        </RouteCellStyled>
-                      ))
+                        <img className="justArrowHead" src={ArrowHGreen} alt="" />
+                      </RouteCellStyled>
+                    ))
                   }
                 </div>
                 <img className="LineVIcon" src={LineVIcon} alt="" />

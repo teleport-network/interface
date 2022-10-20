@@ -2,6 +2,7 @@ import { TradeType } from './constants'
 import invariant from 'tiny-invariant'
 import { validateAndParseAddress } from './utils'
 import { ETHER, Percent, Trade } from './entities'
+import BigNumber from 'bignumber.js'
 
 /**
  * Options for producing the arguments to send call to the router.
@@ -87,27 +88,29 @@ export abstract class Router {
         })
         let amountInString = rowItem[0]['amountIn']
         let amountInHex = '0x' + Number(amountInString).toString(16)
-        let amountOutString = rowItem[0]['amountOut']
+        let amountOutString = rowItem[rowItem.length - 1]['amountOut']
         let amountOutHex = '0x' + Number(amountOutString).toString(16)
 
         let rowParams: Array<any> = []
-        if (type === 1) {
-          rowParams = [amountOutHex, routePathArge, to, deadline]
-        }
-        if (type === 2) {
-          rowParams = [amountInHex, 0, routePathArge, to, deadline]
-        }
-        if (type === 3) {
-          rowParams = [amountInHex, 0, routePathArge, to, deadline]
-        }
-        if (type === 4) {
-          rowParams = [amountOutHex, routePathArge, to, deadline]
-        }
-        if (type === 5) {
-          rowParams = [amountOutHex, amountInHex, routePathArge, to, deadline]
-        }
-        if (type === 6) {
-          rowParams = [amountOutHex, amountInHex, routePathArge, to, deadline]
+        switch (type) {
+          case 1:
+            rowParams = [amountInHex, 0, routePathArge, to, deadline]
+            break;
+          case 2:
+            rowParams = [amountInHex, 0, routePathArge, to, deadline]
+            break;
+          case 3:
+            rowParams = [amountInHex, 0, routePathArge, to, deadline]
+            break;
+          case 4:
+            rowParams = [amountInHex, 0, routePathArge, to, deadline]
+            break;
+          case 5:
+            rowParams = [amountOutHex, amountInHex, routePathArge, to, deadline]
+            break;
+          case 6:
+            rowParams = [amountOutHex, amountInHex, routePathArge, to, deadline]
+            break;
         }
         tempMuitcallParams.push(rowParams)
         tempAmountIn.push(amountInHex)
@@ -161,7 +164,7 @@ export abstract class Router {
           multiParams = payload.tempMuitcallParams
           args = []
           // value = amountIn
-          value = payload.tempAmountIn[0]
+          value = payload && payload.tempAmountIn && payload['tempAmountIn'].length > 0 && payload.tempAmountIn.reduce((count, item) => new BigNumber(item).plus(count).toNumber()) || ZERO_HEX
         } else if (etherOut) {
           methodName = useFeeOnTransfer ? 'swapExactTokensForETHSupportingFeeOnTransferTokens' : 'swapExactTokensForETH'
           // for (let index = 0; index < routeDataRoute.length; index++) {
@@ -209,7 +212,7 @@ export abstract class Router {
           multiParams = payload.tempMuitcallParams
           args = []
           // value = amountIn
-          value = payload.tempAmountIn[0]
+          value = payload && payload.tempAmountIn && payload['tempAmountIn'].length > 0 && payload.tempAmountIn.reduce((count, item) => new BigNumber(item).plus(count).toNumber()) || ZERO_HEX
         } else if (etherOut) {
           methodName = 'swapTokensForExactETH'
           // (uint amountOut, uint amountInMax, address[] calldata path, address to, uint deadline)
