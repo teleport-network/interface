@@ -624,7 +624,7 @@ export function LiquidityCard({
             : '-'}
         </Box>
         {/* <td>xx</td> */}
-        <Box style={{ display: 'flex', justifyContent: 'space-between', justifySelf: 'end' }}>
+        <Box style={{ display: 'flex', justifyContent: 'space-between', justifySelf: 'end', width: '10rem' }}>
           {/* <ButtonPrimary padding={"unset"} width={"5rem"} borderRadius={".3rem"} sx={{ height: "1.3rem", fontSize: ".5rem", color: "#000000" }} as={Link} to="/manager">
           Manage
         </ButtonPrimary> */}

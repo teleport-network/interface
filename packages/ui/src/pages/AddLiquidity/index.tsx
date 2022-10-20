@@ -1065,7 +1065,7 @@ export default function AddLiquidity() {
               zIndex: -1,
               color: 'rgba(255,255,255,0.6)',
               maxWidth: isMobile ? '100%' : '30rem',
-              fontSize: '14px',
+              fontSize: 'max(0.6rem, 12px)',
               position: 'relative',
               width: '30rem',
               fontWeight: 200,

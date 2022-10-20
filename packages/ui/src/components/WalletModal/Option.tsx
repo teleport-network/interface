@@ -73,7 +73,7 @@ const CircleWrapper = styled.div`
 const HeaderText = styled.div`
   ${({ theme }) => theme.flexRowNoWrap};
   color: ${(props) => (props.color === 'blue' ? ({ theme }) => theme.primary1 : ({ theme }) => theme.text1)};
-  font-size: 0.8rem;
+  font-size: max(0.8rem, 12px);
   font-weight: 400;
 `
 

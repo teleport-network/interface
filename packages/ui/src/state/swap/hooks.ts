@@ -217,7 +217,7 @@ export function useDerivedSwapInfo():
   }, [typedValue, inputName, outputName, isExactIn])
 
   const alertMsg = (msg: string) => {
-    let divTemp = document.createElement('div')
+    const divTemp = document.createElement('div')
     divTemp.className = 'toastMessageWrap'
     divTemp.innerHTML = `
           <div class="toastMessageContent">
