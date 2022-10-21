@@ -311,8 +311,6 @@ body {
 .text-detail {
   font-size: max(0.75rem, 12px) !important;
 }
-
-
 .primary-button-text {
   font-size: 1.5rem !important;
 }
@@ -344,4 +342,5 @@ body {
 .extreme-small-radius {
   border-radius: 0.5rem!important;
 }
+
 `

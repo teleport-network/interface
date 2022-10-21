@@ -255,7 +255,8 @@ const StyledTableView = styled(Box)`
       > td {
         overflow: hidden;
         font-weight: 500;
-        font-size: 0.7rem;
+        /* font-size: 0.7rem; */
+        font-size: max(0.7rem, 12px);
         color: #ffffff;
         flex: 1;
         text-align: left;
