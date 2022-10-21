@@ -487,16 +487,14 @@ export default function Swap({ history }: RouteComponentProps) {
                 borderRadius={'1rem'}
               >
                 <AutoColumn gap="8px" style={{ padding: '0 1rem' }}>
-                  {Boolean(trade) && (
+                  {Boolean(trade) && !loading && (
                     <RowBetween align="center">
                       <Text className="text" fontWeight={400} color="white">
                         Price
                       </Text>
-                      <TradePrice
-                        price={trade?.executionPrice}
-                        showInverted={showInverted}
-                        setShowInverted={setShowInverted}
-                      />
+                      {trade && trade.routeData && (
+                        <TradePrice trade={trade} showInverted={showInverted} setShowInverted={setShowInverted} />
+                      )}
                     </RowBetween>
                   )}
                   {allowedSlippage !== INITIAL_ALLOWED_SLIPPAGE && (
