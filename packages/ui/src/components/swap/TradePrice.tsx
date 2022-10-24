@@ -20,12 +20,12 @@ export default function TradePrice({ trade, showInverted, setShowInverted }: Tra
   const amountStringB = tradeType === 0 ? routeData.quoteDecimals : routeData.amountDecimals
   const symbolA = routeData.inputAmount.currency.symbol
   const symbolB = routeData.outputAmount.currency.symbol
-  const formattedPrice = showInverted ? new BigNumber(amountStringA).dividedBy(amountStringB).toFixed(4) : new BigNumber(amountStringB).dividedBy(amountStringA).toFixed(4)
+  const formattedPrice = showInverted
+    ? new BigNumber(amountStringA).dividedBy(amountStringB).toFixed(4)
+    : new BigNumber(amountStringB).dividedBy(amountStringA).toFixed(4)
 
   const show = Boolean(symbolA && symbolB)
-  const label = showInverted
-    ? `${symbolA} per ${symbolB}`
-    : `${symbolB} per ${symbolA}`
+  const label = showInverted ? `${symbolA} per ${symbolB}` : `${symbolB} per ${symbolA}`
 
   return (
     <Text
