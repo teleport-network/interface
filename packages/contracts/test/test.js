@@ -492,7 +492,6 @@ describe('Router02', function () {
 
                 let amountIn = ethers.utils.parseUnits("1", 18)
                 let args = [
-                    amountIn,
                     ethAmt,
                     route,
                     ans.signer.address,
@@ -639,10 +638,9 @@ describe('Router02', function () {
             let lEthAmt = 100
             let lUsdtAmt = 130000
             let lUsdcAmt = lUsdtAmt
-            let swap1EthAmt = 10
-            let swap2EthAmt = 10
-            let swapEthAmt = swap1EthAmt + swap2EthAmt
-
+            let swap1EthAmt = ethers.utils.parseEther("1")
+            let swap2EthAmt = ethers.utils.parseEther("1")
+            let swapEthAmt = swap1EthAmt.add(swap2EthAmt)
             // addLiquidity for eth-usdt
             await addLiquidity(ans, ans.weth, ans.usdt, lEthAmt, lUsdtAmt, false, 0)
             // addLiquidity for eth-usdc
@@ -650,17 +648,20 @@ describe('Router02', function () {
 
             // pack tx swap eth for usdt
             let routerIface = ans.router.interface
+            // swap 1eth for usdt
             let step1 = routerIface.encodeFunctionData("swapExactETHForTokens", [swap1EthAmt, 0, [[ans.weth.address, ans.usdt.address, false]], ans.signer.address, getDeadline()])
-            // pack tx swap eth for usdc
-            let step2 = routerIface.encodeFunctionData("swapExactETHForTokens", [swap2EthAmt, 0, [[ans.weth.address, ans.usdc.address, false]], ans.signer.address, getDeadline()])
-            // construct multicall tx
+            // swap ether for 10usdc
+            let step2 = routerIface.encodeFunctionData("swapETHForExactTokensMulti", [10, [[ans.weth.address, ans.usdc.address, false]], ans.signer.address, getDeadline()])
+            // refund unused eth
+            let setp3 = routerIface.encodeFunctionData("refundETH")
             let params = [
-                step1, step2
+                step1, step2,setp3
             ]
 
             // multicall
             console.log("\nprev usdt balance", await ans.usdt.balanceOf(ans.signer.address))
             await ans.router.multicall(getDeadline(), params, { value: swapEthAmt })
+            console.log("contract ether balance",await ethers.provider.getBalance(ans.router.address))
             console.log("prev usdc balance", await ans.usdc.balanceOf(ans.signer.address))
         })
 
