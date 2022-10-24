@@ -25,11 +25,11 @@ contract TeleswapV2Router02 is ITeleswapV2Router02 {
         _;
     }
 
-        constructor(address _factory, address _WETH) public {
-            factory = _factory;
-            WETH = _WETH;
-            pairCodeHash = ITeleswapV2Factory(_factory).pairInitCodeHash();
-        }
+    constructor(address _factory, address _WETH) public {
+        factory = _factory;
+        WETH = _WETH;
+        pairCodeHash = ITeleswapV2Factory(_factory).pairInitCodeHash();
+    }
 
 
     receive() external payable {
@@ -337,6 +337,23 @@ contract TeleswapV2Router02 is ITeleswapV2Router02 {
         if (msg.value > amounts[0]) TransferHelper.safeTransferETH(msg.sender, msg.value - amounts[0]);
     }
 
+    // for multicall
+    // must call refund or you will lose you money
+    function swapETHForExactTokensMulti(uint amountOut, route[] calldata routes, address to, uint deadline)
+    external
+    virtual
+    override
+    payable
+    ensure(deadline)
+    returns (uint[] memory amounts)
+    {
+        require(routes[0].from == WETH, 'TeleswapV2Router: INVALID_PATH');
+        amounts = getAmountsIn(amountOut, routes);
+        IWETH(WETH).deposit{value : amounts[0]}();
+        assert(IWETH(WETH).transfer(TeleswapV2Library.pairFor(pairCodeHash, factory, routes[0]), amounts[0]));
+        _swap(amounts, routes, to);
+    }
+
     // **** SWAP (supporting fee-on-transfer tokens) ****
     // requires the initial amount to have already been sent to the first pair
     function _swapSupportingFeeOnTransferTokens(route[] memory _routes, address _to) internal virtual {
@@ -395,7 +412,7 @@ contract TeleswapV2Router02 is ITeleswapV2Router02 {
     ensure(deadline)
     {
         require(routes[0].from == WETH, 'TeleswapV2Router: INVALID_PATH');
-         require(amountIn <= msg.value, 'TeleswapV2Router: INVALID_MSG_VALUE');
+        require(amountIn <= msg.value, 'TeleswapV2Router: INVALID_MSG_VALUE');
         IWETH(WETH).deposit{value : amountIn}();
         assert(IWETH(WETH).transfer(TeleswapV2Library.pairFor(pairCodeHash, factory, routes[0]), amountIn));
         uint balanceBefore = IERC20(routes[routes.length - 1].to).balanceOf(to);
@@ -510,4 +527,9 @@ contract TeleswapV2Router02 is ITeleswapV2Router02 {
             results[i] = result;
         }
     }
+
+    function refundETH() external payable override {
+        if (address(this).balance > 0) TransferHelper.safeTransferETH(msg.sender, address(this).balance);
+    }
+
 }
