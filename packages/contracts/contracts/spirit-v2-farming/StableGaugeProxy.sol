@@ -248,10 +248,8 @@ contract StableGauge is ReentrancyGuard {
 contract StableGaugeProxy is ProtocolGovernance, ReentrancyGuard {
     using SafeERC20 for IERC20;
 
-    MasterChef public MASTER;
     IERC20 public governanceToken;
     IERC20 public rewardToken;
-    IERC20 public immutable TOKEN; // mInSpirit
 
     address public admin; //Admin address to manage gauges like add/deprecate/resurrect
     uint256 public minFee = 100 ether;
@@ -260,7 +258,6 @@ contract StableGaugeProxy is ProtocolGovernance, ReentrancyGuard {
     address public bribeFactory;
     uint256 public immutable MIN_INSPIRIT_FOR_VERIFY = 1e23; // 100k inSPIRIT
 
-    uint256 public pid = type(uint256).max; // -1 means 0xFFF....F and hasn't been set yet
     uint256 public totalWeight;
 
     // Time delays
@@ -313,17 +310,14 @@ contract StableGaugeProxy is ProtocolGovernance, ReentrancyGuard {
     }
 
     constructor(
-        address _masterChef,
         address _spirit,
         address _inSpirit,
         address _feeDist,
         address _bribeFactory, 
         address _pairFactory
     ) public {
-        MASTER = MasterChef(_masterChef);
         rewardToken = IERC20(_spirit);
         governanceToken = IERC20(_inSpirit);
-        TOKEN = IERC20(address(new MasterDill()));
         governance = msg.sender;
         admin = msg.sender;
         feeDistAddr = _feeDist;
@@ -540,30 +534,6 @@ contract StableGaugeProxy is ProtocolGovernance, ReentrancyGuard {
         emit GaugeResurrected(_token);
     }
 
-    // Sets MasterChef PID
-    function setPID(uint256 _pid) external {
-        require(msg.sender == governance, "!gov");
-        pid = _pid;
-    }
-
-    // Deposits minSPIRIT into MasterChef
-    function deposit() public {
-        require(pid != type(uint256).max, "pid not initialized");
-        IERC20 _token = TOKEN;
-        uint256 _balance = _token.balanceOf(address(this));
-        _token.safeApprove(address(MASTER), 0);
-        _token.safeApprove(address(MASTER), _balance);
-        MASTER.deposit(pid, _balance);
-    }
-
-    // Fetches Spirit
-    // Change from public to internal, ONLY preDistribute should be able to call
-    function collect() internal {
-        (uint256 _locked, ) = MASTER.userInfo(pid, address(this));
-        MASTER.withdraw(pid, _locked);
-        deposit();
-    }
-
     function length() external view returns (uint256) {
         return _tokens.length;
     }
@@ -574,7 +544,6 @@ contract StableGaugeProxy is ProtocolGovernance, ReentrancyGuard {
             lockedWeights[_tokens[i]] = weights[_tokens[i]];
             hasDistributed[_tokens[i]] = false;
         }
-        collect();
         lastDistribute = block.timestamp;
         uint256 _balance = rewardToken.balanceOf(address(this));
         lockedBalance = _balance;

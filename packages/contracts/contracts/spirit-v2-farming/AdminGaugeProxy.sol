@@ -244,12 +244,9 @@ contract AdminGauge is ReentrancyGuard {
 contract AdminGaugeProxy is ProtocolGovernance {
     using SafeERC20 for IERC20;
 
-    MasterChef public MASTER;
     IERC20 public governanceToken;
     IERC20 public rewardToken;
-    IERC20 public immutable TOKEN; // mInSpirit
 
-    uint256 public pid = type(uint256).max; // -1 means 0xFFF....F and hasn't been set yet
     uint256 public depositFeeRate = 0; // EX: 3000 = 30% : MAXIMUM-2000
 
     // VE bool
@@ -264,17 +261,14 @@ contract AdminGaugeProxy is ProtocolGovernance {
     mapping(address => uint256) public gaugeWeights; // token => weight
 
     constructor(
-        address _masterChef,
         address _spirit,
         address _inSpirit,
         address _treasury,
         address _feeDist,
         uint256 _depositFeeRate
     ) public {
-        MASTER = MasterChef(_masterChef);
         rewardToken = IERC20(_spirit);
         governanceToken = IERC20(_inSpirit);
-        TOKEN = IERC20(address(new MasterDill()));
         governance = msg.sender;
         admin = msg.sender;
         treasury = _treasury;
@@ -322,37 +316,12 @@ contract AdminGaugeProxy is ProtocolGovernance {
         gaugeWeights[_token] = _weight;
     }
 
-    // Sets MasterChef PID
-    function setPID(uint256 _pid) external {
-        require(msg.sender == governance, "!gov");
-        pid = _pid;
-    }
-
-    // Deposits minSPIRIT into MasterChef
-    function deposit() public {
-        require(pid != type(uint256).max, "pid not initialized");
-        IERC20 _token = TOKEN;
-        uint256 _balance = _token.balanceOf(address(this));
-        _token.safeApprove(address(MASTER), 0);
-        _token.safeApprove(address(MASTER), _balance);
-
-        MASTER.deposit(pid, _balance);
-    }
-
-    // Fetches Spirit
-    function collect() public {
-        (uint256 _locked, ) = MASTER.userInfo(pid, address(this));
-        MASTER.withdraw(pid, _locked);
-        deposit();
-    }
-
     function length() external view returns (uint256) {
         return _tokens.length;
     }
 
     // In this GaugeProxy the distribution will be equal amongst active gauges, irrespective of votes
     function distribute() external {
-        collect();
         uint256 _balance = rewardToken.balanceOf(address(this));
         uint256 _inSpiritRewards = 0;
         if (ve) {
