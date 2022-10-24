@@ -100,8 +100,8 @@ function getRpcUrl(chainId: SupportedChainId): string {
 
 const NETWORK_SELECTOR_CHAINS = [
   SupportedChainId.MAINNET,
-  SupportedChainId.ROPSTEN,
-  SupportedChainId.RINKEBY,
+  // SupportedChainId.ROPSTEN,
+  // SupportedChainId.RINKEBY,
   SupportedChainId.OPTIMISM_GOERLI
 ]
 
