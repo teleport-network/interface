@@ -4,8 +4,8 @@ import LineVIcon from 'assets/images/tele/lineV.png'
 import ArrowHGreen from 'assets/svg/arrowHGreen.svg'
 import ArrowHLoneLine from 'assets/svg/arrowHLoneLine.svg'
 import arrowShowRoute from 'assets/svg/arrowShowRoute.svg'
-import TeleRouteIcon from 'assets/svg/teleRoute.svg'
 import axios from 'axios'
+import CurrencyLogo from 'components/CurrencyLogo'
 import useThemedContext from 'hooks/useThemedContext'
 import { useState } from 'react'
 import { Box } from 'rebass'
@@ -126,13 +126,15 @@ const RouteCellStyled = styled(Box)`
     .ArrowHLoneLine {
       width: 4.1rem;
       height: 0.8rem;
-      margin: 2px 0;
+      margin: 2px 0 5px 0;
+      position: relative;
+      right: 5px;
     }
   }
   .tokenImgWrap {
     background: rgba(57, 225, 186, 0.1);
-    border-radius: 0.5rem;
-    padding: 0.4rem 0.3rem;
+    border-radius: 16px;
+    padding: 0.4rem 0.5rem;
     display: flex;
     justify-content: flex-start;
     align-items: center;
@@ -209,8 +211,12 @@ export function AdvancedSwapDetails({ trade }: AdvancedSwapDetailsProps) {
                 </RouteAccordionStyled>
               </RowBetween>
               <RouteStyled className="text-detail" sx={showRouterDetail ? { maxHeight: 'unset' } : { display: 'none' }}>
-                <img className="leftTokenImg" src={TeleRouteIcon} alt="" />
-                <img className="LineVIcon" style={{margin: '0 8px 0 12.5px'}} src={LineVIcon} alt="" />
+                <CurrencyLogo
+                  className="leftTokenImg"
+                  currency={trade && trade.inputAmount && trade.inputAmount.currency}
+                />
+                {/* <img className="leftTokenImg" src={TeleRouteIcon} alt="" /> */}
+                <img className="LineVIcon" style={{ margin: '0 8px 0 12.5px' }} src={LineVIcon} alt="" />
                 <div>
                   {
                     // @ts-ignore
@@ -238,8 +244,10 @@ export function AdvancedSwapDetails({ trade }: AdvancedSwapDetailsProps) {
                                 </span>
                               </div>
                               <div className="tokenImgWrap">
-                                <img src={TeleRouteIcon} alt="" />
-                                <img src={TeleRouteIcon} alt="" />
+                                <CurrencyLogo currency={routeItem && routeItem.tokenIn} />
+                                <CurrencyLogo currency={routeItem && routeItem.tokenOut} />
+                                {/* <img src={TeleRouteIcon} alt="" />
+                                <img src={TeleRouteIcon} alt="" /> */}
                               </div>
                             </>
                           ))}
@@ -257,8 +265,12 @@ export function AdvancedSwapDetails({ trade }: AdvancedSwapDetailsProps) {
                       ))
                   }
                 </div>
-                <img className="LineVIcon" style={{margin: '0 12.5px 0 8px'}} src={LineVIcon} alt="" />
-                <img className="rightTokenImg" src={TeleRouteIcon} alt="" />
+                <img className="LineVIcon" style={{ margin: '0 12.5px 0 8px' }} src={LineVIcon} alt="" />
+                {/* <img className="rightTokenImg" src={TeleRouteIcon} alt="" /> */}
+                <CurrencyLogo
+                  className="rightTokenImg"
+                  currency={trade && trade.outputAmount && trade.outputAmount.currency}
+                />
               </RouteStyled>
             </>
           )}
