@@ -596,9 +596,9 @@ export default function Liquidity() {
 function TopPairRow({ v2Pair, index, ethPrice }: { v2Pair: any; index: number; ethPrice?: Bn }) {
   return (
     <>
-      {!isMobile && <Box key={`${v2Pair.id}-1`}>{index + 1}</Box>}
+      {!isMobile && <Box key={`${index}-${v2Pair.id}-1`}>{index + 1}</Box>}
       <Box
-        key={`${v2Pair.id}-2`}
+        key={`${index}-${v2Pair.id}-2`}
         sx={{ textAlign: 'center', width: '10rem', display: 'flex', justifyContent: 'flex-start' }}
       >
         <Flex sx={{ gap: isMobile ? '0.25rem' : '0.25rem', width: '8rem' }}>
@@ -617,15 +617,15 @@ function TopPairRow({ v2Pair, index, ethPrice }: { v2Pair: any; index: number; e
           </Text>
         </Flex>
       </Box>
-      {!isMobile && <Box key={`${v2Pair.id}-3`}>{v2Pair.stable ? 'Stable' : 'Volatile'}</Box>}
-      <Box key={`${v2Pair.id}-3`}>
+      {!isMobile && <Box key={`${index}-${v2Pair.id}-3`}>{v2Pair.stable ? 'Stable' : 'Volatile'}</Box>}
+      <Box key={`${index}-${v2Pair.id}-3-mobile`}>
         $&nbsp;
         {ethPrice
           ? new Bn(v2Pair.trackedReserveETH).multipliedBy(ethPrice).decimalPlaces(4, Bn.ROUND_HALF_UP).toFixed(4)
           : '-'}
       </Box>
       <Box
-        key={`${v2Pair.id}-4`}
+        key={`${index}-${v2Pair.id}-4`}
         sx={{
           display: 'flex',
           justifyContent: 'flex-end',
