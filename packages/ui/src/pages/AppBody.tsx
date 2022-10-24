@@ -5,12 +5,12 @@ import styled from 'styled-components'
 export const BodyWrapper = styled(Box)`
   position: relative;
   /* max-width: 420px; */
-  max-width: 30rem;
+  max-width: 34rem;
   ${({ theme }) => theme.mediaWidth.upToSmall`
     max-width: 100%;
   `};
   /* max-width: 38rem; */
-  width: 30rem;
+  width: 33rem;
   padding: 1.8rem;
   ${({ theme }) => theme.mediaWidth.upToMedium`
     padding: 1.4rem;

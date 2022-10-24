@@ -4,6 +4,9 @@ import { validateAndParseAddress } from './utils'
 import { ETHER, Percent, Trade } from './entities'
 import BigNumber from 'bignumber.js'
 
+
+export const swapETHForExactTokensMultiText = 'swapETHForExactTokensMulti'
+
 /**
  * Options for producing the arguments to send call to the router.
  */
@@ -77,51 +80,7 @@ export abstract class Router {
    * @param options options for the call parameters
    */
   public static swapCallParameters(trade: Trade, options: TradeOptions | TradeOptionsDeadline): SwapParameters {
-    const getParams = (tempRouteDataRoute: Array<any>, type: number) => {
-      let tempMuitcallParams: Array<any> = []
-      let tempAmountIn: Array<any> = []
-      let tempAmountOut: Array<any> = []
-      tempRouteDataRoute.forEach((rowItem: any) => {
-        let routePathArge: Array<any> = []
-        rowItem.forEach((_routeDataItem: any, itemIndex: number) => {
-          routePathArge.push([rowItem[itemIndex]['tokenIn']['address'], rowItem[itemIndex]['tokenOut']['address'], rowItem[itemIndex]['stable']])
-        })
-        let amountInString = rowItem[0]['amountIn']
-        let amountInHex = '0x' + Number(amountInString).toString(16)
-        let amountOutString = rowItem[rowItem.length - 1]['amountOut']
-        let amountOutHex = '0x' + Number(amountOutString).toString(16)
 
-        let rowParams: Array<any> = []
-        switch (type) {
-          case 1:
-            rowParams = [amountInHex, 0, routePathArge, to, deadline]
-            break;
-          case 2:
-            rowParams = [amountInHex, 0, routePathArge, to, deadline]
-            break;
-          case 3:
-            rowParams = [amountInHex, 0, routePathArge, to, deadline]
-            break;
-          case 4:
-            rowParams = [amountInHex, 0, routePathArge, to, deadline]
-            break;
-          case 5:
-            rowParams = [amountOutHex, amountInHex, routePathArge, to, deadline]
-            break;
-          case 6:
-            rowParams = [amountOutHex, amountInHex, routePathArge, to, deadline]
-            break;
-        }
-        tempMuitcallParams.push(rowParams)
-        tempAmountIn.push(amountInHex)
-        tempAmountOut.push(amountOutHex)
-      })
-      return {
-        tempMuitcallParams,
-        tempAmountIn,
-        tempAmountOut
-      }
-    }
     const etherIn = trade.inputAmount.currency === ETHER
     const etherOut = trade.outputAmount.currency === ETHER
     // the router does not support both ether in and out
@@ -142,6 +101,56 @@ export abstract class Router {
 
     const useFeeOnTransfer = Boolean(options.feeOnTransfer)
     const routeDataRoute = trade?.routeData?.route || null
+    const maxInString =  routeDataRoute.maxIn.toSignificant()
+    const maxInHex = '0x' + Number(maxInString).toString(16)
+    const minOutString =  routeDataRoute.minOut.toSignificant()
+    const minOutHex = '0x' + Number(minOutString).toString(16)
+
+    const getParams = (tempRouteDataRoute: Array<any>, type: number) => {
+      let tempMuitcallParams: Array<any> = []
+      let tempAmountIn: Array<any> = []
+      let tempAmountOut: Array<any> = []
+      tempRouteDataRoute.forEach((rowItem: any) => {
+        let routePathArge: Array<any> = []
+        rowItem.forEach((_routeDataItem: any, itemIndex: number) => {
+          routePathArge.push([rowItem[itemIndex]['tokenIn']['address'], rowItem[itemIndex]['tokenOut']['address'], rowItem[itemIndex]['stable']])
+        })
+        let amountInString = rowItem[0]['amountIn']
+        let amountInHex = '0x' + Number(amountInString).toString(16)
+        let amountOutString = rowItem[rowItem.length - 1]['amountOut']
+        let amountOutHex = '0x' + Number(amountOutString).toString(16)
+
+        let rowParams: Array<any> = []
+        switch (type) {
+          case 1:
+            rowParams = [amountInHex, minOutHex, routePathArge, to, deadline]
+            break;
+          case 2:
+            rowParams = [amountInHex, minOutHex, routePathArge, to, deadline]
+            break;
+          case 3:
+            rowParams = [amountInHex, minOutHex, routePathArge, to, deadline]
+            break;
+          case 4:
+            rowParams = [amountOutHex, routePathArge, to, deadline]
+            break;
+          case 5:
+            rowParams = [amountOutHex, maxInHex, routePathArge, to, deadline]
+            break;
+          case 6:
+            rowParams = [amountOutHex, maxInHex, routePathArge, to, deadline]
+            break;
+        }
+        tempMuitcallParams.push(rowParams)
+        tempAmountIn.push(amountInHex)
+        tempAmountOut.push(amountOutHex)
+      })
+      return {
+        tempMuitcallParams,
+        tempAmountIn,
+        tempAmountOut
+      }
+    }
     let methodName: string
     // let args: (string | string[])[]
     let args: Array<any>
@@ -205,7 +214,8 @@ export abstract class Router {
       case TradeType.EXACT_OUTPUT:
         invariant(!useFeeOnTransfer, 'EXACT_OUT_FOT')
         if (etherIn) {
-          methodName = 'swapETHForExactTokens'
+          // methodName = 'swapETHForExactTokens'
+          methodName = swapETHForExactTokensMultiText
           // (uint amountOut, address[] calldata path, address to, uint deadline)
           // args = [amountOut, [[...path, getRoutePairMode()]], to, deadline]
           let payload = getParams(routeDataRoute, 4)
