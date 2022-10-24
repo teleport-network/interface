@@ -238,6 +238,7 @@ export function useDerivedSwapInfo():
   }
   const getData = async () => {
     try {
+      setRouteData({})
       if (
         typedValue &&
         currencies &&

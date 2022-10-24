@@ -1,6 +1,6 @@
 import { BigNumber } from '@ethersproject/bignumber'
 import { Contract } from '@ethersproject/contracts'
-import { JSBI, Percent, Router, SwapParameters, Trade, TradeType, WETH } from '@teleswap/sdk'
+import { JSBI, Percent, Router, SwapParameters, Trade, TradeType, WETH, swapETHForExactTokensMultiText } from '@teleswap/sdk'
 import { useMemo } from 'react'
 import { getTradeVersion } from 'utils/tradeVersion'
 
@@ -144,8 +144,16 @@ export function useSwapCallback(
                 if (inputTokenAddress && inputTokenAddress === WETH[chainId]['address']) {
                   tokenInContract = getContract(WETH[chainId].address, WETH_ABI, library)
                 }
-                const step1 = routerContract!.interface.encodeFunctionData(methodName, routeItem)
-                multiFinalParams.push(step1)
+                const step2 = routerContract!.interface.encodeFunctionData(methodName, routeItem)
+                multiFinalParams.push(step2)
+                // if (methodName === swapETHForExactTokensMultiText) {
+                //   const setp3 = routerContract!.interface.encodeFunctionData("refundETH")
+                //   multiFinalParams.push(setp3)
+                // }
+              }
+              if (methodName === swapETHForExactTokensMultiText) {
+                const setp3 = routerContract!.interface.encodeFunctionData("refundETH")
+                multiFinalParams.push(setp3)
               }
               return contract.estimateGas
                 .multicall(deadline, multiFinalParams, options)
@@ -247,11 +255,10 @@ export function useSwapCallback(
               const withRecipient =
                 recipient === account
                   ? base
-                  : `${base} to ${
-                      recipientAddressOrName && isAddress(recipientAddressOrName)
-                        ? shortenAddress(recipientAddressOrName)
-                        : recipientAddressOrName
-                    }`
+                  : `${base} to ${recipientAddressOrName && isAddress(recipientAddressOrName)
+                    ? shortenAddress(recipientAddressOrName)
+                    : recipientAddressOrName
+                  }`
 
               const withVersion =
                 tradeVersion === Version.v2
@@ -289,11 +296,10 @@ export function useSwapCallback(
               const withRecipient =
                 recipient === account
                   ? base
-                  : `${base} to ${
-                      recipientAddressOrName && isAddress(recipientAddressOrName)
-                        ? shortenAddress(recipientAddressOrName)
-                        : recipientAddressOrName
-                    }`
+                  : `${base} to ${recipientAddressOrName && isAddress(recipientAddressOrName)
+                    ? shortenAddress(recipientAddressOrName)
+                    : recipientAddressOrName
+                  }`
 
               const withVersion =
                 tradeVersion === Version.v2
