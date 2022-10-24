@@ -216,7 +216,7 @@ export function AdvancedSwapDetails({ trade }: AdvancedSwapDetailsProps) {
                   currency={trade && trade.inputAmount && trade.inputAmount.currency}
                 />
                 {/* <img className="leftTokenImg" src={TeleRouteIcon} alt="" /> */}
-                <img className="LineVIcon" style={{ margin: '0 8px 0 12.5px' }} src={LineVIcon} alt="" />
+                <img className="LineVIcon" style={{ margin: '0 0.5rem 0 0.89rem' }} src={LineVIcon} alt="" />
                 <div>
                   {
                     // @ts-ignore
@@ -265,7 +265,7 @@ export function AdvancedSwapDetails({ trade }: AdvancedSwapDetailsProps) {
                       ))
                   }
                 </div>
-                <img className="LineVIcon" style={{ margin: '0 12.5px 0 8px' }} src={LineVIcon} alt="" />
+                <img className="LineVIcon" style={{ margin: '0 0.89rem 0 0.5rem' }} src={LineVIcon} alt="" />
                 {/* <img className="rightTokenImg" src={TeleRouteIcon} alt="" /> */}
                 <CurrencyLogo
                   className="rightTokenImg"
