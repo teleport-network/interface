@@ -111,13 +111,13 @@ function involvesAddress(trade: Trade, checksummedAddress: string): boolean {
 export function useDerivedSwapInfo():
   | any
   | {
-    currencies: { [field in Field]?: Currency }
-    currencyBalances: { [field in Field]?: CurrencyAmount }
-    parsedAmount: CurrencyAmount | undefined
-    v2Trade: Trade | undefined
-    inputError?: string
-    routeData?: any
-  } {
+      currencies: { [field in Field]?: Currency }
+      currencyBalances: { [field in Field]?: CurrencyAmount }
+      parsedAmount: CurrencyAmount | undefined
+      v2Trade: Trade | undefined
+      inputError?: string
+      routeData?: any
+    } {
   const { account, chainId } = useActiveWeb3React()
   const [loading, setLoading] = useState(false)
   const {
@@ -202,7 +202,7 @@ export function useDerivedSwapInfo():
   const inputName = (currencies && currencies[Field.INPUT]?.name) || ''
   const outputName = (currencies && currencies[Field.OUTPUT]?.name) || ''
   useEffect(() => {
-    ; (async () => {
+    ;(async () => {
       try {
         if (!!timeout) {
           clearTimeout(timeout)
