@@ -4,8 +4,8 @@ import LineVIcon from 'assets/images/tele/lineV.png'
 import ArrowHGreen from 'assets/svg/arrowHGreen.svg'
 import ArrowHLoneLine from 'assets/svg/arrowHLoneLine.svg'
 import arrowShowRoute from 'assets/svg/arrowShowRoute.svg'
-import TeleRouteIcon from 'assets/svg/teleRoute.svg'
 import axios from 'axios'
+import CurrencyLogo from 'components/CurrencyLogo'
 import useThemedContext from 'hooks/useThemedContext'
 import { useState } from 'react'
 import { Box } from 'rebass'
@@ -98,7 +98,7 @@ const RouteStyled = styled(Box)`
   margin-top: 0.8rem !important;
   border: 1px solid ${({ theme }) => theme.bg3};
   display: flex;
-  justify-content: space-around;
+  justify-content: center;
   align-items: center;
   color: rgba(255, 255, 255, 0.8);
   /* height: 5.7rem; */
@@ -106,14 +106,13 @@ const RouteStyled = styled(Box)`
   border-radius: 0.5rem;
   padding: 0.7rem 0.9rem;
   .LineVIcon {
-    height: 2.6rem;
+    height: 5rem;
     width: 1px;
-    margin: 0 0.5rem;
   }
   .leftTokenImg,
   .rightTokenImg {
-    width: 1.2rem;
-    height: 1.2rem;
+    width: 2.3rem;
+    height: 2.3rem;
   }
 `
 const RouteCellStyled = styled(Box)`
@@ -125,37 +124,40 @@ const RouteCellStyled = styled(Box)`
   }
   .routeCellBlock {
     .ArrowHLoneLine {
-      width: 3rem;
-      height: 0.6rem;
-      margin: 2px 0;
+      width: 4.1rem;
+      height: 0.8rem;
+      margin: 2px 0 5px 0;
+      position: relative;
+      right: 5px;
     }
   }
   .tokenImgWrap {
     background: rgba(57, 225, 186, 0.1);
-    border-radius: 0.5rem;
-    padding: 0.2rem;
+    border-radius: 16px;
+    padding: 0.4rem 0.5rem;
     display: flex;
     justify-content: flex-start;
     align-items: center;
     position: relative;
-    width: 2rem;
-    height: 1.3rem;
     img {
-      width: 1.1rem;
+      width: 1.7rem;
       height: auto;
     }
     img:nth-of-type(1) {
       margin-right: 10px;
+      position: relative;
+      left: 8px;
     }
     img:nth-of-type(2) {
-      position: absolute;
-      right: 3px;
+      position: relative;
+      right: 8px;
       z-index: -1;
     }
   }
   .justArrowHead {
-    width: 0.4rem;
-    height: 0.4rem;
+    width: 0.6rem;
+    height: 0.7rem;
+    margin-left: 8px;
   }
 `
 const RouteAccordionStyled = styled(Box)`
@@ -209,8 +211,12 @@ export function AdvancedSwapDetails({ trade }: AdvancedSwapDetailsProps) {
                 </RouteAccordionStyled>
               </RowBetween>
               <RouteStyled className="text-detail" sx={showRouterDetail ? { maxHeight: 'unset' } : { display: 'none' }}>
-                <img className="leftTokenImg" src={TeleRouteIcon} alt="" />
-                <img className="LineVIcon" src={LineVIcon} alt="" />
+                <CurrencyLogo
+                  className="leftTokenImg"
+                  currency={trade && trade.inputAmount && trade.inputAmount.currency}
+                />
+                {/* <img className="leftTokenImg" src={TeleRouteIcon} alt="" /> */}
+                <img className="LineVIcon" style={{ margin: '0 8px 0 12.5px' }} src={LineVIcon} alt="" />
                 <div>
                   {
                     // @ts-ignore
@@ -223,7 +229,7 @@ export function AdvancedSwapDetails({ trade }: AdvancedSwapDetailsProps) {
                               <div
                                 key={routeItemIndex}
                                 className="routeCellBlock ColumnStartCenter"
-                                style={{ marginRight: '.5rem' }}
+                                style={{ marginRight: '10px' }}
                               >
                                 {routeItemIndex == 0 ? <span>{routeData.percents[index]}%</span> : <span>　</span>}
                                 <img className="ArrowHLoneLine" src={ArrowHLoneLine} alt="" />
@@ -237,9 +243,11 @@ export function AdvancedSwapDetails({ trade }: AdvancedSwapDetailsProps) {
                                   {routeItem.stable ? 'Stable' : 'Volatile'}
                                 </span>
                               </div>
-                              <div className="tokenImgWrap" style={{ marginRight: '.5rem' }}>
-                                <img src={TeleRouteIcon} alt="" />
-                                <img src={TeleRouteIcon} alt="" />
+                              <div className="tokenImgWrap">
+                                <CurrencyLogo currency={routeItem && routeItem.tokenIn} />
+                                <CurrencyLogo currency={routeItem && routeItem.tokenOut} />
+                                {/* <img src={TeleRouteIcon} alt="" />
+                                <img src={TeleRouteIcon} alt="" /> */}
                               </div>
                             </>
                           ))}
@@ -257,8 +265,12 @@ export function AdvancedSwapDetails({ trade }: AdvancedSwapDetailsProps) {
                       ))
                   }
                 </div>
-                <img className="LineVIcon" src={LineVIcon} alt="" />
-                <img className="rightTokenImg" src={TeleRouteIcon} alt="" />
+                <img className="LineVIcon" style={{ margin: '0 12.5px 0 8px' }} src={LineVIcon} alt="" />
+                {/* <img className="rightTokenImg" src={TeleRouteIcon} alt="" /> */}
+                <CurrencyLogo
+                  className="rightTokenImg"
+                  currency={trade && trade.outputAmount && trade.outputAmount.currency}
+                />
               </RouteStyled>
             </>
           )}

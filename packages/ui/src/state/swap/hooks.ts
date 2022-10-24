@@ -9,7 +9,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { route } from 'state/routing/slice'
 import { useActiveWeb3React } from '../../hooks'
 import { useCurrency } from '../../hooks/Tokens'
-import { useTradeExactIn, useTradeExactOut } from '../../hooks/Trades'
+// import { useTradeExactIn, useTradeExactOut } from '../../hooks/Trades'
 import useENS from '../../hooks/useENS'
 import useParsedQueryString from '../../hooks/useParsedQueryString'
 import { isAddress } from '../../utils'
@@ -141,8 +141,8 @@ export function useDerivedSwapInfo():
   const isExactIn: boolean = independentField === Field.INPUT
   const parsedAmount = tryParseAmount(typedValue, (isExactIn ? inputCurrency : outputCurrency) ?? undefined)
 
-  const bestTradeExactIn = useTradeExactIn(isExactIn ? parsedAmount : undefined, outputCurrency ?? undefined)
-  const bestTradeExactOut = useTradeExactOut(inputCurrency ?? undefined, !isExactIn ? parsedAmount : undefined)
+  // const bestTradeExactIn = useTradeExactIn(isExactIn ? parsedAmount : undefined, outputCurrency ?? undefined)
+  // const bestTradeExactOut = useTradeExactOut(inputCurrency ?? undefined, !isExactIn ? parsedAmount : undefined)
 
   // const v2Trade = isExactIn ? bestTradeExactIn : bestTradeExactOut
   const v2Trade: any = {}
@@ -174,9 +174,9 @@ export function useDerivedSwapInfo():
     inputError = inputError ?? 'Enter a recipient'
   } else {
     if (
-      BAD_RECIPIENT_ADDRESSES.indexOf(formattedTo) !== -1 ||
-      (bestTradeExactIn && involvesAddress(bestTradeExactIn, formattedTo)) ||
-      (bestTradeExactOut && involvesAddress(bestTradeExactOut, formattedTo))
+      BAD_RECIPIENT_ADDRESSES.indexOf(formattedTo) !== -1
+      // (bestTradeExactIn && involvesAddress(bestTradeExactIn, formattedTo)) ||
+      // (bestTradeExactOut && involvesAddress(bestTradeExactOut, formattedTo))
     ) {
       inputError = inputError ?? 'Invalid recipient'
     }
@@ -214,7 +214,7 @@ export function useDerivedSwapInfo():
         console.error('useDerivedSwapInfo error', error)
       }
     })()
-  }, [typedValue, inputName, outputName, isExactIn])
+  }, [typedValue, inputName, outputName])
 
   const alertMsg = (msg: string) => {
     const divTemp = document.createElement('div')

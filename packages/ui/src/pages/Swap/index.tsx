@@ -108,10 +108,6 @@ export default function Swap({ history }: RouteComponentProps) {
     loading
   } = useDerivedSwapInfo()
   if (routeData && v2Trade) {
-    v2Trade['testRoute'] = v2Trade['route']
-    delete v2Trade['route']
-
-    // v2Trade['route'] = routeData
     v2Trade['routeData'] = routeData
     v2Trade['inputAmount'] = routeData['inputAmount']
     v2Trade['outputAmount'] = routeData['outputAmount']
@@ -122,14 +118,14 @@ export default function Swap({ history }: RouteComponentProps) {
     } else {
       console.error('tradeType null:', routeData.reqParams)
     }
-    delete v2Trade['executionPrice']
-    delete v2Trade['nextMidPrice']
-    delete v2Trade['priceImpact']
+
+    // delete v2Trade['route']
+    // v2Trade['route'] = routeData
+    // delete v2Trade['executionPrice']
+    // delete v2Trade['nextMidPrice']
+    // delete v2Trade['priceImpact']
   }
-  // if(!routeData){
-  //   v2Trade['inputAmount'] = routeData['inputAmount']
-  //   v2Trade['outputAmount'] = routeData['outputAmount']
-  // }
+
   const {
     wrapType,
     execute: onWrap,
@@ -397,7 +393,7 @@ export default function Swap({ history }: RouteComponentProps) {
           <AutoColumn gap={'.4rem'}>
             <CurrencyInputPanel
               label={independentField === Field.OUTPUT && !showWrap && trade ? 'From (estimated)' : 'From'}
-              value={formattedAmounts[Field.INPUT]}
+              value={typedValue === '' ? '' : formattedAmounts[Field.INPUT]}
               showMaxButton={!atMaxAmountInput}
               currency={currencies[Field.INPUT]}
               onUserInput={handleTypeInput}
@@ -440,7 +436,7 @@ export default function Swap({ history }: RouteComponentProps) {
               </AutoRow>
             </AutoColumn>
             <CurrencyInputPanel
-              value={formattedAmounts[Field.OUTPUT]}
+              value={typedValue === '' ? '' : formattedAmounts[Field.OUTPUT]}
               onUserInput={handleTypeOutput}
               label={independentField === Field.INPUT && !showWrap && trade ? 'To (estimated)' : 'To'}
               showMaxButton={false}
@@ -480,7 +476,7 @@ export default function Swap({ history }: RouteComponentProps) {
                 <span style={{ position: 'relative', left: '-10px' }}>Fetching best price...</span>
               </div>
             )}
-            {showWrap ? null : (
+            {showWrap ? null : !loading && typedValue !== '' ? (
               <Card
                 padding={showWrap ? '.25rem 1rem 0 1rem' : '0.5rem 0px'}
                 sx={{ color: '#D7DCE0', /*  fontSize: '.4rem', */ fontWeight: 400 }}
@@ -492,11 +488,9 @@ export default function Swap({ history }: RouteComponentProps) {
                       <Text className="text" fontWeight={400} color="white">
                         Price
                       </Text>
-                      <TradePrice
-                        price={trade?.executionPrice}
-                        showInverted={showInverted}
-                        setShowInverted={setShowInverted}
-                      />
+                      {trade && trade.routeData && (
+                        <TradePrice trade={trade} showInverted={showInverted} setShowInverted={setShowInverted} />
+                      )}
                     </RowBetween>
                   )}
                   {allowedSlippage !== INITIAL_ALLOWED_SLIPPAGE && (
@@ -511,13 +505,15 @@ export default function Swap({ history }: RouteComponentProps) {
                   )}
                 </AutoColumn>
               </Card>
+            ) : (
+              <></>
             )}
             {!swapIsUnsupported ? (
-              routeData && !loading && <AdvancedSwapDetailsDropdown trade={trade} />
+              routeData && !loading && typedValue !== '' && <AdvancedSwapDetailsDropdown trade={trade} />
             ) : (
               <UnsupportedCurrencyFooter show={swapIsUnsupported} currencies={[currencies.INPUT, currencies.OUTPUT]} />
             )}
-            {!isMobile && (
+            {!isMobile && !loading && (
               <BottomGrouping>
                 {swapIsUnsupported ? (
                   <ButtonPrimary className="secondary-title" disabled={true}>
