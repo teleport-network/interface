@@ -5,11 +5,12 @@ import { QuoteArguments } from 'lib/hooks/routing/clientSideSmartOrderRouter'
 import { ParsedQs } from 'qs'
 import { useCallback, useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
+import { ReqTradeType } from '../../constants'
 
 import { route } from 'state/routing/slice'
 import { useActiveWeb3React } from '../../hooks'
 import { useCurrency } from '../../hooks/Tokens'
-// import { useTradeExactIn, useTradeExactOut } from '../../hooks/Trades'
+import { useTradeExactIn, useTradeExactOut } from '../../hooks/Trades'
 import useENS from '../../hooks/useENS'
 import useParsedQueryString from '../../hooks/useParsedQueryString'
 import { isAddress } from '../../utils'
@@ -141,11 +142,11 @@ export function useDerivedSwapInfo():
   const isExactIn: boolean = independentField === Field.INPUT
   const parsedAmount = tryParseAmount(typedValue, (isExactIn ? inputCurrency : outputCurrency) ?? undefined)
 
-  // const bestTradeExactIn = useTradeExactIn(isExactIn ? parsedAmount : undefined, outputCurrency ?? undefined)
-  // const bestTradeExactOut = useTradeExactOut(inputCurrency ?? undefined, !isExactIn ? parsedAmount : undefined)
+  const bestTradeExactIn = useTradeExactIn(isExactIn ? parsedAmount : undefined, outputCurrency ?? undefined)
+  const bestTradeExactOut = useTradeExactOut(inputCurrency ?? undefined, !isExactIn ? parsedAmount : undefined)
 
-  // const v2Trade = isExactIn ? bestTradeExactIn : bestTradeExactOut
-  const v2Trade: any = {}
+  const v2Trade = isExactIn ? bestTradeExactIn : bestTradeExactOut
+  // const v2Trade: any = {}
   const currencyBalances = {
     [Field.INPUT]: relevantTokenBalances[0],
     [Field.OUTPUT]: relevantTokenBalances[1]
@@ -202,14 +203,20 @@ export function useDerivedSwapInfo():
   const inputName = (currencies && currencies[Field.INPUT]?.name) || ''
   const outputName = (currencies && currencies[Field.OUTPUT]?.name) || ''
   useEffect(() => {
+    setLoading(false)
+  }, [chainId])
+
+  useEffect(() => {
     ;(async () => {
       try {
-        if (!!timeout) {
-          clearTimeout(timeout)
+        if (account) {
+          if (!!timeout) {
+            clearTimeout(timeout)
+          }
+          timeout = setTimeout(() => {
+            getData().then()
+          }, 500)
         }
-        timeout = setTimeout(() => {
-          getData().then()
-        }, 500)
       } catch (error) {
         console.error('useDerivedSwapInfo error', error)
       }
@@ -277,7 +284,7 @@ export function useDerivedSwapInfo():
           tokenOutAddress: currencies[Field.OUTPUT]!['address']!,
           tokenOutChainId: currencies[Field.OUTPUT]!['chainId'],
           amount,
-          type: isExactIn ? 'exactIn' : 'exactOut',
+          type: isExactIn ? ReqTradeType.exactIn : ReqTradeType.exactOut,
           tokenInSymbol: currencies[Field.INPUT]!.symbol,
           tokenOutSymbol: currencies[Field.OUTPUT]!.symbol,
           slippageTolerance: allowedSlippage ? String(allowedSlippage) : '',
@@ -308,11 +315,11 @@ export function useDerivedSwapInfo():
             )
             const exactType = response.data && response.data.reqParams && response.data.reqParams.type
             switch (exactType) {
-              case 'exactIn':
+              case ReqTradeType.exactIn:
                 response.data['inputAmount'] = parsedAmount
                 response.data['outputAmount'] = outputAmount
                 break
-              case 'exactOut':
+              case ReqTradeType.exactOut:
                 response.data['inputAmount'] = outputAmount
                 response.data['outputAmount'] = parsedAmount
                 break
@@ -322,6 +329,8 @@ export function useDerivedSwapInfo():
         }
       }
     } catch (error: any) {
+      setLoading(false)
+      console.error('getData', error)
       if (document && document.querySelector('body')) {
         alertMsg(error?.message || error)
       } else {

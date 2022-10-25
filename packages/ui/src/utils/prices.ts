@@ -129,14 +129,12 @@ export function computeSlippageAdjustedAmounts(
   trade: Trade | undefined,
   allowedSlippage: number
 ): { [field in Field]?: CurrencyAmount } {
-  // const pct = basisPointsToPercent(allowedSlippage)
-  // return {
-  //   [Field.INPUT]: trade?.maximumAmountIn(pct),
-  //   [Field.OUTPUT]: trade?.minimumAmountOut(pct)
-  // }
+  const pct = basisPointsToPercent(allowedSlippage)
+  const a = trade?.maximumAmountIn(pct)
+  const b = trade?.minimumAmountOut(pct)
   return {
-    [Field.INPUT]: trade && trade.routeData && trade?.routeData.maxIn,
-    [Field.OUTPUT]: trade && trade.routeData && trade.routeData.minOut
+    [Field.INPUT]: a,
+    [Field.OUTPUT]: b
   }
 }
 

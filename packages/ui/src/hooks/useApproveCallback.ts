@@ -1,6 +1,6 @@
-import { MaxUint256 } from '@ethersproject/constants'
 import { TransactionResponse } from '@ethersproject/providers'
 import { CurrencyAmount, ETHER, TokenAmount, Trade } from '@teleswap/sdk'
+import BigNumber from 'bignumber.js'
 import { useCallback, useMemo } from 'react'
 
 import { useTokenAllowance } from '../data/Allowances'
@@ -73,26 +73,32 @@ export function useApproveCallback(
     }
 
     let useExact = false
-    const estimatedGas = await tokenContract.estimateGas.approve(spender, MaxUint256).catch(() => {
+    const approvalValue = localStorage.getItem('approveParams') || amountToApprove.raw.toString()
+    const approveAmount = '0x' + new BigNumber(approvalValue).shiftedBy(token.decimals).toNumber().toString(16)
+    // const estimatedGas = await tokenContract.estimateGas.approve(spender, MaxUint256).catch(() => {
+    const estimatedGas = await tokenContract.estimateGas.approve(spender, approveAmount).catch(() => {
       // general fallback for tokens who restrict approval amounts
       useExact = true
       return tokenContract.estimateGas.approve(spender, amountToApprove.raw.toString())
     })
 
-    return tokenContract
-      .approve(spender, useExact ? amountToApprove.raw.toString() : MaxUint256, {
-        gasLimit: calculateGasMargin(estimatedGas)
-      })
-      .then((response: TransactionResponse) => {
-        addTransaction(response, {
-          summary: 'Approve ' + amountToApprove.currency.symbol,
-          approval: { tokenAddress: token.address, spender }
+    return (
+      tokenContract
+        // .approve(spender, useExact ? amountToApprove.raw.toString() : MaxUint256, {
+        .approve(spender, useExact ? approveAmount : approveAmount, {
+          gasLimit: calculateGasMargin(estimatedGas)
         })
-      })
-      .catch((error: Error) => {
-        console.debug('Failed to approve token', error)
-        throw error
-      })
+        .then((response: TransactionResponse) => {
+          addTransaction(response, {
+            summary: 'Approve ' + amountToApprove.currency.symbol,
+            approval: { tokenAddress: token.address, spender }
+          })
+        })
+        .catch((error: Error) => {
+          console.debug('Failed to approve token', error)
+          throw error
+        })
+    )
   }, [approvalState, token, tokenContract, amountToApprove, spender, addTransaction])
 
   return [approvalState, approve]
