@@ -24,7 +24,7 @@ export default function AdvancedSwapDetailsDropdown({ trade, ...rest }: Advanced
   const lastTrade = useLastTruthy(trade)
 
   return (
-    <AdvancedDetailsFooter show={Boolean(trade && trade.hasOwnProperty('routeData'))}>
+    <AdvancedDetailsFooter show={Boolean(trade?.routeData || false)}>
       <AdvancedSwapDetails {...rest} trade={trade ?? lastTrade ?? undefined} />
     </AdvancedDetailsFooter>
   )
