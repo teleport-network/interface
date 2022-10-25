@@ -3,7 +3,7 @@ import { Contract } from '@ethersproject/contracts'
 import {
   JSBI,
   Percent,
-  Router,
+  SDKRouter,
   swapETHForExactTokensMultiText,
   SwapParameters,
   Trade,
@@ -78,7 +78,7 @@ function useSwapCallArguments(
     switch (tradeVersion) {
       case Version.v2:
         swapMethods.push(
-          Router.swapCallParameters(trade, {
+          SDKRouter.swapCallParameters(trade, {
             feeOnTransfer: false,
             allowedSlippage: new Percent(JSBI.BigInt(allowedSlippage), BIPS_BASE),
             recipient,
@@ -88,7 +88,7 @@ function useSwapCallArguments(
 
         if (trade.tradeType === TradeType.EXACT_INPUT) {
           swapMethods.push(
-            Router.swapCallParameters(trade, {
+            SDKRouter.swapCallParameters(trade, {
               feeOnTransfer: true,
               allowedSlippage: new Percent(JSBI.BigInt(allowedSlippage), BIPS_BASE),
               recipient,
