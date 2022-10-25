@@ -75,7 +75,6 @@ import {
   ChainId,
   ID_TO_CHAIN_ID,
   ID_TO_NETWORK_NAME,
-  V2_SUPPORTED,
 } from '../../util/chains';
 import {log} from '../../util/log';
 import {
@@ -833,8 +832,6 @@ export class AlphaRouter
       { blockNumber }
     );
 
-    const { protocols } = routingConfig;
-
     const currencyIn =
       tradeType == TradeType.EXACT_INPUT ? amount.currency : quoteCurrency;
     const currencyOut =
@@ -867,91 +864,18 @@ export class AlphaRouter
       candidatePools: CandidatePoolsBySelectionCriteria;
     }>[] = [];
 
-    const protocolsSet = new Set(protocols ?? []);
-
-    // TODO: debug joy, l2 gas fee
-    // const v3gasModel = await this.v3GasModelFactory.buildGasModel({
-    //   chainId: this.chainId,
-    //   gasPriceWei,
-    //   v3poolProvider: this.v3PoolProvider,
-    //   token: quoteToken,
-    //   v2poolProvider: this.v2PoolProvider,
-    //   l2GasDataProvider: this.l2GasDataProvider,
-    // });
-
-    // const mixedRouteGasModel =
-    //   await this.mixedRouteGasModelFactory.buildGasModel({
-    //     chainId: this.chainId,
-    //     gasPriceWei,
-    //     v3poolProvider: this.v3PoolProvider,
-    //     token: quoteToken,
-    //     v2poolProvider: this.v2PoolProvider,
-    //   });
-
-    if (
-      (protocolsSet.size == 0 ||
-        (protocolsSet.has(Protocol.V2) && protocolsSet.has(Protocol.V3))) &&
-      V2_SUPPORTED.includes(this.chainId)
-    ) {
-      log.info({ protocols, tradeType }, 'Routing across all protocols');
-      quotePromises.push(
-        this.getV2Quotes(
-          tokenIn,
-          tokenOut,
-          amounts,
-          percents,
-          quoteToken,
-          gasPriceWei,
-          tradeType,
-          routingConfig
-        )
-      );
-      /// @dev only add mixedRoutes in the case where no protocols were specified, and if TradeType is correct
-      if (
-        tradeType == TradeType.EXACT_INPUT &&
-        /// The cases where protocols = [] and protocols = [V2, V3, MIXED]
-        (protocolsSet.size == 0 || protocolsSet.has(Protocol.MIXED))
-      ) {
-        log.info(
-          { protocols, swapType: tradeType },
-          'Routing across MixedRoutes'
-        );
-      }
-    } else {
-      if (
-        protocolsSet.has(Protocol.V3) ||
-        (protocolsSet.size == 0 && !V2_SUPPORTED.includes(this.chainId))
-      ) {
-        log.info({ protocols, swapType: tradeType }, 'Routing across V3');
-      }
-      if (protocolsSet.has(Protocol.V2)) {
-        log.info({ protocols, swapType: tradeType }, 'Routing across V2');
-        quotePromises.push(
-          this.getV2Quotes(
-            tokenIn,
-            tokenOut,
-            amounts,
-            percents,
-            quoteToken,
-            gasPriceWei,
-            tradeType,
-            routingConfig
-          )
-        );
-      }
-      /// If protocolsSet is not empty, and we specify mixedRoutes, consider them if the chain has v2 liq
-      /// and tradeType === EXACT_INPUT
-      if (
-        protocolsSet.has(Protocol.MIXED) &&
-        V2_SUPPORTED.includes(this.chainId) &&
-        tradeType == TradeType.EXACT_INPUT
-      ) {
-        log.info(
-          { protocols, swapType: tradeType },
-          'Routing across MixedRoutes'
-        );
-      }
-    }
+    quotePromises.push(
+      this.getV2Quotes(
+        tokenIn,
+        tokenOut,
+        amounts,
+        percents,
+        quoteToken,
+        gasPriceWei,
+        tradeType,
+        routingConfig
+      )
+    );
 
     const routesWithValidQuotesByProtocol = await Promise.all(quotePromises);
 

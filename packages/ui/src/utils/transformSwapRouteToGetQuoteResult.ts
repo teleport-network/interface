@@ -46,6 +46,7 @@ export function transformSwapRouteToGetQuoteResult(
       50
     )
 
+    console.log('debug joy', amount)
     maxIn = maxIn.add(
       CurrencyAmount.fromRawAmount(
         type == 'exactIn' ? amount.currency : quote.currency,
