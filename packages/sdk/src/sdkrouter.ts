@@ -69,7 +69,7 @@ const ZERO_HEX = '0x0'
 /**
  * Represents the Uniswap V2 Router, and has static methods for helping execute trades.
  */
-export abstract class Router {
+export abstract class SDKRouter {
   /**
    * Cannot be constructed.
    */
@@ -100,16 +100,17 @@ export abstract class Router {
         : `0x${options.deadline.toString(16)}`
 
     const useFeeOnTransfer = Boolean(options.feeOnTransfer)
-    const routeDataRoute = trade?.routeData?.route || null
-    const maxInString =  routeDataRoute.maxIn.toSignificant()
-    const maxInHex = '0x' + Number(maxInString).toString(16)
-    const minOutString =  routeDataRoute.minOut.toSignificant()
-    const minOutHex = '0x' + Number(minOutString).toString(16)
+    const routeDataRoute = trade?.routeData?.route || {}
 
-    const getParams = (tempRouteDataRoute: Array<any>, type: number) => {
+    const getParams = (tempRouteDataRoute: any, type: number) => {
       let tempMuitcallParams: Array<any> = []
       let tempAmountIn: Array<any> = []
       let tempAmountOut: Array<any> = []
+      const maxInString =  tempRouteDataRoute?.maxIn?.toSignificant() || ''
+      const maxInHex = '0x' + Number(maxInString).toString(16)
+      const minOutString =  tempRouteDataRoute?.minOut?.toSignificant() || ''
+      const minOutHex = '0x' + Number(minOutString).toString(16)
+
       tempRouteDataRoute.forEach((rowItem: any) => {
         let routePathArge: Array<any> = []
         rowItem.forEach((_routeDataItem: any, itemIndex: number) => {

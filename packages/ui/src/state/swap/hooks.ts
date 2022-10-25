@@ -289,7 +289,9 @@ export function useDerivedSwapInfo():
           params['deadline'] = String(ttl)
         }
         setLoading(true)
+        console.log('req params', params)
         const response = await route(params)
+        console.log('res', response?.data || '')
         setLoading(false)
         if (response.data.hasOwnProperty('invalidRoute') && response.data.invalidRoute === true) {
           if (document && document.querySelector('body')) {
