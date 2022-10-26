@@ -1,5 +1,5 @@
 import { parseUnits } from '@ethersproject/units'
-import { Currency, CurrencyAmount, JSBI, Token, TokenAmount, Trade, WETH } from '@teleswap/sdk'
+import { Currency, CurrencyAmount, ETHER, JSBI, Token, TokenAmount, Trade, WETH } from '@teleswap/sdk'
 import BigNumber from 'bignumber.js'
 import { QuoteArguments } from 'lib/hooks/routing/clientSideSmartOrderRouter'
 import { ParsedQs } from 'qs'
@@ -247,6 +247,7 @@ export function useDerivedSwapInfo():
       setRouteData({})
       if (
         typedValue &&
+        new BigNumber(typedValue).toNumber() > 0 &&
         currencies &&
         currencies[Field.INPUT] &&
         currencies[Field.INPUT]?.hasOwnProperty('decimals') &&
