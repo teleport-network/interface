@@ -1,7 +1,6 @@
 import { Trade, TradeType } from '@teleswap/sdk'
 import useThemedContext from 'hooks/useThemedContext'
 import { useMemo, useState } from 'react'
-import { Repeat } from 'react-feather'
 import { Text } from 'rebass'
 
 import { Field } from '../../state/swap/actions'
@@ -17,7 +16,7 @@ import { AutoColumn } from '../Column'
 import QuestionHelper from '../QuestionHelper'
 import { AutoRow, RowBetween, RowFixed } from '../Row'
 import FormattedPriceImpact from './FormattedPriceImpact'
-import { StyledBalanceMaxMini, SwapCallbackError } from './styleds'
+import { SwapCallbackError } from './styleds'
 
 export default function SwapModalFooter({
   trade,
@@ -38,13 +37,14 @@ export default function SwapModalFooter({
     () => computeSlippageAdjustedAmounts(trade, allowedSlippage),
     [allowedSlippage, trade]
   )
-  const { priceImpactWithoutFee, realizedLPFee } = useMemo(() => computeTradePriceBreakdown(trade), [trade])
+  // realizedLPFee
+  const { priceImpactWithoutFee, gasUseEstimateUSD } = useMemo(() => computeTradePriceBreakdown(trade), [trade])
   const severity = warningSeverity(priceImpactWithoutFee)
 
   return (
     <>
       <AutoColumn gap="0px">
-        <RowBetween align="center">
+        {/* <RowBetween align="center">
           <Text fontWeight={400} fontSize={14} color={theme.text2}>
             Price
           </Text>
@@ -60,12 +60,12 @@ export default function SwapModalFooter({
               paddingLeft: '10px'
             }}
           >
-            {/* {formatExecutionPrice(trade, showInverted)} */}
+            {formatExecutionPrice(trade, showInverted)}
             <StyledBalanceMaxMini onClick={() => setShowInverted(!showInverted)}>
               <Repeat size={14} />
             </StyledBalanceMaxMini>
           </Text>
-        </RowBetween>
+        </RowBetween> */}
 
         <RowBetween>
           <RowFixed>
@@ -104,7 +104,8 @@ export default function SwapModalFooter({
             <QuestionHelper text="A portion of each trade (0.30%) goes to liquidity providers as a protocol incentive." />
           </RowFixed>
           <TYPE.black fontSize={14}>
-            {realizedLPFee ? realizedLPFee?.toSignificant(6) + ' ' + trade.inputAmount.currency.symbol : '-'}
+            {/* {realizedLPFee ? realizedLPFee?.toSignificant(6) + ' ' + trade.inputAmount.currency.symbol : '-'} */}${' '}
+            {gasUseEstimateUSD}
           </TYPE.black>
         </RowBetween>
       </AutoColumn>
