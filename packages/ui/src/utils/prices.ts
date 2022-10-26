@@ -44,8 +44,8 @@ export function computeTradePriceBreakdownByRoute(route: V2RouteWithValidQuote):
   // remove lp fees from price impact
   const priceImpactWithoutFeeFraction = computePriceImpact(
     new Fraction(route.route.midPrice.numerator, route.route.midPrice.denominator),
-    route.tradeType == TradeType.EXACT_INPUT ? route.amount.quotient : route.quote.quotient,
-    route.tradeType == TradeType.EXACT_INPUT ? route.quote.quotient : route.amount.quotient
+    route.tradeType === TradeType.EXACT_INPUT ? route.amount.quotient : route.quote.quotient,
+    route.tradeType === TradeType.EXACT_INPUT ? route.quote.quotient : route.amount.quotient
   ).subtract(realizedLPFee)
 
   console.log(
