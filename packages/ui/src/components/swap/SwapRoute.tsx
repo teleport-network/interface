@@ -14,7 +14,22 @@ export default memo(function SwapRoute({ trade }: { trade: Trade }) {
   const inputSymbol = trade?.inputAmount?.currency?.symbol || ''
   return (
     <Flex flexWrap="wrap" width="100%" justifyContent="flex-end" alignItems="center">
-      {route && route.length > 1 && (
+      {
+        <Fragment>
+          <Flex alignItems="end">
+            <TYPE.black className="text-detail" color={theme.text1} ml="0.125rem" mr="0.125rem">
+              {(route[0] && route[0][0]?.tokenIn?.symbol) || ''}
+            </TYPE.black>
+          </Flex>
+          <ChevronRight size={12} color={theme.text2} />
+          <Flex alignItems="end">
+            <TYPE.black className="text-detail" color={theme.text1} ml="0.125rem" mr="0.125rem">
+              {trade?.outputAmount?.currency?.symbol || ''}
+            </TYPE.black>
+          </Flex>
+        </Fragment>
+      }
+      {false && route && route.length > 1 && (
         <Fragment>
           {inputSymbol && inputSymbol === ETHText && (
             <>
@@ -39,7 +54,7 @@ export default memo(function SwapRoute({ trade }: { trade: Trade }) {
           </Flex>
         </Fragment>
       )}
-      {route &&
+      {false && route &&
         route.length === 1 &&
         route[0] &&
         route[0].map((token, i, path) => {
