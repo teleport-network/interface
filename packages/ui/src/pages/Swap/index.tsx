@@ -470,7 +470,7 @@ export default function Swap({ history }: RouteComponentProps) {
                       fontSize: '12px !important'
                     }}
                     loading={loading}
-                    loadingPosition="start"
+                    // loadingPosition="start"
                     variant="contained"
                   ></LoadingButton>
                 </div>
