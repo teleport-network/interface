@@ -106,9 +106,9 @@ export abstract class SDKRouter {
       let tempMuitcallParams: Array<any> = []
       let tempAmountIn: Array<any> = []
       let tempAmountOut: Array<any> = []
-      const maxInString =  tempRouteDataRoute?.maxIn?.toSignificant() || ''
+      const maxInString = tempRouteDataRoute?.maxIn?.toSignificant() || ''
       const maxInHex = '0x' + Number(maxInString).toString(16)
-      const minOutString =  tempRouteDataRoute?.minOut?.toSignificant() || ''
+      const minOutString = tempRouteDataRoute?.minOut?.toSignificant() || ''
       const minOutHex = '0x' + Number(minOutString).toString(16)
 
       tempRouteDataRoute.forEach((rowItem: any) => {
@@ -174,7 +174,12 @@ export abstract class SDKRouter {
           multiParams = payload.tempMuitcallParams
           args = []
           // value = amountIn
-          value = payload && payload.tempAmountIn && payload['tempAmountIn'].length > 0 && payload.tempAmountIn.reduce((count, item) => new BigNumber(item).plus(count).toNumber()) || ZERO_HEX
+          if (payload?.tempAmountIn?.length > 0 || false) {
+            const a = payload.tempAmountIn.reduce((count, item) => new BigNumber(item).plus(count).toString(16))
+            value = `0x${a}`
+          } else {
+            value = ZERO_HEX
+          }
         } else if (etherOut) {
           methodName = useFeeOnTransfer ? 'swapExactTokensForETHSupportingFeeOnTransferTokens' : 'swapExactTokensForETH'
           // for (let index = 0; index < routeDataRoute.length; index++) {
@@ -223,7 +228,12 @@ export abstract class SDKRouter {
           multiParams = payload.tempMuitcallParams
           args = []
           // value = amountIn
-          value = payload && payload.tempAmountIn && payload['tempAmountIn'].length > 0 && payload.tempAmountIn.reduce((count, item) => new BigNumber(item).plus(count).toNumber()) || ZERO_HEX
+          if (payload?.tempAmountIn?.length > 0 || false) {
+            const a = payload.tempAmountIn.reduce((count, item) => new BigNumber(item).plus(count).toString(16))
+            value = `0x${a}`
+          } else {
+            value = ZERO_HEX
+          }
         } else if (etherOut) {
           methodName = 'swapTokensForExactETH'
           // (uint amountOut, uint amountInMax, address[] calldata path, address to, uint deadline)
