@@ -220,7 +220,7 @@ export function useDerivedSwapInfo():
         console.error('useDerivedSwapInfo error', error)
       }
     })()
-  }, [typedValue, inputName, outputName])
+  }, [typedValue, inputName, outputName, isExactIn])
 
   const alertMsg = (msg: string) => {
     const divTemp = document.createElement('div')
