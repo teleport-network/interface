@@ -664,6 +664,54 @@ describe('Router02', function () {
             console.log("contract ether balance",await ethers.provider.getBalance(ans.router.address))
             console.log("prev usdc balance", await ans.usdc.balanceOf(ans.signer.address))
         })
+        it("multiPathAndRoute", async () => {
+            let ans = await loadFixture(deployContracts)
+
+            let receiver = "0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199"
+                // add liquidity for pools include eth/usdt,eth/usdc,usdt/usdc
+            let leth = ethers.utils.parseEther("1")
+            let lusdt = leth.mul("1500")
+            let lusdc = lusdt
+
+            // create pools
+
+            // approve
+            // usdt to router
+            await ans.usdt.approve(ans.router.address,ethers.utils.parseEther("2000"))
+
+            // eth/usdt
+            await addLiquidity(ans, ans.usdt,ans.weth, lusdt,leth , false, leth)
+            // eth/usdc
+            await addLiquidity(ans,ans.usdc, ans.weth,lusdc, leth , false, leth)
+            // usdc/usdt
+            await addLiquidity(ans, ans.usdc, ans.usdt, lusdc, lusdt, true, 0)
+
+
+            // construct multicall
+            // swap amout
+            let ieth = ethers.utils.parseEther("2")
+            let iethForStep1 = ieth.div("2")
+            let iethFoeSetp2 = ieth.sub(iethForStep1)
+
+            // swapExactETHForTokens eth-> usdt->usdc
+            // swapExactETHForTokens eth-> usdc
+            let routerIface = ans.router.interface
+            let step1 = routerIface.encodeFunctionData("swapExactETHForTokens",
+                [iethForStep1, 0, [[ans.weth.address, ans.usdt.address, false], [ans.usdt.address, ans.usdc.address, true]], ans.signer.address, getDeadline()])
+            let step2 = routerIface.encodeFunctionData("swapExactETHForTokens", [
+                iethFoeSetp2, 0, [[ans.weth.address, ans.usdc.address, false]], ans.signer.address, getDeadline()
+            ])
+
+
+
+            let params = [
+                step1,step2
+            ]
+
+            await ans.router.multicall(getDeadline(), params,{value: ieth})
+
+
+        })
 
     })
 
