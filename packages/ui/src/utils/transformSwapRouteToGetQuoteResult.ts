@@ -33,8 +33,8 @@ export function transformSwapRouteToGetQuoteResult(
 
   const percents: number[] = []
 
-  let maxIn = CurrencyAmount.fromRawAmount(type == 'exactIn' ? amount.currency : quote.currency, ZERO)
-  let minOut = CurrencyAmount.fromRawAmount(type == 'exactIn' ? quote.currency : amount.currency, ZERO)
+  let maxIn = CurrencyAmount.fromRawAmount(type === 'exactIn' ? amount.currency : quote.currency, ZERO)
+  let minOut = CurrencyAmount.fromRawAmount(type === 'exactIn' ? quote.currency : amount.currency, ZERO)
 
   for (const subRoute of route) {
     const { amount, quote, tokenPath, percent } = subRoute
@@ -48,13 +48,13 @@ export function transformSwapRouteToGetQuoteResult(
 
     maxIn = maxIn.add(
       CurrencyAmount.fromRawAmount(
-        type == 'exactIn' ? amount.currency : quote.currency,
+        type === 'exactIn' ? amount.currency : quote.currency,
         slippageAdjustedAmounts[Field.INPUT].quotient
       )
     )
     minOut = minOut.add(
       CurrencyAmount.fromRawAmount(
-        type == 'exactIn' ? quote.currency : amount.currency,
+        type === 'exactIn' ? quote.currency : amount.currency,
         slippageAdjustedAmounts[Field.OUTPUT].quotient
       )
     )
@@ -176,7 +176,7 @@ export function transformSwapRouteToGetQuoteResult(
         _realizedLPFee.denominator,
         JSBI.exponentiate(
           JSBI.BigInt(10),
-          JSBI.BigInt(type == 'exactIn' ? amount.currency.decimals : quote.currency.decimals)
+          JSBI.BigInt(type === 'exactIn' ? amount.currency.decimals : quote.currency.decimals)
         )
       )
     ),

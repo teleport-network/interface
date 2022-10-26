@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next'
 import { NavLink, NavLinkProps } from 'react-router-dom'
 import { Box, Flex, Text } from 'rebass'
 import styled from 'styled-components'
+import { NativeToken } from '../../constants'
 
 // import usePrevious from '../../hooks/usePrevious'
 // import TeleLogoText from '../../assets/images/tele/logoText.svg'
@@ -552,7 +553,8 @@ export default function Header() {
             >
               {account && userEthBalance ? (
                 <BalanceText style={{ flexShrink: 0, color: theme.common2 }} pl="0.75rem" pr="0.5rem" fontWeight={500}>
-                  {userEthBalance?.toSignificant(4, undefined, Rounding.ROUND_HALF_UP)}
+                  {userEthBalance?.toSignificant(4, undefined, Rounding.ROUND_HALF_UP)}{' '}
+                  {(chainId && NativeToken && NativeToken[chainId]?.symbol) || ''}
                 </BalanceText>
               ) : null}
               <Web3Status />

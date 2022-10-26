@@ -44,8 +44,8 @@ export function computeTradePriceBreakdownByRoute(route: V2RouteWithValidQuote):
   // remove lp fees from price impact
   const priceImpactWithoutFeeFraction = computePriceImpact(
     new Fraction(route.route.midPrice.numerator, route.route.midPrice.denominator),
-    route.tradeType == TradeType.EXACT_INPUT ? route.amount.quotient : route.quote.quotient,
-    route.tradeType == TradeType.EXACT_INPUT ? route.quote.quotient : route.amount.quotient
+    route.tradeType === TradeType.EXACT_INPUT ? route.amount.quotient : route.quote.quotient,
+    route.tradeType === TradeType.EXACT_INPUT ? route.quote.quotient : route.amount.quotient
   ).subtract(realizedLPFee)
 
   console.log(
@@ -129,14 +129,12 @@ export function computeSlippageAdjustedAmounts(
   trade: Trade | undefined,
   allowedSlippage: number
 ): { [field in Field]?: CurrencyAmount } {
-  // const pct = basisPointsToPercent(allowedSlippage)
-  // return {
-  //   [Field.INPUT]: trade?.maximumAmountIn(pct),
-  //   [Field.OUTPUT]: trade?.minimumAmountOut(pct)
-  // }
+  const pct = basisPointsToPercent(allowedSlippage)
+  const a = trade?.maximumAmountIn(pct)
+  const b = trade?.minimumAmountOut(pct)
   return {
-    [Field.INPUT]: trade && trade.routeData && trade?.routeData.maxIn,
-    [Field.OUTPUT]: trade && trade.routeData && trade.routeData.minOut
+    [Field.INPUT]: a,
+    [Field.OUTPUT]: b
   }
 }
 
