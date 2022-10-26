@@ -65,6 +65,15 @@ export const DEFAULT_TOKENS: DefaultTokenList = {
   }
 }
 
+export const NativeToken = {
+  [ChainId.OP_GOERLI]: {
+    symbol: 'TELE'
+  },
+  [ChainId.MAINNET]: {
+    symbol: 'ETH'
+  }
+}
+
 export const WBTC = new Token(ChainId.MAINNET, '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599', 8, 'WBTC', 'Wrapped BTC')
 export const FEI = new Token(ChainId.MAINNET, '0x956F47F50A910163D8BF957Cf5846D573E7f87CA', 18, 'FEI', 'Fei USD')
 export const TRIBE = new Token(ChainId.MAINNET, '0xc7283b66Eb1EB5FB86327f08e1B5816b0720212B', 18, 'TRIBE', 'Tribe')
