@@ -104,7 +104,7 @@ const CHAIN_INFO: any = {
     logoUrl: optimismLogoUrl,
     statusPage: 'https://optimism.io/status',
     helpCenterUrl: 'https://help.uniswap.org/en/collections/3137778-uniswap-on-optimistic-ethereum-oξ',
-    nativeCurrency: { name: 'Optimism Goerli Ether', symbol: 'görOpETH', decimals: 18 }
+    nativeCurrency: { name: 'Optimism Goerli Ether', symbol: 'OpETH', decimals: 18 }
   }
 }
 
