@@ -356,3 +356,5 @@ export enum ReqTradeType {
   exactIn = 'exactIn',
   exactOut = 'exactOut'
 }
+
+export const ETHText = 'ETH'

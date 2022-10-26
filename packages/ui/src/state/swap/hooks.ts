@@ -1,5 +1,5 @@
 import { parseUnits } from '@ethersproject/units'
-import { Currency, CurrencyAmount, ETHER, JSBI, Token, TokenAmount, Trade, WETH } from '@teleswap/sdk'
+import { Currency, CurrencyAmount, JSBI, Token, TokenAmount, Trade, WETH } from '@teleswap/sdk'
 import BigNumber from 'bignumber.js'
 import { QuoteArguments } from 'lib/hooks/routing/clientSideSmartOrderRouter'
 import { ParsedQs } from 'qs'
@@ -20,7 +20,6 @@ import { useUserSlippageTolerance, useUserTransactionTTL } from '../user/hooks'
 import { useCurrencyBalances } from '../wallet/hooks'
 import { Field, replaceSwapState, selectCurrency, setRecipient, switchCurrencies, typeInput } from './actions'
 import { SwapState } from './reducer'
-
 let timeout
 export function useSwapState(): AppState['swap'] {
   return useSelector<AppState, AppState['swap']>((state) => state.swap)
@@ -262,8 +261,9 @@ export function useDerivedSwapInfo():
         if (currencies[Field.OUTPUT]!['symbol'] === 'ETH') {
           currencies[Field.OUTPUT] = WETH[chainId]
         }
+
         if (!currencies[Field.INPUT] || !currencies[Field.INPUT]!['address'] || !currencies[Field.INPUT]!['chainId']) {
-          throw new Error(`Invalid`)
+          throw new Error(`Missing Field ${JSON.stringify(currencies)}`)
         }
 
         if (
