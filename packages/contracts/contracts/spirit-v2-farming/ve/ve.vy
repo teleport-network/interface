@@ -1,7 +1,7 @@
 # @version 0.2.8
 """
-@title Voting Escrow
-@author Curve Finance
+@title Voting Escrow TELE
+@author Curve Finance / Teleswap
 @license MIT
 @notice Votes have a weight depending on time, so that users are
         committed to the future of (whatever they are voting for)
@@ -12,15 +12,20 @@
 # Voting escrow to have time-weighted votes
 # Votes have a weight depending on time, so that users are committed
 # to the future of (whatever they are voting for).
-# The weight in this implementation is linear, and lock cannot be more than maxtime:
+# The weight in this implementation is exponential, and lock cannot be more than maxtime:
 # w ^
-# 1 +        /
-#   |      /
-#   |    /
-#   |  /
-#   |/
-# 0 +--------+------> time
-#       maxtime (4 years?)
+# 1 +                                                   *
+#   |                                                *
+#   |                                             *
+#   |                                         *
+#   |                                      *
+#0.5+                                 *
+#   |                             *
+#   |                         *
+#   |                   *     
+#   |             * 
+# 0 +--------—---+--------—---+--------—---+--------—---+--> time(week)
+#               13            26           39          52
 
 struct Point:
     bias: int128
