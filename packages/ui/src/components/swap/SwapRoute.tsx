@@ -54,7 +54,8 @@ export default memo(function SwapRoute({ trade }: { trade: Trade }) {
           </Flex>
         </Fragment>
       )}
-      {false && route &&
+      {false &&
+        route &&
         route.length === 1 &&
         route[0] &&
         route[0].map((token, i, path) => {
