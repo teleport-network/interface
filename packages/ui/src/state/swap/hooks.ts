@@ -199,8 +199,8 @@ export function useDerivedSwapInfo():
 
   // api route
   const [routeData, setRouteData] = useState({})
-  const inputName = (currencies && currencies[Field.INPUT]?.name) || ''
-  const outputName = (currencies && currencies[Field.OUTPUT]?.name) || ''
+  const inputAddress = (currencies && currencies[Field.INPUT]?.address) || ''
+  const outputAddress = (currencies && currencies[Field.OUTPUT]?.address) || ''
   useEffect(() => {
     setLoading(false)
   }, [chainId])
@@ -220,7 +220,7 @@ export function useDerivedSwapInfo():
         console.error('useDerivedSwapInfo error', error)
       }
     })()
-  }, [typedValue, inputName, outputName, isExactIn])
+  }, [typedValue, inputAddress, outputAddress, isExactIn])
 
   const alertMsg = (msg: string) => {
     const divTemp = document.createElement('div')

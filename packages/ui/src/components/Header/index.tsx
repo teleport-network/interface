@@ -12,7 +12,6 @@ import { useTranslation } from 'react-i18next'
 import { NavLink, NavLinkProps } from 'react-router-dom'
 import { Box, Flex, Text } from 'rebass'
 import styled from 'styled-components'
-import { NativeToken } from '../../constants'
 
 // import usePrevious from '../../hooks/usePrevious'
 // import TeleLogoText from '../../assets/images/tele/logoText.svg'
@@ -33,6 +32,7 @@ import { YellowCard } from '../Card'
 // import { Dots } from '../swap/styleds'
 import Modal from '../Modal'
 // import Menu from '../Menu'
+import { getChainInfo } from 'constants/chainInfo'
 import Row, { RowFixed } from '../Row'
 import Web3Status from '../Web3Status'
 import Network from './Network'
@@ -409,6 +409,7 @@ export const StyledMenuButton = styled.button`
 
 export default function Header() {
   const { account, chainId } = useActiveWeb3React()
+  const info = getChainInfo(chainId)
   const { t } = useTranslation()
   const theme = useThemedContext()
 
@@ -554,7 +555,7 @@ export default function Header() {
               {account && userEthBalance ? (
                 <BalanceText style={{ flexShrink: 0, color: theme.common2 }} pl="0.75rem" pr="0.5rem" fontWeight={500}>
                   {userEthBalance?.toSignificant(4, undefined, Rounding.ROUND_HALF_UP)}{' '}
-                  {(chainId && NativeToken && NativeToken[chainId]?.symbol) || ''}
+                  {info?.nativeCurrency?.symbol || ''}
                 </BalanceText>
               ) : null}
               <Web3Status />
