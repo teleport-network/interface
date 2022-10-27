@@ -23,12 +23,10 @@ const USDT = '0x049d68029688eAbF473097a2fC38ef61633A3C7A';
 const MIM = '0x82f0B8B456c1A451378467398982d4834b6829c1';
 
 // Contracts
-const ROUTER = '0xE71b29c760b39A1eb243A5386bB876683b25595d';
-const FACTORY = '0xf0fD47c2ae0D6717332602356eaAeF63C1a6c14a';
-const MASTER_CHEF = '0x9083EA3756BDE6Ee6f27a6e996806FBD37F6F093';
-const inSPIRIT = '0x2FBFf41a9efAEAE77538bd63f1ea489494acdc08';
-const SPIRIT = '0x5Cc61A78F164885776AA610fb0FE1257df78E59B';
-const MULTISIG = '0xc541896f54Ad2F0F6aF89AFd9Ea7C0c2a7F3933F';
+const FACTORY = '';
+const VOTER_ESCROW_TOKEN = '0x02Fd17296f1d5B80f6F292B27b56273b5F89dFc4';
+const REWARD_TOKEN = '0xED59D07e00118b7ab76EE6fB29D738e266aAca02';
+const TREASURY_ADDRESS = '0xc541896f54Ad2F0F6aF89AFd9Ea7C0c2a7F3933F';
 const FEE_DISTRIBUTOR = '0x19F236eaADa7b47C1bCCD5CC6671fC247bffcC21';
 const VARIABLE_BRIBE_FACTORY = '0x0bCf7B1d512379aF8d2D93358121266226De20D6';
 const STABLE_BRIBE_FACTORY = '0xFc22f71708855c3c14EdE21e9C4BC91915157150';
@@ -53,27 +51,21 @@ async function initFeeDistributor(wallet) {
 
   // initialize feeDistributor
   const feeDistributorArtifact = await ethers.getContractFactory("fee-distributor");
-  const feeDistributorContract = await feeDistributorArtifact.deploy(inSPIRIT, "1654128000", SPIRIT, wallet, "0xc541896f54Ad2F0F6aF89AFd9Ea7C0c2a7F3933F", {
-        gasPrice: ethers.gasPrice,
-      });
+  const feeDistributorContract = await feeDistributorArtifact.deploy(VOTER_ESCROW_TOKEN, "1654128000", REWARD_TOKEN, wallet, wallet, );
   await feeDistributorContract.deployed();
   await sleep(5000);
 
   const feeDistributor = await ethers.getContractAt("fee-distributor", feeDistributorContract.address);
   console.log("- FeeDistributor Initialized at address: ", feeDistributorContract.address);
   FEE_DISTRIBUTOR = feeDistributorContract.address;
-  await feeDistributor.toggle_allow_checkpoint_token({
-      gasPrice: ethers.gasPrice,
-    });
+  await feeDistributor.toggle_allow_checkpoint_token();
 }
 
 async function initVariableBribeFactory() {
   console.log('Starting Variable BribeFactory deployment');
   // initialize bribeFactory
   const bribeFactoryArtifact = await ethers.getContractFactory("BribeFactory");
-  const bribeFactoryContract = await bribeFactoryArtifact.deploy({
-    gasPrice: ethers.gasPrice,
-  });
+  const bribeFactoryContract = await bribeFactoryArtifact.deploy();
   await bribeFactoryContract.deployed();
   await sleep(5000);
 
@@ -81,10 +73,10 @@ async function initVariableBribeFactory() {
   console.log("- Variable BribeFactory Initialized at address: ", bribeFactoryContract.address);
   VARIABLE_BRIBE_FACTORY = bribeFactoryContract.address;
 
-  await hre.run("verify:verify", {
-    address: VARIABLE_BRIBE_FACTORY,
-    contract: "contracts/SpiritV2/Bribes.sol:BribeFactory",
-  });
+  // await hre.run("verify:verify", {
+  //   address: VARIABLE_BRIBE_FACTORY,
+  //   contract: "contracts/SpiritV2/Bribes.sol:BribeFactory",
+  // });
 
 }
 
@@ -92,9 +84,7 @@ async function initStableBribeFactory() {
     console.log('Starting Stable BribeFactory deployment');
     // initialize bribeFactory
     const bribeFactoryArtifact = await ethers.getContractFactory("BribeFactory");
-    const bribeFactoryContract = await bribeFactoryArtifact.deploy({
-      gasPrice: ethers.gasPrice,
-    });
+    const bribeFactoryContract = await bribeFactoryArtifact.deploy();
     await bribeFactoryContract.deployed();
     await sleep(5000);
   
@@ -102,10 +92,10 @@ async function initStableBribeFactory() {
     console.log("- Stable BribeFactory Initialized at address: ", bribeFactoryContract.address);
     STABLE_BRIBE_FACTORY = bribeFactoryContract.address;
   
-    await hre.run("verify:verify", {
-      address: STABLE_BRIBE_FACTORY,
-      contract: "contracts/SpiritV2/Bribes.sol:BribeFactory",
-    });
+    // await hre.run("verify:verify", {
+    //   address: STABLE_BRIBE_FACTORY,
+    //   contract: "contracts/SpiritV2/Bribes.sol:BribeFactory",
+    // });
   
 }
 
@@ -115,33 +105,30 @@ async function initVariableGaugeProxy() {
   // initialize gaugeProxy
   const gaugeProxyArtifact = await ethers.getContractFactory("VariableGaugeProxy");
   const gaugeProxyContract = await gaugeProxyArtifact.deploy(
-    MASTER_CHEF, 
-    SPIRIT, 
-    inSPIRIT, 
+    REWARD_TOKEN, 
+    VOTER_ESCROW_TOKEN, 
     FEE_DISTRIBUTOR, 
     VARIABLE_BRIBE_FACTORY,
     FACTORY, 
-    {
-        gasPrice: ethers.gasPrice,
-    });
-  await gaugeProxyContract.deployed();
+  )
+  await gaugeProxyContract.deployed()
   await sleep(5000);
 
   // const gaugeProxy = await ethers.getContractAt("GaugeProxy", gaugeProxyContract.address);
   console.log("- Variable GaugeProxy Initialized at address: ", gaugeProxyContract.address);
   VARIABLE_GAUGE_PROXY = gaugeProxyContract.address;
 
-  await hre.run("verify:verify", {
-      address: gaugeProxyContract.address,
-      contract: "contracts/SpiritV2/VariableGaugeProxy.sol:VariableGaugeProxy",
-      constructorArguments: [MASTER_CHEF, 
-        SPIRIT, 
-        inSPIRIT, 
-        FEE_DISTRIBUTOR, 
-        VARIABLE_BRIBE_FACTORY,
-        FACTORY, 
-      ],
-    });
+  // await hre.run("verify:verify", {
+  //     address: gaugeProxyContract.address,
+  //     contract: "contracts/SpiritV2/VariableGaugeProxy.sol:VariableGaugeProxy",
+  //     constructorArguments: [ 
+  //       REWARD_TOKEN, 
+  //       VOTER_ESCROW_TOKEN, 
+  //       FEE_DISTRIBUTOR, 
+  //       VARIABLE_BRIBE_FACTORY,
+  //       FACTORY, 
+  //     ],
+  //   });
 
 }
 
@@ -151,15 +138,12 @@ async function initStableGaugeProxy() {
     // initialize gaugeProxy
     const gaugeProxyArtifact = await ethers.getContractFactory("StableGaugeProxy");
     const gaugeProxyContract = await gaugeProxyArtifact.deploy(
-      MASTER_CHEF, 
-      SPIRIT, 
-      inSPIRIT, 
+      REWARD_TOKEN, 
+      VOTER_ESCROW_TOKEN, 
       FEE_DISTRIBUTOR, 
       STABLE_BRIBE_FACTORY,
       FACTORY, 
-      {
-          gasPrice: ethers.gasPrice,
-      });
+      );
     await gaugeProxyContract.deployed();
     await sleep(5000);
   
@@ -167,17 +151,17 @@ async function initStableGaugeProxy() {
     console.log("- Stable GaugeProxy Initialized at address: ", gaugeProxyContract.address);
     STABLE_GAUGE_PROXY = gaugeProxyContract.address;
 
-    await hre.run("verify:verify", {
-        address: gaugeProxyContract.address,
-        contract: "contracts/SpiritV2/StableGaugeProxy.sol:StableGaugeProxy",
-        constructorArguments: [MASTER_CHEF, 
-          SPIRIT, 
-          inSPIRIT, 
-          FEE_DISTRIBUTOR, 
-          STABLE_BRIBE_FACTORY,
-          FACTORY, 
-        ],
-      });
+    // await hre.run("verify:verify", {
+    //     address: gaugeProxyContract.address,
+    //     contract: "contracts/SpiritV2/StableGaugeProxy.sol:StableGaugeProxy",
+    //     constructorArguments: [ 
+    //       SPIRIT, 
+    //       inSPIRIT, 
+    //       FEE_DISTRIBUTOR, 
+    //       STABLE_BRIBE_FACTORY,
+    //       FACTORY, 
+    //     ],
+    //   });
   
 }
 
@@ -187,32 +171,29 @@ async function initAdminGaugeProxy() {
     // initialize gaugeProxy
     const gaugeProxyArtifact = await ethers.getContractFactory("AdminGaugeProxy");
     const gaugeProxyContract = await gaugeProxyArtifact.deploy(
-      MASTER_CHEF, 
-      SPIRIT, 
-      inSPIRIT, 
-      MULTISIG, 
+      REWARD_TOKEN, 
+      VOTER_ESCROW_TOKEN, 
+      TREASURY_ADDRESS, 
       FEE_DISTRIBUTOR, 
       0, 
-      {
-          gasPrice: ethers.gasPrice,
-      });
+      );
     await gaugeProxyContract.deployed();
     await sleep(5000);
   
     // const gaugeProxy = await ethers.getContractAt("GaugeProxy", gaugeProxyContract.address);
     console.log("- Admin GaugeProxy Initialized at address: ", gaugeProxyContract.address);
   
-    await hre.run("verify:verify", {
-        address: gaugeProxyContract.address,
-        contract: "contracts/SpiritV2/AdminGaugeProxy.sol:AdminGaugeProxy",
-        constructorArguments: [MASTER_CHEF, 
-          SPIRIT, 
-          inSPIRIT, 
-          MULTISIG, 
-          FEE_DISTRIBUTOR, 
-          0,
-        ],
-      });
+    // await hre.run("verify:verify", {
+    //     address: gaugeProxyContract.address,
+    //     contract: "contracts/SpiritV2/AdminGaugeProxy.sol:AdminGaugeProxy",
+    //     constructorArguments: [ 
+    //       SPIRIT, 
+    //       inSPIRIT, 
+    //       MULTISIG, 
+    //       FEE_DISTRIBUTOR, 
+    //       0,
+    //     ],
+    //   });
 }
 
 async function verifyTokensVariableGaugeProxy() {
@@ -221,40 +202,18 @@ async function verifyTokensVariableGaugeProxy() {
 
   console.log('Starting token verification');
   const setTxn1 = await gaugeProxy.setBaseToken(FTM, true,
-    {
-    gasPrice: ethers.gasPrice,
-    }
   );
   await setTxn1.wait();
   const setTxn2 = await gaugeProxy.setVerifiedToken(BTC, true,
-    {
-    gasPrice: ethers.gasPrice,
-    }
   );
   await setTxn2.wait();
-  const setTxn3 = await gaugeProxy.setVerifiedToken(ETH, true,
-    {
-    gasPrice: ethers.gasPrice,
-    }
-  );
+  const setTxn3 = await gaugeProxy.setVerifiedToken(ETH, true);
   await setTxn3.wait();
-  const setTxn4 = await gaugeProxy.setVerifiedToken(CRV, true,
-    {
-    gasPrice: ethers.gasPrice,
-    }
-  );
+  const setTxn4 = await gaugeProxy.setVerifiedToken(CRV, true);
   await setTxn4.wait();
-  const setTxn5 = await gaugeProxy.setVerifiedToken(LQDR, true,
-    {
-    gasPrice: ethers.gasPrice,
-    }
-  );
+  const setTxn5 = await gaugeProxy.setVerifiedToken(LQDR, true);
   await setTxn5.wait();
-  const setTxn6 = await gaugeProxy.setVerifiedToken(BIFI, true,
-    {
-    gasPrice: ethers.gasPrice,
-    }
-  );
+  const setTxn6 = await gaugeProxy.setVerifiedToken(BIFI, true);
   await setTxn6.wait();
 
 }
@@ -264,35 +223,15 @@ async function verifyTokensStableGaugeProxy() {
   const gaugeProxy = await ethers.getContractAt("StableGaugeProxy", STABLE_GAUGE_PROXY);
 
   console.log('Starting token verification');
-  const setTxn1 = await gaugeProxy.setBaseToken(USDC, true,
-    {
-    gasPrice: ethers.gasPrice,
-    }
-  );
+  const setTxn1 = await gaugeProxy.setBaseToken(USDC, true);
   await setTxn1.wait();
-  const setTxn2 = await gaugeProxy.setVerifiedToken(DAI, true,
-    {
-    gasPrice: ethers.gasPrice,
-    }
-  );
+  const setTxn2 = await gaugeProxy.setVerifiedToken(DAI, true);
   await setTxn2.wait();
-  const setTxn3 = await gaugeProxy.setVerifiedToken(FRAX, true,
-    {
-    gasPrice: ethers.gasPrice,
-    }
-  );
+  const setTxn3 = await gaugeProxy.setVerifiedToken(FRAX, true);
   await setTxn3.wait();
-  const setTxn4 = await gaugeProxy.setVerifiedToken(MIM, true,
-    {
-    gasPrice: ethers.gasPrice,
-    }
-  );
+  const setTxn4 = await gaugeProxy.setVerifiedToken(MIM, true);
   await setTxn4.wait();
-  const setTxn5 = await gaugeProxy.setVerifiedToken(USDT, true,
-    {
-    gasPrice: ethers.gasPrice,
-    }
-  );
+  const setTxn5 = await gaugeProxy.setVerifiedToken(USDT, true);
   await setTxn5.wait();
 }
 
@@ -307,14 +246,14 @@ async function main() {
   const [wallet] = await ethers.getSigners();
   console.log('Using wallet: ', wallet.address);
   
-    // await initFeeDistributor(wallet.address);
+    await initFeeDistributor(wallet.address);
 
-    // await initVariableBribeFactory();
-    // await initStableBribeFactory();
+    await initVariableBribeFactory();
+    await initStableBribeFactory();
 
-    // await initVariableGaugeProxy();
-    // await initStableGaugeProxy();
-    // await initAdminGaugeProxy();
+    await initVariableGaugeProxy();
+    await initStableGaugeProxy();
+    await initAdminGaugeProxy();
 
     // await verifyTokensVariableGaugeProxy();
     // await verifyTokensStableGaugeProxy();
