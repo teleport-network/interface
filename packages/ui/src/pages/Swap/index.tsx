@@ -402,6 +402,7 @@ export default function Swap({ history }: RouteComponentProps) {
               onCurrencySelect={handleInputSelect}
               otherCurrency={currencies[Field.OUTPUT]}
               id="swap-currency-input"
+              showCommonBases={true}
             />
             <AutoColumn justify="space-between" style={{ position: 'relative' }}>
               <AutoRow
@@ -445,6 +446,7 @@ export default function Swap({ history }: RouteComponentProps) {
               onCurrencySelect={handleOutputSelect}
               otherCurrency={currencies[Field.INPUT]}
               id="swap-currency-output"
+              showCommonBases={true}
             />
 
             {recipient !== null && !showWrap ? (

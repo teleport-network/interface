@@ -1,4 +1,4 @@
-import { Currency, CurrencyAmount, currencyEquals, ETHER, Token } from '@teleswap/sdk'
+import { Currency, CurrencyAmount, currencyEquals, ETHER, Token, WETH } from '@teleswap/sdk'
 import { LightGreyCard } from 'components/Card'
 import QuestionHelper from 'components/QuestionHelper'
 import useThemedContext from 'hooks/useThemedContext'
@@ -182,6 +182,7 @@ export default function CurrencyList({
   setImportToken: (token: Token) => void
   breakIndex: number | undefined
 }) {
+  const { chainId } = useActiveWeb3React()
   const itemData: (Currency | undefined)[] = useMemo(() => {
     const addressSet = new Set()
     const formatted: (Currency | undefined)[] = []
@@ -201,6 +202,9 @@ export default function CurrencyList({
         )
       })
     ) {
+      if (chainId && WETH && WETH[chainId]) {
+        formatted.unshift(WETH[chainId])
+      }
       formatted.unshift(Currency.ETHER)
     }
     /*  if (breakIndex !== undefined) {
@@ -209,7 +213,6 @@ export default function CurrencyList({
     return formatted
   }, [currencies, showETH])
 
-  const { chainId } = useActiveWeb3React()
   const theme = useThemedContext()
 
   const inactiveTokens: {

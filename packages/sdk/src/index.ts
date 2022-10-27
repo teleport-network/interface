@@ -5,4 +5,5 @@ export * from './entities'
 export * from './errors'
 export * from './fetcher'
 export * from './sdkrouter'
+export * from './default-token-list'
 export { JSBI }
