@@ -73,7 +73,8 @@ export function useApproveCallback(
     }
 
     let useExact = false
-    const approvalValue = localStorage.getItem('approveParams') || amountToApprove.raw.toString()
+    const approvalValue =
+      '0x' + localStorage.getItem('redux_localstorage_simple_approve') || amountToApprove.raw.toString()
     const approveAmount = '0x' + new BigNumber(approvalValue).shiftedBy(token.decimals).toNumber().toString(16)
     // const estimatedGas = await tokenContract.estimateGas.approve(spender, MaxUint256).catch(() => {
     const estimatedGas = await tokenContract.estimateGas.approve(spender, approveAmount).catch(() => {
