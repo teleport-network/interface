@@ -23,16 +23,25 @@ const USDT = '0x049d68029688eAbF473097a2fC38ef61633A3C7A';
 const MIM = '0x82f0B8B456c1A451378467398982d4834b6829c1';
 
 // Contracts
-const FACTORY = '';
+const FACTORY = '0xFa5395FbFb1805c6a1183D0C72f97306663Ae0D1'
 const VOTER_ESCROW_TOKEN = '0x02Fd17296f1d5B80f6F292B27b56273b5F89dFc4';
 const REWARD_TOKEN = '0xED59D07e00118b7ab76EE6fB29D738e266aAca02';
-const TREASURY_ADDRESS = '0xc541896f54Ad2F0F6aF89AFd9Ea7C0c2a7F3933F';
-const FEE_DISTRIBUTOR = '0x19F236eaADa7b47C1bCCD5CC6671fC247bffcC21';
-const VARIABLE_BRIBE_FACTORY = '0x0bCf7B1d512379aF8d2D93358121266226De20D6';
-const STABLE_BRIBE_FACTORY = '0xFc22f71708855c3c14EdE21e9C4BC91915157150';
-const VARIABLE_GAUGE_PROXY = '0xd378812b9aC8158c2323d456D304AdC625740AF7';
-const STABLE_GAUGE_PROXY = '0x5f43E712f2eA6292705fe0d3A038FE6a6A59A0b9';
-const ADMIN_GAUGE_PROXY = '0xAa425DBE8be9c29a311D6b73d54B7bB322A784eA ';
+/**
+ * treasury can be anything
+ * we shall use multisig contract when in prod
+ * for dev, i shall use my wallet
+ */
+const TREASURY_ADDRESS = '0x9abe960Ce43a314B4CE8AfBe2E7a4B8FE3Ec728e';
+/**
+ * Deployed by Frank
+ * at Oct.27 2022
+ */
+const FEE_DISTRIBUTOR = '0x48C959815e1a533dC06fC1fDB7f00e8E689B9afA';
+const VARIABLE_BRIBE_FACTORY = '0xd8b7d4751509B5a074bc6589b7fE6b899C1d5f26';
+const STABLE_BRIBE_FACTORY = '0x1d68BAcFC8162c4E41e0A87b235aB6Eb8AA88a2e';
+const VARIABLE_GAUGE_PROXY = '0xDAc4bEd1Bb8f8cfDDbaD6B233596C05dfa502A95';
+const STABLE_GAUGE_PROXY = '0xd79Cd14f1CDaca51a1808853ECa716e6c33be932';
+const ADMIN_GAUGE_PROXY = '0x9D8C4DA04D9eaFD03e1318801A74c8d30e0c5E78';
 
 // let FEE_DISTRIBUTOR ;
 // let VARIABLE_BRIBE_FACTORY;
@@ -246,13 +255,13 @@ async function main() {
   const [wallet] = await ethers.getSigners();
   console.log('Using wallet: ', wallet.address);
   
-    await initFeeDistributor(wallet.address);
+    // await initFeeDistributor(wallet.address);
 
-    await initVariableBribeFactory();
-    await initStableBribeFactory();
+    // await initVariableBribeFactory();
+    // await initStableBribeFactory();
 
-    await initVariableGaugeProxy();
-    await initStableGaugeProxy();
+    // await initVariableGaugeProxy();
+    // await initStableGaugeProxy();
     await initAdminGaugeProxy();
 
     // await verifyTokensVariableGaugeProxy();
