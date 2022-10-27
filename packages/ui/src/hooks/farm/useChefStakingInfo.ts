@@ -32,6 +32,11 @@ interface AdditionalStakingInfo {
   pendingReward: TokenAmount
   rewardDebt: CurrencyAmount
   rewardToken: Token
+
+  /**
+   * add `id` to identify a pool since we have filter now
+   */
+  id: number
 }
 export type ChefStakingInfo = MasterChefRawPoolInfo & FarmingPool & AdditionalStakingInfo
 
@@ -91,6 +96,7 @@ export function useChefStakingInfo(): (ChefStakingInfo | undefined)[] {
       stakedAmount: parsedStakedTokenAmount(position, stakingToken)
     }
     return {
+      id: idx,
       ...info,
       isHidden: pool?.isHidden,
       stakingAsset: pool.stakingAsset,

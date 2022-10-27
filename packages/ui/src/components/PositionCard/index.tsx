@@ -110,7 +110,7 @@ export function MinimalPositionCard({ pair, showUnwrapped = false, ...boxProps }
                   size={'1.25rem'}
                 />
                 <Text className="text-emphasize" fontWeight={400}>
-                  {currency0.symbol}/{currency1.symbol}
+                  {currency0.symbol}/{currency1.symbol}/{pair?.stable === false ? 'Volatile' : 'Stable'}
                 </Text>
               </RowFixed>
               <RowFixed>
@@ -194,7 +194,8 @@ export function MinimalPositionCard({ pair, showUnwrapped = false, ...boxProps }
 const YourPisitonCardPart = styled(Box)`
   /* border: 1px solid ${({ theme }) => theme.common3}; */
   /* border-radius: 0.8rem; */
-  font-size: 0.7rem;
+  /* font-size: 0.7rem; */
+  font-size: max(0.7rem, 12px);
   color: #ffffff;
 `
 export function MinimalPositionCardPart({ pair, showUnwrapped = false, border }: PositionCardProps) {
@@ -623,7 +624,7 @@ export function LiquidityCard({
             : '-'}
         </Box>
         {/* <td>xx</td> */}
-        <Box style={{ display: 'flex', justifyContent: 'space-between', justifySelf: 'end' }}>
+        <Box style={{ display: 'flex', justifyContent: 'space-between', justifySelf: 'end', width: '10rem' }}>
           {/* <ButtonPrimary padding={"unset"} width={"5rem"} borderRadius={".3rem"} sx={{ height: "1.3rem", fontSize: ".5rem", color: "#000000" }} as={Link} to="/manager">
           Manage
         </ButtonPrimary> */}

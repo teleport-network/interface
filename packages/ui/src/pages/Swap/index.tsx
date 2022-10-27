@@ -12,6 +12,7 @@ import { RouteComponentProps } from 'react-router-dom'
 import { Text } from 'rebass'
 import { getTradeVersion } from 'utils/tradeVersion'
 
+import LoadingButton from '@mui/lab/LoadingButton'
 import AddressInputPanel from '../../components/AddressInputPanel'
 import { ButtonConfirmed, ButtonError, ButtonLight, ButtonPrimary } from '../../components/Button'
 import Card, { GreyCard } from '../../components/Card'
@@ -34,7 +35,7 @@ import {
 } from '../../components/swap/styleds'
 import TradePrice from '../../components/swap/TradePrice'
 import TokenWarningModal from '../../components/TokenWarningModal'
-import { INITIAL_ALLOWED_SLIPPAGE } from '../../constants'
+import { INITIAL_ALLOWED_SLIPPAGE, ReqTradeType } from '../../constants'
 import { useActiveWeb3React } from '../../hooks'
 import { useAllTokens, useCurrency } from '../../hooks/Tokens'
 import { ApprovalState, useApproveCallbackFromTrade } from '../../hooks/useApproveCallback'
@@ -56,6 +57,8 @@ import { maxAmountSpend } from '../../utils/maxAmountSpend'
 import { computeTradePriceBreakdown, warningSeverity } from '../../utils/prices'
 import AppBody from '../AppBody'
 import { ClickableText } from '../Liquidity/styles'
+
+import { TokenApprovalView } from 'components/TokenApproval'
 
 export default function Swap({ history }: RouteComponentProps) {
   const loadedUrlParams = useDefaultsFromURLSearch()
@@ -103,11 +106,27 @@ export default function Swap({ history }: RouteComponentProps) {
     parsedAmount,
     currencies,
     inputError: swapInputError,
-    routeData
+    routeData,
+    loading
   } = useDerivedSwapInfo()
   if (routeData && v2Trade) {
     v2Trade['routeData'] = routeData
+    v2Trade['inputAmount'] = routeData['inputAmount']
+    v2Trade['outputAmount'] = routeData['outputAmount']
+    if (routeData.reqParams && routeData.reqParams.type === ReqTradeType.exactIn) {
+      v2Trade['tradeType'] = 0
+    } else if (routeData.reqParams && routeData.reqParams.type === ReqTradeType.exactOut) {
+      v2Trade['tradeType'] = 1
+    } else {
+      console.error('tradeType null:', routeData.reqParams)
+    }
+
+    delete v2Trade['route']
+    delete v2Trade['executionPrice']
+    delete v2Trade['nextMidPrice']
+    delete v2Trade['priceImpact']
   }
+
   const {
     wrapType,
     execute: onWrap,
@@ -122,27 +141,19 @@ export default function Swap({ history }: RouteComponentProps) {
   const trade = showWrap ? undefined : tradesByVersion[toggledVersion]
   const defaultTrade = showWrap ? undefined : tradesByVersion[DEFAULT_VERSION]
 
-  const betterTradeLinkV2: Version | undefined =
-    /* toggledVersion === Version.v1 && isTradeBetter(v1Trade, v2Trade) ?  */ Version.v2 /* : undefined */
+  // const betterTradeLinkV2: Version | undefined =
+  // toggledVersion === Version.v1 && isTradeBetter(v1Trade, v2Trade) ? Version.v2  : undefined
 
-  // const parsedAmounts = showWrap
-  //   ? {
-  //     [Field.INPUT]: parsedAmount,
-  //     [Field.OUTPUT]: parsedAmount
-  //   }
-  //   : {
-  //     [Field.INPUT]: independentField === Field.INPUT ? parsedAmount : trade?.inputAmount,
-  //     [Field.OUTPUT]: independentField === Field.OUTPUT ? parsedAmount : trade?.outputAmount
-  //   }
   const parsedAmounts = showWrap
     ? {
         [Field.INPUT]: parsedAmount,
         [Field.OUTPUT]: parsedAmount
       }
     : {
-        [Field.INPUT]: independentField === Field.INPUT ? parsedAmount : routeData?.parsedOutAmount,
-        [Field.OUTPUT]: independentField === Field.OUTPUT ? parsedAmount : routeData?.parsedOutAmount
+        [Field.INPUT]: independentField === Field.INPUT ? parsedAmount : trade?.inputAmount,
+        [Field.OUTPUT]: independentField === Field.OUTPUT ? parsedAmount : trade?.outputAmount
       }
+
   const { onSwitchTokens, onCurrencySelection, onUserInput, onChangeRecipient } = useSwapActionHandlers()
   const isValid = !swapInputError
   const dependentField: Field = independentField === Field.INPUT ? Field.OUTPUT : Field.INPUT
@@ -188,7 +199,9 @@ export default function Swap({ history }: RouteComponentProps) {
       : parsedAmounts[dependentField]?.toSignificant(6) ?? ''
   }
 
-  const route = trade?.route
+  // const route = trade?.route
+  const route = trade && trade.routeData && trade.routeData.route
+
   const userHasSpecifiedInputOutput = Boolean(
     currencies[Field.INPUT] && currencies[Field.OUTPUT] && parsedAmounts[independentField]?.greaterThan(JSBI.BigInt(0))
   )
@@ -381,7 +394,7 @@ export default function Swap({ history }: RouteComponentProps) {
           <AutoColumn gap={'.4rem'}>
             <CurrencyInputPanel
               label={independentField === Field.OUTPUT && !showWrap && trade ? 'From (estimated)' : 'From'}
-              value={formattedAmounts[Field.INPUT]}
+              value={typedValue === '' ? '' : formattedAmounts[Field.INPUT]}
               showMaxButton={!atMaxAmountInput}
               currency={currencies[Field.INPUT]}
               onUserInput={handleTypeInput}
@@ -424,7 +437,7 @@ export default function Swap({ history }: RouteComponentProps) {
               </AutoRow>
             </AutoColumn>
             <CurrencyInputPanel
-              value={formattedAmounts[Field.OUTPUT]}
+              value={typedValue === '' ? '' : formattedAmounts[Field.OUTPUT]}
               onUserInput={handleTypeOutput}
               label={independentField === Field.INPUT && !showWrap && trade ? 'To (estimated)' : 'To'}
               showMaxButton={false}
@@ -447,8 +460,24 @@ export default function Swap({ history }: RouteComponentProps) {
                 <AddressInputPanel id="recipient" value={recipient} onChange={onChangeRecipient} />
               </>
             ) : null}
-
-            {showWrap ? null : (
+            {loading && (
+              <div style={{ marginTop: '20px' }}>
+                <div style={{ display: 'inline-block' }}>
+                  <LoadingButton
+                    sx={{
+                      backgroundColor: 'transparent !important',
+                      color: 'rgba(255, 255, 255, 0.8) !important',
+                      fontSize: '12px !important'
+                    }}
+                    loading={loading}
+                    // loadingPosition="start"
+                    variant="contained"
+                  ></LoadingButton>
+                </div>
+                <span style={{ position: 'relative', left: '-10px' }}>Fetching best price...</span>
+              </div>
+            )}
+            {showWrap ? null : !loading && typedValue !== '' ? (
               <Card
                 padding={showWrap ? '.25rem 1rem 0 1rem' : '0.5rem 0px'}
                 sx={{ color: '#D7DCE0', /*  fontSize: '.4rem', */ fontWeight: 400 }}
@@ -460,11 +489,9 @@ export default function Swap({ history }: RouteComponentProps) {
                       <Text className="text" fontWeight={400} color="white">
                         Price
                       </Text>
-                      <TradePrice
-                        price={trade?.executionPrice}
-                        showInverted={showInverted}
-                        setShowInverted={setShowInverted}
-                      />
+                      {trade && trade.routeData && (
+                        <TradePrice trade={trade} showInverted={showInverted} setShowInverted={setShowInverted} />
+                      )}
                     </RowBetween>
                   )}
                   {allowedSlippage !== INITIAL_ALLOWED_SLIPPAGE && (
@@ -479,13 +506,17 @@ export default function Swap({ history }: RouteComponentProps) {
                   )}
                 </AutoColumn>
               </Card>
+            ) : (
+              <></>
             )}
             {!swapIsUnsupported ? (
-              <AdvancedSwapDetailsDropdown trade={trade} />
+              routeData && !loading && typedValue !== '' && <AdvancedSwapDetailsDropdown trade={trade} />
             ) : (
               <UnsupportedCurrencyFooter show={swapIsUnsupported} currencies={[currencies.INPUT, currencies.OUTPUT]} />
             )}
-            {!isMobile && (
+            {/* showApproveFlow */}
+            {showApproveFlow && <TokenApprovalView></TokenApprovalView>}
+            {!isMobile && !loading && (
               <BottomGrouping>
                 {swapIsUnsupported ? (
                   <ButtonPrimary className="secondary-title" disabled={true}>
@@ -637,7 +668,7 @@ export default function Swap({ history }: RouteComponentProps) {
             ) : noRoute && userHasSpecifiedInputOutput ? (
               <GreyCard style={{ textAlign: 'center' }}>
                 <TYPE.main className="secondary-title" mb="4px">
-                  Insufficient liquidity for this trade.
+                  Insufficient liquidity for this trade
                 </TYPE.main>
                 {singleHopOnly && (
                   <TYPE.main className="secondary-title" mb="4px">

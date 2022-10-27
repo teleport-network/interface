@@ -1,10 +1,7 @@
-// import { Chef } from 'constants/farm/chef.enum'
-// import { CHAINID_TO_FARMING_CONFIG } from 'constants/farming.config'
-// import { useChefPositions } from 'hooks/farm/useChefPositions'
-// import { useChefContract } from 'hooks/farm/useChefContract'
-import { useChefStakingInfo } from 'hooks/farm/useChefStakingInfo'
-// import { useMasterChefPoolInfo } from 'hooks/farm/useMasterChefPoolInfo'
-import { useEffect } from 'react'
+import { ReactComponent as SearchIcon } from 'assets/svg/search.svg'
+import Toggle from 'components/Toggle'
+import { useFilterForStakingInfo } from 'hooks/farm/useFilterForStakingInfo'
+import { useEffect, useState } from 'react'
 import styled from 'styled-components'
 
 import { AutoColumn } from '../../components/Column'
@@ -14,12 +11,9 @@ import { useActiveWeb3React } from '../../hooks'
 import { TYPE } from '../../theme'
 import PoolCard from './PoolCard'
 
-// import { JSBI } from '@teleswap/sdk'
-// import { BIG_INT_ZERO } from '../../constants'
-// import { OutlineCard } from '../../components/Card'
-
 const PageWrapper = styled(AutoColumn)`
-  max-width: 60rem;
+  // 1920x1080, this page designed width is 1120, 1120 / 14 = 80rem
+  max-width: 80rem;
   width: 100%;
   ${({ theme }) => theme.mediaWidth.upToSmall`
   width: 100%;
@@ -38,7 +32,7 @@ const PoolSection = styled.div`
   width: 100%;
   justify-self: center;
   background: rgba(25, 36, 47, 1);
-  padding: 3.5vw
+  padding: 3.4rem;
   color: #39e1ba;
 
   font-size: 1rem;
@@ -50,12 +44,66 @@ flex-direction: column;
 `};
 `
 
+const FarmListFilterBar = styled.div`
+  display: flex;
+  width: 100%;
+
+  .filter-option {
+    display: flex;
+    align-items: center;
+    .toggleText {
+      margin-left: 0.86rem;
+    }
+  }
+
+  #searchBar {
+  }
+`
+
+const StyledSearchInput = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0.6rem 1rem;
+
+  width: 20rem;
+  height: 3rem;
+
+  /* 透明度/纯白-0.2 */
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 1rem;
+
+  margin-left: auto;
+  input {
+    background: transparent;
+    width: 100%;
+    border: 0;
+    color: ${({ theme }) => theme.text1};
+
+    &:focus {
+      outline: none;
+    }
+  }
+`
+
+const StyledSearchIcon = styled(SearchIcon)`
+  width: 1.7rem;
+  margin-right: 0.8rem;
+`
+
 export default function FarmList() {
   const { chainId } = useActiveWeb3React()
+  const [hideInActivePool, setHideInActivePool] = useState(true)
+  const [filterOnlyStaked, setFilterOnlyStaked] = useState(false)
+  const [searchKeyword, setSearchKeyword] = useState('')
   console.debug('chainId', chainId)
   // const mchefContract = useChefContract(farmingConfig?.chefType || Chef.MINICHEF)
   // const positions = useChefPositions(mchefContract, undefined, chainId)
-  const stakingInfos = useChefStakingInfo()
+  const stakingInfos = useFilterForStakingInfo({
+    stakedOnly: filterOnlyStaked,
+    hideInactive: hideInActivePool,
+    searchKeyword
+  })
   useEffect(() => {
     console.info('useChefStakingInfo', stakingInfos)
   }, [stakingInfos])
@@ -64,52 +112,40 @@ export default function FarmList() {
 
   return (
     <PageWrapper gap="lg" justify="center">
-      {/* <TopSection gap="md">
-        <DataCard>
-          <CardBGImage />
-          <CardNoise />
-          <CardSection>
-            <AutoColumn gap="md">
-              <RowBetween>
-                <TYPE.white fontWeight={600}>Uniswap liquidity mining</TYPE.white>
-              </RowBetween>
-              <RowBetween>
-                <TYPE.white fontSize={14}>
-                  Deposit your Liquidity Provider tokens to receive UNI, the Uniswap protocol governance token.
-                </TYPE.white>
-              </RowBetween>{' '}
-              <ExternalLink
-                style={{ color: 'white', textDecoration: 'underline' }}
-                href="https://uniswap.org/blog/uni/"
-                target="_blank"
-              >
-                <TYPE.white fontSize={14}>Read more about UNI</TYPE.white>
-              </ExternalLink>
-            </AutoColumn>
-          </CardSection>
-          <CardBGImage />
-          <CardNoise />
-        </DataCard>
-      </TopSection> */}
-
       <AutoColumn gap="lg" style={{ width: '100%' }}>
         <DataRow style={{ alignItems: 'baseline', flexWrap: 'wrap' }}>
           <TYPE.largeHeader color="#FFF" style={{ marginTop: '0.5rem' }}>
             Farming Pools
           </TYPE.largeHeader>
-          <TYPE.mediumHeader color="#FFF" style={{ marginTop: '12px', width: '100%' }}>
+          <TYPE.subHeader color="#FFF" style={{ marginTop: '12px', width: '100%' }}>
             Stake LP tokens to earn rewards
-          </TYPE.mediumHeader>
-          {/* <Countdown exactEnd={stakingInfos?.[0]?.periodFinish} /> */}
+          </TYPE.subHeader>
+          <FarmListFilterBar>
+            <div className="filter-option" style={{ marginRight: '2.6rem' }}>
+              <Toggle isActive={filterOnlyStaked} toggle={() => setFilterOnlyStaked((state) => !state)} />
+              <TYPE.white fontSize="1.2rem" className="toggleText">
+                Staked
+              </TYPE.white>
+            </div>
+            <div className="filter-option">
+              <Toggle isActive={hideInActivePool} toggle={() => setHideInActivePool((state) => !state)} />
+              <TYPE.white fontSize="1.2rem" className="toggleText">
+                Hide inactive pools
+              </TYPE.white>
+            </div>
+
+            <StyledSearchInput id="searchBar">
+              <StyledSearchIcon />
+              <input type="text" onChange={({ target }) => setSearchKeyword(target.value)} placeholder="Search Pools" />
+            </StyledSearchInput>
+          </FarmListFilterBar>
         </DataRow>
 
         <PoolSection>
           {stakingInfos.length === 0
             ? 'Loading...'
-            : stakingInfos.map((_poolInfo, pid) => {
-                if (!_poolInfo) return null
-                if (_poolInfo.isHidden) return null
-                return <PoolCard key={pid} pid={pid} stakingInfo={_poolInfo} />
+            : stakingInfos.map((_poolInfo) => {
+                return <PoolCard key={_poolInfo.id} pid={_poolInfo.id} stakingInfo={_poolInfo} />
               })}
         </PoolSection>
       </AutoColumn>

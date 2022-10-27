@@ -152,7 +152,6 @@ export default function ClaimRewardModal({ isOpen, onDismiss, pid, stakingInfo }
         <SubmittedView onDismiss={wrappedOndismiss} hash={hash}>
           <AutoColumn gap="12px" justify={'center'}>
             <TYPE.largeHeader>Transaction Submitted</TYPE.largeHeader>
-            <TYPE.white fontSize={20}>Withdrew {stakingCurrency?.symbol}!</TYPE.white>
             <TYPE.white fontSize={20}>
               {t('claimed')} {stakingInfo.rewardToken.symbol}!
             </TYPE.white>

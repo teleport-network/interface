@@ -171,7 +171,7 @@ export const TYPE = {
     return <TextWrapper fontWeight={500} fontSize="1.5rem" {...props} />
   },
   subHeader(props: TextProps) {
-    return <TextWrapper fontWeight={400} fontSize={14} {...props} />
+    return <TextWrapper fontWeight={400} fontSize="1rem" {...props} />
   },
   small(props: TextProps) {
     return <TextWrapper fontWeight={500} fontSize={11} {...props} />
@@ -306,13 +306,11 @@ body {
   font-size: 1rem !important;
 }
 .text-small {
-  font-size: 0.875rem !important;
+  font-size: max(0.875rem, 12px) !important;
 }
 .text-detail {
-  font-size: 0.75rem !important;
+  font-size: max(0.75rem, 12px) !important;
 }
-
-
 .primary-button-text {
   font-size: 1.5rem !important;
 }
@@ -344,4 +342,5 @@ body {
 .extreme-small-radius {
   border-radius: 0.5rem!important;
 }
+
 `

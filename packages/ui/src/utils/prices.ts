@@ -44,8 +44,8 @@ export function computeTradePriceBreakdownByRoute(route: V2RouteWithValidQuote):
   // remove lp fees from price impact
   const priceImpactWithoutFeeFraction = computePriceImpact(
     new Fraction(route.route.midPrice.numerator, route.route.midPrice.denominator),
-    route.tradeType == TradeType.EXACT_INPUT ? route.amount.numerator : route.quote.quotient,
-    route.tradeType == TradeType.EXACT_INPUT ? route.quote.numerator : route.amount.quotient
+    route.tradeType === TradeType.EXACT_INPUT ? route.amount.quotient : route.quote.quotient,
+    route.tradeType === TradeType.EXACT_INPUT ? route.quote.quotient : route.amount.quotient
   ).subtract(realizedLPFee)
 
   console.log(
@@ -79,22 +79,25 @@ export function computeTradePriceBreakdownByRoute(route: V2RouteWithValidQuote):
 // computes price breakdown for the trade
 export function computeTradePriceBreakdown(trade?: Trade | null): {
   priceImpactWithoutFee: Percent | undefined
-  realizedLPFee: CurrencyAmount | undefined | null
+  realizedLPFee?: CurrencyAmount | undefined | null
+  gasUseEstimateUSD?: string
 } {
   // for each hop in our trade, take away the x*y=k price impact from 0.3% fees
   // e.g. for 3 tokens/2 hops: 1 - ((1 - .03) * (1-.03))
-  const realizedLPFee = !trade
-    ? undefined
-    : ONE_HUNDRED_PERCENT.subtract(
-        trade.route.pairs.reduce<Fraction>(
-          (currentFee: Fraction): Fraction => currentFee.multiply(INPUT_FRACTION_AFTER_VOLATILE_FEE),
-          ONE_HUNDRED_PERCENT
-        )
-      )
+  // const realizedLPFee = !trade
+  //   ? undefined
+  //   : ONE_HUNDRED_PERCENT.subtract(
+  //     trade.route.pairs.reduce<Fraction>(
+  //       (currentFee: Fraction): Fraction => currentFee.multiply(INPUT_FRACTION_AFTER_VOLATILE_FEE),
+  //       ONE_HUNDRED_PERCENT
+  //     )
+  //   )
+  const realizedLPFee = trade && trade.routeData && trade.routeData.realizedLPFee
 
   // remove lp fees from price impact
-  const priceImpactWithoutFeeFraction = trade && realizedLPFee ? trade.priceImpact.subtract(realizedLPFee) : undefined
-
+  // const priceImpactWithoutFeeFraction = trade && realizedLPFee ? trade.priceImpact.subtract(realizedLPFee) : undefined
+  const priceImpactWithoutFeeFraction = trade && trade.routeData && trade.routeData.priceImpactWithoutFee
+  const gasUseEstimateUSD = trade?.routeData?.gasUseEstimateUSD || ''
   // the x*y=k impact
   const priceImpactWithoutFeePercent = priceImpactWithoutFeeFraction
     ? new Percent(priceImpactWithoutFeeFraction?.numerator, priceImpactWithoutFeeFraction?.denominator)
@@ -108,7 +111,7 @@ export function computeTradePriceBreakdown(trade?: Trade | null): {
       ? new TokenAmount(trade.inputAmount.token, realizedLPFee.multiply(trade.inputAmount.raw).quotient)
       : CurrencyAmount.ether(realizedLPFee.multiply(trade.inputAmount.raw).quotient))
 
-  return { priceImpactWithoutFee: priceImpactWithoutFeePercent, realizedLPFee: realizedLPFeeAmount }
+  return { priceImpactWithoutFee: priceImpactWithoutFeePercent, realizedLPFee: realizedLPFeeAmount, gasUseEstimateUSD }
 }
 
 export function computeSlippageAdjustedAmountsByRoute(
@@ -128,9 +131,11 @@ export function computeSlippageAdjustedAmounts(
   allowedSlippage: number
 ): { [field in Field]?: CurrencyAmount } {
   const pct = basisPointsToPercent(allowedSlippage)
+  const a = trade?.maximumAmountIn(pct)
+  const b = trade?.minimumAmountOut(pct)
   return {
-    [Field.INPUT]: trade?.maximumAmountIn(pct),
-    [Field.OUTPUT]: trade?.minimumAmountOut(pct)
+    [Field.INPUT]: a,
+    [Field.OUTPUT]: b
   }
 }
 
@@ -142,6 +147,7 @@ export function warningSeverity(priceImpact: Percent | undefined): 0 | 1 | 2 | 3
   return 0
 }
 
+/*
 export function formatExecutionPrice(trade?: Trade, inverted?: boolean): string {
   if (!trade) {
     return ''
@@ -154,3 +160,4 @@ export function formatExecutionPrice(trade?: Trade, inverted?: boolean): string 
         trade.inputAmount.currency.symbol
       }`
 }
+*/

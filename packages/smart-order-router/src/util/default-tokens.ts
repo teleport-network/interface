@@ -759,7 +759,7 @@ export const DEFAULT_TOKENS = {
     },
     {
       "name": "USDCoin",
-      "address": "0x53b1c6025e3f9b149304cf1b39ee7c577d76c6ca",
+      "address": "0x4603cff6498c46583300fc5f1c31f872f5514182",
       "symbol": "USDC",
       "decimals": 18,
       "chainId": 420,
@@ -767,7 +767,7 @@ export const DEFAULT_TOKENS = {
     },
     {
       "name": "Tether USD",
-      "address": "0x5986C8FfADCA9cee5C28A85cC3d4F335aab5Dc90",
+      "address": "0xec6b24429ab7012afc1b083d4e6763f738047792",
       "symbol": "USDT",
       "decimals": 18,
       "chainId": 420,

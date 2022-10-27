@@ -1,10 +1,13 @@
 import { parseUnits } from '@ethersproject/units'
-import { Currency, CurrencyAmount, ETHER, JSBI, Token, TokenAmount, Trade } from '@teleswap/sdk'
+import { Currency, CurrencyAmount, ETHER, JSBI, Token, TokenAmount, Trade, WETH } from '@teleswap/sdk'
 import BigNumber from 'bignumber.js'
+import { QuoteArguments } from 'lib/hooks/routing/clientSideSmartOrderRouter'
 import { ParsedQs } from 'qs'
 import { useCallback, useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
+import { ReqTradeType } from '../../constants'
 
+import { route } from 'state/routing/slice'
 import { useActiveWeb3React } from '../../hooks'
 import { useCurrency } from '../../hooks/Tokens'
 import { useTradeExactIn, useTradeExactOut } from '../../hooks/Trades'
@@ -13,11 +16,11 @@ import useParsedQueryString from '../../hooks/useParsedQueryString'
 import { isAddress } from '../../utils'
 import { computeSlippageAdjustedAmounts } from '../../utils/prices'
 import { AppDispatch, AppState } from '../index'
-import { useUserSlippageTolerance } from '../user/hooks'
+import { useUserSlippageTolerance, useUserTransactionTTL } from '../user/hooks'
 import { useCurrencyBalances } from '../wallet/hooks'
 import { Field, replaceSwapState, selectCurrency, setRecipient, switchCurrencies, typeInput } from './actions'
 import { SwapState } from './reducer'
-
+let timeout
 export function useSwapState(): AppState['swap'] {
   return useSelector<AppState, AppState['swap']>((state) => state.swap)
 }
@@ -105,16 +108,18 @@ function involvesAddress(trade: Trade, checksummedAddress: string): boolean {
 }
 
 // from the current swap inputs, compute the best trade and return it.
-export function useDerivedSwapInfo(): {
-  currencies: { [field in Field]?: Currency }
-  currencyBalances: { [field in Field]?: CurrencyAmount }
-  parsedAmount: CurrencyAmount | undefined
-  v2Trade: Trade | undefined
-  inputError?: string
-  routeData?: any
-} {
-  const { account } = useActiveWeb3React()
-
+export function useDerivedSwapInfo():
+  | any
+  | {
+      currencies: { [field in Field]?: Currency }
+      currencyBalances: { [field in Field]?: CurrencyAmount }
+      parsedAmount: CurrencyAmount | undefined
+      v2Trade: Trade | undefined
+      inputError?: string
+      routeData?: any
+    } {
+  const { account, chainId } = useActiveWeb3React()
+  const [loading, setLoading] = useState(false)
   const {
     independentField,
     typedValue,
@@ -140,7 +145,7 @@ export function useDerivedSwapInfo(): {
   const bestTradeExactOut = useTradeExactOut(inputCurrency ?? undefined, !isExactIn ? parsedAmount : undefined)
 
   const v2Trade = isExactIn ? bestTradeExactIn : bestTradeExactOut
-
+  // const v2Trade: any = {}
   const currencyBalances = {
     [Field.INPUT]: relevantTokenBalances[0],
     [Field.OUTPUT]: relevantTokenBalances[1]
@@ -169,15 +174,16 @@ export function useDerivedSwapInfo(): {
     inputError = inputError ?? 'Enter a recipient'
   } else {
     if (
-      BAD_RECIPIENT_ADDRESSES.indexOf(formattedTo) !== -1 ||
-      (bestTradeExactIn && involvesAddress(bestTradeExactIn, formattedTo)) ||
-      (bestTradeExactOut && involvesAddress(bestTradeExactOut, formattedTo))
+      BAD_RECIPIENT_ADDRESSES.indexOf(formattedTo) !== -1
+      // (bestTradeExactIn && involvesAddress(bestTradeExactIn, formattedTo)) ||
+      // (bestTradeExactOut && involvesAddress(bestTradeExactOut, formattedTo))
     ) {
       inputError = inputError ?? 'Invalid recipient'
     }
   }
 
   const [allowedSlippage] = useUserSlippageTolerance()
+  const [ttl] = useUserTransactionTTL()
 
   const slippageAdjustedAmounts = v2Trade && allowedSlippage && computeSlippageAdjustedAmounts(v2Trade, allowedSlippage)
 
@@ -193,133 +199,155 @@ export function useDerivedSwapInfo(): {
 
   // api route
   const [routeData, setRouteData] = useState({})
+  const inputAddress = (currencies && currencies[Field.INPUT]?.address) || ''
+  const outputAddress = (currencies && currencies[Field.OUTPUT]?.address) || ''
+  useEffect(() => {
+    setLoading(false)
+  }, [chainId])
 
-  const inputName = (currencies && currencies[Field.INPUT]?.name) || ''
-  const outputName = (currencies && currencies[Field.OUTPUT]?.name) || ''
   useEffect(() => {
     ;(async () => {
       try {
+        if (account) {
+          if (!!timeout) {
+            clearTimeout(timeout)
+          }
+          timeout = setTimeout(() => {
+            getData().then()
+          }, 500)
+        }
+      } catch (error) {
+        console.error('useDerivedSwapInfo error', error)
+      }
+    })()
+  }, [typedValue, inputAddress, outputAddress, isExactIn])
+
+  const alertMsg = (msg: string) => {
+    const divTemp = document.createElement('div')
+    divTemp.className = 'toastMessageWrap'
+    divTemp.innerHTML = `
+          <div class="toastMessageContent">
+                ${msg}
+          </div> 
+    `
+    // @ts-ignore
+    document.querySelector('body').append(divTemp)
+    setTimeout(() => {
+      const nodeTags = document.getElementsByClassName('toastMessageWrap')
+      for (let k = 0; k < nodeTags.length; k++) {
+        if (nodeTags[k] != null) {
+          // @ts-ignore
+          nodeTags[k].parentNode.removeChild(nodeTags[k])
+        }
+      }
+    }, 2000)
+  }
+  const getData = async () => {
+    try {
+      setRouteData({})
+      if (
+        typedValue &&
+        new BigNumber(typedValue).toNumber() > 0 &&
+        currencies &&
+        currencies[Field.INPUT] &&
+        currencies[Field.INPUT]?.hasOwnProperty('decimals') &&
+        currencies[Field.OUTPUT] &&
+        currencies[Field.OUTPUT]?.hasOwnProperty('decimals') &&
+        chainId
+      ) {
+        // if (currencyAmount.currency === ETHER) return new TokenAmount(WETH[chainId], currencyAmount.raw)
+        if (currencies[Field.INPUT]!['symbol'] === 'ETH') {
+          currencies[Field.INPUT] = WETH[chainId]
+        }
+        if (currencies[Field.OUTPUT]!['symbol'] === 'ETH') {
+          currencies[Field.OUTPUT] = WETH[chainId]
+        }
+
+        if (!currencies[Field.INPUT] || !currencies[Field.INPUT]!['address'] || !currencies[Field.INPUT]!['chainId']) {
+          throw new Error(`Missing Field ${JSON.stringify(currencies)}`)
+        }
+
         if (
-          currencies[Field.INPUT] &&
-          currencies[Field.INPUT]?.hasOwnProperty('address') &&
-          currencies[Field.OUTPUT] &&
-          currencies[Field.OUTPUT]?.hasOwnProperty('address') &&
-          currencies[Field.OUTPUT]?.hasOwnProperty('decimals')
+          !currencies[Field.OUTPUT] ||
+          !currencies[Field.OUTPUT]!['address'] ||
+          !currencies[Field.OUTPUT]!['chainId']
         ) {
-          const inputItem = currencies[Field.INPUT]
-          if (!inputItem || !inputItem['address'] || !inputItem['chainId']) {
-            throw new Error(`Invalid`)
+          throw new Error(`Invalid`)
+        }
+        const decimal = isExactIn ? currencies[Field.INPUT]?.decimals : currencies[Field.OUTPUT]?.decimals
+        if (!decimal) {
+          throw new Error(`Invalid decimal`)
+        }
+        const amount = new BigNumber(typedValue).shiftedBy(decimal).toNumber().toLocaleString().replace(/,/g, '')
+        const params: QuoteArguments = {
+          tokenInAddress: currencies[Field.INPUT]!['address']!,
+          tokenInChainId: currencies[Field.INPUT]!['chainId'],
+          tokenOutAddress: currencies[Field.OUTPUT]!['address']!,
+          tokenOutChainId: currencies[Field.OUTPUT]!['chainId'],
+          amount,
+          type: isExactIn ? ReqTradeType.exactIn : ReqTradeType.exactOut,
+          tokenInSymbol: currencies[Field.INPUT]!.symbol,
+          tokenOutSymbol: currencies[Field.OUTPUT]!.symbol,
+          slippageTolerance: allowedSlippage ? String(allowedSlippage) : '',
+          tokenInDecimals: currencies[Field.INPUT]!.decimals,
+          tokenOutDecimals: currencies[Field.OUTPUT]!.decimals
+        }
+        params['recipient'] = ''
+        if (ttl) {
+          params['deadline'] = String(ttl)
+        }
+        setLoading(true)
+        console.log('req params', params)
+        const response = await route(params)
+        console.log('res', response?.data || '')
+        setLoading(false)
+        if (response.data.hasOwnProperty('invalidRoute') && response.data.invalidRoute === true) {
+          if (document && document.querySelector('body')) {
+            alertMsg('No valid route matched')
+          } else {
+            alert('No valid route matched')
           }
-          const outputItem = currencies[Field.OUTPUT]
-          if (!outputItem || !outputItem['address'] || !outputItem['chainId']) {
-            throw new Error(`Invalid`)
-          }
-          const decimal = isExactIn ? currencies[Field.INPUT]?.decimals : currencies[Field.OUTPUT]?.decimals
-          const amount = new BigNumber(typedValue).shiftedBy(decimal!).toNumber()
-          const params = {
-            tokenInAddress: inputItem['address'],
-            tokenInChainId: inputItem['chainId'],
-            tokenOutAddress: outputItem['address'],
-            tokenOutChainId: outputItem['chainId'],
-            amount,
-            type: isExactIn ? 'exactIn' : 'exactOut',
-            protocols: 'v2'
-          }
-          /*  let volidatas = Object.keys(params).find((key) => {
-            return !!params[key] == false
-          }) */
-          const data = JSON.stringify(params)
-          const url = 'https://teleport-routing.qa.davionlabs.com/quote'
-          const config = {
-            method: 'post',
-            url,
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            data
-          }
-          // let response = await axios(config)
-          const response: any = {}
-          response['data'] = {
-            blockNumber: '1812566',
-            amount: '1000000000000000000',
-            amountDecimals: '1',
-            quote: '99989999999786560901',
-            quoteDecimals: '99.989999999786560901',
-            quoteGasAdjusted: '99989999999672744170',
-            quoteGasAdjustedDecimals: '99.98999999967274417',
-            gasUseEstimateQuote: '113816730',
-            gasUseEstimateQuoteDecimals: '0.00000000011381673',
-            gasUseEstimate: '135000',
-            gasUseEstimateUSD: '0.00000000011381673',
-            gasPriceWei: '1',
-            route: [
-              [
-                {
-                  type: 'v2-pool',
-                  address: '0xa60306D462cb8a64CF1652Ee9c41E12E47D384c4',
-                  tokenIn: {
-                    chainId: 420,
-                    decimals: '18',
-                    address: '0x53B1c6025E3f9B149304Cf1B39ee7c577d76c6Ca',
-                    symbol: 'USDC'
-                  },
-                  tokenOut: {
-                    chainId: 420,
-                    decimals: '18',
-                    address: '0x5986C8FfADCA9cee5C28A85cC3d4F335aab5Dc90',
-                    symbol: 'USDT'
-                  },
-                  reserve0: {
-                    token: {
-                      chainId: 420,
-                      decimals: '18',
-                      address: '0x53B1c6025E3f9B149304Cf1B39ee7c577d76c6Ca',
-                      symbol: 'USDC'
-                    },
-                    quotient: '10060670000000000000000000'
-                  },
-                  reserve1: {
-                    token: {
-                      chainId: 420,
-                      decimals: '18',
-                      address: '0x5986C8FfADCA9cee5C28A85cC3d4F335aab5Dc90',
-                      symbol: 'USDT'
-                    },
-                    quotient: '10060670000000000000000000'
-                  },
-                  amountIn: '1000000000000000000',
-                  amountOut: '1000000000000000000',
-                  stable: true
-                }
-              ]
-            ],
-            routeString: '[V2] 100.00% = USDC -- [0xa60306D462cb8a64CF1652Ee9c41E12E47D384c4] --> USDT',
-            percents: [100],
-            quoteId: ''
-          }
+          setRouteData({})
+        } else {
           if (response.data && response.data.hasOwnProperty('quoteDecimals')) {
-            const parsedOutAmount = tryParseAmount(
+            const outputAmount = tryParseAmount(
               response.data.quoteDecimals,
               (isExactIn ? outputCurrency : inputCurrency) ?? undefined
             )
-            response.data['parsedOutAmount'] = parsedOutAmount
+            const exactType = response.data && response.data.reqParams && response.data.reqParams.type
+            switch (exactType) {
+              case ReqTradeType.exactIn:
+                response.data['inputAmount'] = parsedAmount
+                response.data['outputAmount'] = outputAmount
+                break
+              case ReqTradeType.exactOut:
+                response.data['inputAmount'] = outputAmount
+                response.data['outputAmount'] = parsedAmount
+                break
+            }
             setRouteData(response.data)
           }
         }
-      } catch (error) {
-        console.log('useDerivedSwapInfo error', error)
       }
-    })()
-  }, [typedValue, inputName, outputName, isExactIn])
-
+    } catch (error: any) {
+      setLoading(false)
+      console.error('getData', error)
+      if (document && document.querySelector('body')) {
+        alertMsg(error?.message || error)
+      } else {
+        alert(error?.message || error)
+      }
+    }
+  }
   return {
     currencies,
     currencyBalances,
     parsedAmount,
-    v2Trade: v2Trade ?? undefined,
+    v2Trade: Object.keys(routeData).length > 0 ? v2Trade : undefined,
+    // v2Trade: v2Trade ?? undefined,
     inputError,
-    routeData
+    routeData,
+    loading
   }
 }
 

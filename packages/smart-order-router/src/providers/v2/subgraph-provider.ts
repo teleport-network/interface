@@ -140,7 +140,9 @@ export class V2SubgraphProvider implements IV2SubgraphProvider {
                 pairsPage = poolsResult.pairs;
 
                 pairs = pairs.concat(pairsPage);
-                lastId = pairs[pairs.length - 1]!.id;
+                if (pairs.length > 0) {
+                  lastId = pairs[pairs.length - 1]!.id;
+                }
               },
               {
                 retries: this.retries,

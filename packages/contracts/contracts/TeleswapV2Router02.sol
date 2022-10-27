@@ -9,9 +9,8 @@ import './libraries/TeleswapV2Library.sol';
 import './libraries/SafeMath.sol';
 import './interfaces/IERC20.sol';
 import './interfaces/IWETH.sol';
-import './base/Multicall.sol';
 
-contract TeleswapV2Router02 is ITeleswapV2Router02, Multicall {
+contract TeleswapV2Router02 is ITeleswapV2Router02 {
     using SafeMath for uint;
 
     address public override factory;
@@ -26,11 +25,11 @@ contract TeleswapV2Router02 is ITeleswapV2Router02, Multicall {
         _;
     }
 
-        constructor(address _factory, address _WETH) public {
-            factory = _factory;
-            WETH = _WETH;
-            pairCodeHash = ITeleswapV2Factory(_factory).pairInitCodeHash();
-        }
+    constructor(address _factory, address _WETH) public {
+        factory = _factory;
+        WETH = _WETH;
+        pairCodeHash = ITeleswapV2Factory(_factory).pairInitCodeHash();
+    }
 
 
     receive() external payable {
@@ -67,7 +66,7 @@ contract TeleswapV2Router02 is ITeleswapV2Router02, Multicall {
             }
         }
     }
-    //todo: stack too deep
+
     function addLiquidity(
         route calldata _route,
         uint amountADesired,
@@ -267,7 +266,7 @@ contract TeleswapV2Router02 is ITeleswapV2Router02, Multicall {
         _swap(amounts, routes, to);
     }
 
-    function swapExactETHForTokens(uint amountOutMin, route[] calldata routes, address to, uint deadline)
+    function swapExactETHForTokens(uint256 amountIn, uint amountOutMin, route[] calldata routes, address to, uint deadline)
     external
     virtual
     override
@@ -276,7 +275,8 @@ contract TeleswapV2Router02 is ITeleswapV2Router02, Multicall {
     returns (uint[] memory amounts)
     {
         require(routes[0].from == WETH, 'TeleswapV2Router: INVALID_PATH');
-        amounts = getAmountsOut(msg.value, routes);
+        require(amountIn <= msg.value, 'TeleswapV2Router: INVALID_MSG_VALUE');
+        amounts = getAmountsOut(amountIn, routes);
         require(amounts[amounts.length - 1] >= amountOutMin, 'TeleswapV2Router: INSUFFICIENT_OUTPUT_AMOUNT');
         IWETH(WETH).deposit{value : amounts[0]}();
         assert(IWETH(WETH).transfer(TeleswapV2Library.pairFor(pairCodeHash, factory, routes[0]), amounts[0]));
@@ -337,6 +337,23 @@ contract TeleswapV2Router02 is ITeleswapV2Router02, Multicall {
         if (msg.value > amounts[0]) TransferHelper.safeTransferETH(msg.sender, msg.value - amounts[0]);
     }
 
+    // for multicall
+    // must call refund or you will lose you money
+    function swapETHForExactTokensMulti(uint amountOut, route[] calldata routes, address to, uint deadline)
+    external
+    virtual
+    override
+    payable
+    ensure(deadline)
+    returns (uint[] memory amounts)
+    {
+        require(routes[0].from == WETH, 'TeleswapV2Router: INVALID_PATH');
+        amounts = getAmountsIn(amountOut, routes);
+        IWETH(WETH).deposit{value : amounts[0]}();
+        assert(IWETH(WETH).transfer(TeleswapV2Library.pairFor(pairCodeHash, factory, routes[0]), amounts[0]));
+        _swap(amounts, routes, to);
+    }
+
     // **** SWAP (supporting fee-on-transfer tokens) ****
     // requires the initial amount to have already been sent to the first pair
     function _swapSupportingFeeOnTransferTokens(route[] memory _routes, address _to) internal virtual {
@@ -382,6 +399,7 @@ contract TeleswapV2Router02 is ITeleswapV2Router02, Multicall {
     }
 
     function swapExactETHForTokensSupportingFeeOnTransferTokens(
+        uint256 amountIn,
         uint amountOutMin,
         route[] calldata routes,
         address to,
@@ -394,7 +412,7 @@ contract TeleswapV2Router02 is ITeleswapV2Router02, Multicall {
     ensure(deadline)
     {
         require(routes[0].from == WETH, 'TeleswapV2Router: INVALID_PATH');
-        uint amountIn = msg.value;
+        require(amountIn <= msg.value, 'TeleswapV2Router: INVALID_MSG_VALUE');
         IWETH(WETH).deposit{value : amountIn}();
         assert(IWETH(WETH).transfer(TeleswapV2Library.pairFor(pairCodeHash, factory, routes[0]), amountIn));
         uint balanceBefore = IERC20(routes[routes.length - 1].to).balanceOf(to);
@@ -485,4 +503,33 @@ contract TeleswapV2Router02 is ITeleswapV2Router02, Multicall {
 
         return TeleswapV2Library.getAmountsIn(factory, amountOut, _routes, decimals);
     }
+
+    function multicall(uint256 deadline, bytes[] calldata data)
+    external
+    payable
+    override
+    ensure(deadline)
+    returns (bytes[] memory results)
+    {
+        results = new bytes[](data.length);
+        for (uint256 i = 0; i < data.length; i++) {
+            (bool success, bytes memory result) = address(this).delegatecall(data[i]);
+            if (!success) {
+                // Next 5 lines from https://ethereum.stackexchange.com/a/83577
+
+                if (result.length < 68) revert();
+                assembly {
+                    result := add(result, 0x04)
+                }
+                revert(abi.decode(result, (string)));
+            }
+
+            results[i] = result;
+        }
+    }
+
+    function refundETH() external payable override {
+        if (address(this).balance > 0) TransferHelper.safeTransferETH(msg.sender, address(this).balance);
+    }
+
 }

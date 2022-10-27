@@ -42,7 +42,8 @@ const AppWrapper = styled.div`
   font-family: 'Poppins';
   font-style: normal;
   font-weight: 400;
-  font-size: 0.6rem;
+  /* font-size: 0.6rem; */
+  font-size: max(0.6rem, 12px);
   position: relative;
 `
 

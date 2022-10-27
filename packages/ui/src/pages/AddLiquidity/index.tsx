@@ -182,14 +182,16 @@ export default function AddLiquidity() {
     }
     let estimate,
       method: (...args: any) => Promise<TransactionResponse>,
-      args: Array<
-        string | string[] | number | { from: string | undefined; to: string | undefined; stable: boolean } | Array<any>
-      >,
+      // args: Array<
+      //   string | string[] | number | { from: string | undefined; to: string | undefined; stable: boolean } | Array<any>
+      // >,
+      args: any,
       value: BigNumber | null
     if (currencyA === ETHER || currencyB === ETHER) {
       const tokenBIsETH = currencyB === ETHER
       estimate = router.estimateGas.addLiquidityETH
       method = router.addLiquidityETH
+      const aAmount = BigNumber.from((tokenBIsETH ? parsedAmountA : parsedAmountB).raw.toString())
       args = [
         [
           tokenBIsETH
@@ -200,11 +202,15 @@ export default function AddLiquidity() {
             : wrappedCurrency(currencyA, chainId)?.address ?? '',
           pairModeStable
         ],
-        (tokenBIsETH ? parsedAmountA : parsedAmountB).raw.toString(), // token desired
-        amountsMin[tokenBIsETH ? Field.CURRENCY_A : Field.CURRENCY_B].toString(), // token min
-        amountsMin[tokenBIsETH ? Field.CURRENCY_B : Field.CURRENCY_A].toString(), // eth min
+        aAmount,
+        // (tokenBIsETH ? parsedAmountB : parsedAmountA).raw.toString(), // token desired
+        // amountsMin[tokenBIsETH ? Field.CURRENCY_A : Field.CURRENCY_B].toString(), // token min
+        // amountsMin[tokenBIsETH ? Field.CURRENCY_B : Field.CURRENCY_A].toString(), // eth min
+        0,
+        0,
         account,
-        deadline.toHexString()
+        // deadline.toHexString()
+        deadline.toNumber()
       ]
       value = BigNumber.from((tokenBIsETH ? parsedAmountB : parsedAmountA).raw.toString())
     } else {
@@ -1059,7 +1065,7 @@ export default function AddLiquidity() {
               zIndex: -1,
               color: 'rgba(255,255,255,0.6)',
               maxWidth: isMobile ? '100%' : '30rem',
-              fontSize: '0.6rem',
+              fontSize: 'max(0.6rem, 12px)',
               position: 'relative',
               width: '30rem',
               fontWeight: 200,
