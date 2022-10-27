@@ -41,7 +41,7 @@ function TradeSummary({ trade, allowedSlippage }: { trade: Trade; allowedSlippag
         <RowBetween>
           <RowFixed>
             <TYPE.black fontWeight={400} color={theme.text2}>
-              {isExactIn ? 'Minimum received' : 'Maximum sold'}
+              {isExactIn ? 'Minimum received' : 'Maximum spent'}
             </TYPE.black>
             <QuestionHelper text="Your transaction will revert if there is a large, unfavorable price movement before it is confirmed." />
           </RowFixed>
