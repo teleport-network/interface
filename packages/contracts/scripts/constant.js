@@ -8,7 +8,7 @@ const SUSHI = '0xED59D07e00118b7ab76EE6fB29D738e266aAca02'
  * @dev HEADS UP 🙋
  * First Token in the list will be the base token of the gauge proxy
  */
-const allowedVariableToken = [NATIVE_TOKEN, SUSHI]
+const allowedVariableToken = [NATIVE_TOKEN, SUSHI, USDC, USDT]
 const allowedStableToken = [USDC, DAI, USDT]
 
 // Contracts
