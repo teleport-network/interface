@@ -1,4 +1,4 @@
-import { Trade } from '@teleswap/sdk'
+import { Trade, TradeType } from '@teleswap/sdk'
 // TradeType
 import LineVIcon from 'assets/images/tele/lineV.png'
 import ArrowHGreen from 'assets/svg/arrowHGreen.svg'
@@ -11,10 +11,8 @@ import { useState } from 'react'
 import { Box } from 'rebass'
 import styled from 'styled-components'
 
-import { Field } from '../../state/swap/actions'
 import { useUserSlippageTolerance } from '../../state/user/hooks'
 import { ExternalLink, TYPE } from '../../theme'
-import { computeSlippageAdjustedAmounts, computeTradePriceBreakdown } from '../../utils/prices'
 import { AutoColumn } from '../Column'
 import QuestionHelper from '../QuestionHelper'
 import { RowBetween, RowFixed } from '../Row'
@@ -33,13 +31,10 @@ const InfoLink = styled(ExternalLink)`
 
 function TradeSummary({ trade, allowedSlippage }: { trade: Trade; allowedSlippage: number }) {
   const theme = useThemedContext()
-  const { priceImpactWithoutFee, realizedLPFee } = computeTradePriceBreakdown(trade)
-  // const priceImpactWithoutFee = trade.routeData.priceImpactWithoutFee
-  // const realizedLPFee = trade.routeData.realizedLPFee
-  // const isExactIn = trade.tradeType === TradeType.EXACT_INPUT
-  const isExactIn = trade?.routeData?.reqParams?.type === 'exactIn'
-  const slippageAdjustedAmounts = computeSlippageAdjustedAmounts(trade, allowedSlippage)
-  // const slippageAdjustedAmounts = isExactIn ? trade.routeData.minOut : trade.routeData.maxIn
+  const priceImpactWithoutFee = trade?.routeData?.priceImpactWithoutFee || ''
+  const gasUseEstimateUSD = trade?.routeData?.gasUseEstimateUSD || ''
+  const isExactIn = trade?.tradeType === TradeType.EXACT_INPUT
+  const slippageAdjustedAmounts = isExactIn ? trade?.routeData?.minOut || '' : trade?.routeData?.maxIn || ''
   return (
     <>
       <AutoColumn className="text-detail" style={{ padding: '0 16px', color: '#D7DCE0' }} gap="0.4rem">
@@ -52,17 +47,19 @@ function TradeSummary({ trade, allowedSlippage }: { trade: Trade; allowedSlippag
           </RowFixed>
           <RowFixed>
             <TYPE.black color={theme.text1}>
-              {isExactIn
+              {/* {isExactIn
                 ? `${slippageAdjustedAmounts[Field.OUTPUT]?.toSignificant(4)} ${
                     trade?.outputAmount?.currency?.symbol
                   }` ?? '-'
                 : `${slippageAdjustedAmounts[Field.INPUT]?.toSignificant(4)} ${trade?.inputAmount?.currency?.symbol}` ??
-                  '-'}
-              {/* {isExactIn
-                ? `${slippageAdjustedAmounts && slippageAdjustedAmounts.toSignificant(4)} ${trade?.outputAmount?.currency?.symbol || ''}` ??
-                '-'
-                : `${slippageAdjustedAmounts && slippageAdjustedAmounts.toSignificant(4)} ${trade?.inputAmount?.currency?.symbol || ''}` ??
-                '-'} */}
+                  '-'} */}
+              {isExactIn
+                ? `${slippageAdjustedAmounts && slippageAdjustedAmounts.toSignificant(4)} ${
+                    trade?.outputAmount?.currency?.symbol || ''
+                  }` ?? '-'
+                : `${slippageAdjustedAmounts && slippageAdjustedAmounts.toSignificant(4)} ${
+                    trade?.inputAmount?.currency?.symbol || ''
+                  }` ?? '-'}
             </TYPE.black>
           </RowFixed>
         </RowBetween>
@@ -73,7 +70,7 @@ function TradeSummary({ trade, allowedSlippage }: { trade: Trade; allowedSlippag
             </TYPE.black>
             <QuestionHelper text="The difference between the market price and estimated price due to trade size." />
           </RowFixed>
-          <FormattedPriceImpact priceImpact={priceImpactWithoutFee} />
+          {priceImpactWithoutFee && <FormattedPriceImpact priceImpact={priceImpactWithoutFee} />}
         </RowBetween>
 
         <RowBetween>
@@ -84,7 +81,8 @@ function TradeSummary({ trade, allowedSlippage }: { trade: Trade; allowedSlippag
             <QuestionHelper text="A portion of each trade (0.30%) goes to liquidity providers as a protocol incentive." />
           </RowFixed>
           <TYPE.black color={theme.text1}>
-            {realizedLPFee ? `${realizedLPFee.toSignificant(4)} ${trade?.inputAmount?.currency?.symbol}` : '-'}
+            {/* {realizedLPFee ? `${realizedLPFee.toSignificant(4)} ${trade?.inputAmount?.currency?.symbol}` : '-'} */}
+            {'$'} {gasUseEstimateUSD || ''}
           </TYPE.black>
         </RowBetween>
       </AutoColumn>

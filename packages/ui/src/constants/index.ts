@@ -33,8 +33,14 @@ type DefaultTokenList = {
   }
 }
 
-export const AMPL = new Token(ChainId.MAINNET, '0xD46bA6D942050d489DBd938a2C909A5d5039A161', 9, 'AMPL', 'Ampleforth')
-export const DAI = new Token(ChainId.MAINNET, '0x38fA58a6a83d97389Be88752DAa408E2FEA40C8b', 18, 'DAI', 'Dai Stablecoin')
+export const AMPL = new Token(ChainId.OP_GOERLI, '0xD46bA6D942050d489DBd938a2C909A5d5039A161', 9, 'AMPL', 'Ampleforth')
+export const DAI = new Token(
+  ChainId.OP_GOERLI,
+  '0x38fA58a6a83d97389Be88752DAa408E2FEA40C8b',
+  18,
+  'DAI',
+  'Dai Stablecoin'
+)
 export const USDC = new Token(
   ChainId.OP_GOERLI,
   '0x4603cff6498c46583300fc5f1c31f872f5514182',
@@ -345,3 +351,10 @@ export const ENABLED_NETWORK_LABELS: { [chainId in ChainId]?: string } = {
   [ChainId.OP_GOERLI]: 'OpGörli'
   // [ChainId.KOVAN]: 'Kovan'
 }
+
+export enum ReqTradeType {
+  exactIn = 'exactIn',
+  exactOut = 'exactOut'
+}
+
+export const ETHText = 'ETH'

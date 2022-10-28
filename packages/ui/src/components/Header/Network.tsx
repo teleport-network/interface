@@ -20,7 +20,7 @@ const NetHeadStyle = styled.div`
   font-family: 'IBM Plex Sans';
   font-style: normal;
   font-weight: 600;
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   line-height: 26px;
   text-align: center;
   text-transform: capitalize;

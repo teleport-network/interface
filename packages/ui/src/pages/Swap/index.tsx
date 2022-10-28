@@ -35,7 +35,7 @@ import {
 } from '../../components/swap/styleds'
 import TradePrice from '../../components/swap/TradePrice'
 import TokenWarningModal from '../../components/TokenWarningModal'
-import { INITIAL_ALLOWED_SLIPPAGE } from '../../constants'
+import { INITIAL_ALLOWED_SLIPPAGE, ReqTradeType } from '../../constants'
 import { useActiveWeb3React } from '../../hooks'
 import { useAllTokens, useCurrency } from '../../hooks/Tokens'
 import { ApprovalState, useApproveCallbackFromTrade } from '../../hooks/useApproveCallback'
@@ -57,6 +57,8 @@ import { maxAmountSpend } from '../../utils/maxAmountSpend'
 import { computeTradePriceBreakdown, warningSeverity } from '../../utils/prices'
 import AppBody from '../AppBody'
 import { ClickableText } from '../Liquidity/styles'
+
+import { TokenApprovalView } from 'components/TokenApproval'
 
 export default function Swap({ history }: RouteComponentProps) {
   const loadedUrlParams = useDefaultsFromURLSearch()
@@ -111,19 +113,18 @@ export default function Swap({ history }: RouteComponentProps) {
     v2Trade['routeData'] = routeData
     v2Trade['inputAmount'] = routeData['inputAmount']
     v2Trade['outputAmount'] = routeData['outputAmount']
-    if (routeData.reqParams && routeData.reqParams.type === 'exactIn') {
+    if (routeData.reqParams && routeData.reqParams.type === ReqTradeType.exactIn) {
       v2Trade['tradeType'] = 0
-    } else if (routeData.reqParams && routeData.reqParams.type === 'exactOut') {
+    } else if (routeData.reqParams && routeData.reqParams.type === ReqTradeType.exactOut) {
       v2Trade['tradeType'] = 1
     } else {
       console.error('tradeType null:', routeData.reqParams)
     }
 
-    // delete v2Trade['route']
-    // v2Trade['route'] = routeData
-    // delete v2Trade['executionPrice']
-    // delete v2Trade['nextMidPrice']
-    // delete v2Trade['priceImpact']
+    delete v2Trade['route']
+    delete v2Trade['executionPrice']
+    delete v2Trade['nextMidPrice']
+    delete v2Trade['priceImpact']
   }
 
   const {
@@ -469,7 +470,7 @@ export default function Swap({ history }: RouteComponentProps) {
                       fontSize: '12px !important'
                     }}
                     loading={loading}
-                    loadingPosition="start"
+                    // loadingPosition="start"
                     variant="contained"
                   ></LoadingButton>
                 </div>
@@ -513,6 +514,8 @@ export default function Swap({ history }: RouteComponentProps) {
             ) : (
               <UnsupportedCurrencyFooter show={swapIsUnsupported} currencies={[currencies.INPUT, currencies.OUTPUT]} />
             )}
+            {/* showApproveFlow */}
+            {showApproveFlow && <TokenApprovalView></TokenApprovalView>}
             {!isMobile && !loading && (
               <BottomGrouping>
                 {swapIsUnsupported ? (
