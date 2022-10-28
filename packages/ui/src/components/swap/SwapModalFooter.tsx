@@ -6,7 +6,6 @@ import { Text } from 'rebass'
 import { Field } from '../../state/swap/actions'
 import { TYPE } from '../../theme'
 import {
-  computeSlippageAdjustedAmounts,
   computeTradePriceBreakdown,
   // formatExecutionPrice,
   warningSeverity
@@ -33,10 +32,7 @@ export default function SwapModalFooter({
 }) {
   const [showInverted, setShowInverted] = useState<boolean>(false)
   const theme = useThemedContext()
-  const slippageAdjustedAmounts = useMemo(
-    () => computeSlippageAdjustedAmounts(trade, allowedSlippage),
-    [allowedSlippage, trade]
-  )
+  const slippageAdjustedAmounts = (trade && trade['slippageAdjustedAmounts']) || null
   // realizedLPFee
   const { priceImpactWithoutFee, gasUseEstimateUSD } = useMemo(() => computeTradePriceBreakdown(trade), [trade])
   const severity = warningSeverity(priceImpactWithoutFee)
@@ -77,8 +73,8 @@ export default function SwapModalFooter({
           <RowFixed>
             <TYPE.black fontSize={14}>
               {trade.tradeType === TradeType.EXACT_INPUT
-                ? slippageAdjustedAmounts[Field.OUTPUT]?.toSignificant(4) ?? '-'
-                : slippageAdjustedAmounts[Field.INPUT]?.toSignificant(4) ?? '-'}
+                ? (slippageAdjustedAmounts && slippageAdjustedAmounts[Field.OUTPUT]?.toSignificant(4)) ?? '-'
+                : (slippageAdjustedAmounts && slippageAdjustedAmounts[Field.INPUT]?.toSignificant(4)) ?? '-'}
             </TYPE.black>
             <TYPE.black fontSize={14} marginLeft={'4px'}>
               {trade.tradeType === TradeType.EXACT_INPUT

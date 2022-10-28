@@ -14,7 +14,6 @@ import { useTradeExactIn, useTradeExactOut } from '../../hooks/Trades'
 import useENS from '../../hooks/useENS'
 import useParsedQueryString from '../../hooks/useParsedQueryString'
 import { isAddress } from '../../utils'
-import { computeSlippageAdjustedAmounts } from '../../utils/prices'
 import { AppDispatch, AppState } from '../index'
 import { useUserSlippageTolerance, useUserTransactionTTL } from '../user/hooks'
 import { useCurrencyBalances } from '../wallet/hooks'
@@ -144,7 +143,8 @@ export function useDerivedSwapInfo():
   const bestTradeExactIn = useTradeExactIn(isExactIn ? parsedAmount : undefined, outputCurrency ?? undefined)
   const bestTradeExactOut = useTradeExactOut(inputCurrency ?? undefined, !isExactIn ? parsedAmount : undefined)
 
-  const v2Trade = isExactIn ? bestTradeExactIn : bestTradeExactOut
+  let v2Trade: any = isExactIn ? bestTradeExactIn : bestTradeExactOut
+  v2Trade = v2Trade ? v2Trade : {}
   // const v2Trade: any = {}
   const currencyBalances = {
     [Field.INPUT]: relevantTokenBalances[0],
@@ -184,18 +184,6 @@ export function useDerivedSwapInfo():
 
   const [allowedSlippage] = useUserSlippageTolerance()
   const [ttl] = useUserTransactionTTL()
-
-  const slippageAdjustedAmounts = v2Trade && allowedSlippage && computeSlippageAdjustedAmounts(v2Trade, allowedSlippage)
-
-  // compare input balance to max input based on version
-  const [balanceIn, amountIn] = [
-    currencyBalances[Field.INPUT],
-    slippageAdjustedAmounts ? slippageAdjustedAmounts[Field.INPUT] : null
-  ]
-
-  if (balanceIn && amountIn && balanceIn.lessThan(amountIn)) {
-    inputError = 'Insufficient ' + amountIn.currency.symbol + ' balance'
-  }
 
   // api route
   const [routeData, setRouteData] = useState({})
@@ -310,6 +298,17 @@ export function useDerivedSwapInfo():
           setRouteData({})
         } else {
           if (response.data && response.data.hasOwnProperty('quoteDecimals')) {
+            const slippageAdjustedAmountsMaxIn = response.data.maxIn
+
+            // compare input balance to max input based on version
+            const [balanceIn, amountIn] = [
+              currencyBalances[Field.INPUT],
+              slippageAdjustedAmountsMaxIn ? slippageAdjustedAmountsMaxIn : null
+            ]
+
+            if (balanceIn && amountIn && new BigNumber(balanceIn.toSignificant(10)).lt(amountIn.toSignificant(10))) {
+              inputError = 'Insufficient ' + amountIn.currency.symbol + ' balance'
+            }
             const outputAmount = tryParseAmount(
               response.data.quoteDecimals,
               (isExactIn ? outputCurrency : inputCurrency) ?? undefined

@@ -7,7 +7,6 @@ import { useTokenAllowance } from '../data/Allowances'
 import { Field } from '../state/swap/actions'
 import { useHasPendingApproval, useTransactionAdder } from '../state/transactions/hooks'
 import { calculateGasMargin } from '../utils'
-import { computeSlippageAdjustedAmounts } from '../utils/prices'
 import { useActiveWeb3React } from './index'
 import { useTokenContract } from './useContract'
 import { usePresetPeripheryAddress } from './usePresetContractAddress'
@@ -108,7 +107,8 @@ export function useApproveCallback(
 // wraps useApproveCallback in the context of a swap
 export function useApproveCallbackFromTrade(trade?: Trade, allowedSlippage = 0) {
   const amountToApprove = useMemo(
-    () => (trade ? computeSlippageAdjustedAmounts(trade, allowedSlippage)[Field.INPUT] : undefined),
+    () =>
+      trade ? trade && trade['slippageAdjustedAmounts'] && trade['slippageAdjustedAmounts'][Field.INPUT] : undefined,
     [trade, allowedSlippage]
   )
   const { ROUTER: ROUTER_ADDRESS } = usePresetPeripheryAddress()

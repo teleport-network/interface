@@ -126,18 +126,18 @@ export function computeSlippageAdjustedAmountsByRoute(
 }
 
 // computes the minimum amount out and maximum amount in for a trade given a user specified allowed slippage in bips
-export function computeSlippageAdjustedAmounts(
-  trade: Trade | undefined,
-  allowedSlippage: number
-): { [field in Field]?: CurrencyAmount } {
-  const pct = basisPointsToPercent(allowedSlippage)
-  const a = trade?.maximumAmountIn(pct)
-  const b = trade?.minimumAmountOut(pct)
-  return {
-    [Field.INPUT]: a,
-    [Field.OUTPUT]: b
-  }
-}
+// export function computeSlippageAdjustedAmounts(
+//   trade: Trade | undefined,
+//   allowedSlippage: number
+// ): { [field in Field]?: CurrencyAmount } {
+//   const pct = basisPointsToPercent(allowedSlippage)
+//   const a = trade?.maximumAmountIn(pct)
+//   const b = trade?.minimumAmountOut(pct)
+//   return {
+//     [Field.INPUT]: a,
+//     [Field.OUTPUT]: b
+//   }
+// }
 
 export function warningSeverity(priceImpact: Percent | undefined): 0 | 1 | 2 | 3 | 4 {
   if (!priceImpact?.lessThan(BLOCKED_PRICE_IMPACT_NON_EXPERT)) return 4
