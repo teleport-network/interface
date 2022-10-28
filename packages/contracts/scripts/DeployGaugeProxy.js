@@ -10,17 +10,17 @@ const hre = require("hardhat")
 const convert = (amount, decimals) => ethers.utils.parseUnits(amount, decimals);
 
 // Tokens
-const FTM = '0x21be370d5312f44cb42ce377bc9b8a0cef1a4c83';
-const BTC = '0x321162Cd933E2Be498Cd2267a90534A804051b11';
-const ETH = '0x74b23882a30290451A17c44f4F05243b6b58C76d';
-const CRV = '0x1E4F97b9f9F913c46F1632781732927B9019C68b';
-const LQDR = '0x10b620b2dbAC4Faa7D7FFD71Da486f5D44cd86f9';
-const BIFI = '0xd6070ae98b8069de6B494332d1A1a81B6179D960';
-const USDC = '0x04068DA6C83AFCFA0e13ba15A6696662335D5B75';
-const DAI = '0x8D11eC38a3EB5E956B052f67Da8Bdc9bef8Abf3E';
-const FRAX = '0xdc301622e621166BD8E82f2cA0A26c13Ad0BE355';
-const USDT = '0x049d68029688eAbF473097a2fC38ef61633A3C7A';
-const MIM = '0x82f0B8B456c1A451378467398982d4834b6829c1';
+const NATIVE_TOKEN = '0x21be370d5312f44cb42ce377bc9b8a0cef1a4c83';
+const USDC = '0x4603cff6498c46583300fc5f1c31f872f5514182';
+const DAI = '0x38fA58a6a83d97389Be88752DAa408E2FEA40C8b';
+const USDT = '0xec6b24429ab7012afc1b083d4e6763f738047792';
+const SUSHI = '0xED59D07e00118b7ab76EE6fB29D738e266aAca02'
+/**
+ * @dev HEADS UP 🙋
+ * First Token in the list will be the base token of the gauge proxy
+ */
+const allowedVariableToken = [NATIVE_TOKEN, SUSHI]
+const allowedStableToken = [USDC, DAI, USDT]
 
 // Contracts
 const FACTORY = '0xFa5395FbFb1805c6a1183D0C72f97306663Ae0D1'
@@ -210,21 +210,13 @@ async function verifyTokensVariableGaugeProxy() {
   const gaugeProxy = await ethers.getContractAt("VariableGaugeProxy", VARIABLE_GAUGE_PROXY);
 
   console.log('Starting token verification');
-  const setTxn1 = await gaugeProxy.setBaseToken(FTM, true,
-  );
+  const [BaseToken, ...otherTokens] = allowedVariableToken
+  const setTxn1 = await gaugeProxy.setBaseToken(BaseToken, true);
   await setTxn1.wait();
-  const setTxn2 = await gaugeProxy.setVerifiedToken(BTC, true,
-  );
-  await setTxn2.wait();
-  const setTxn3 = await gaugeProxy.setVerifiedToken(ETH, true);
-  await setTxn3.wait();
-  const setTxn4 = await gaugeProxy.setVerifiedToken(CRV, true);
-  await setTxn4.wait();
-  const setTxn5 = await gaugeProxy.setVerifiedToken(LQDR, true);
-  await setTxn5.wait();
-  const setTxn6 = await gaugeProxy.setVerifiedToken(BIFI, true);
-  await setTxn6.wait();
-
+  for (const allowedToken of otherTokens) {
+    const setTxn = await gaugeProxy.setVerifiedToken(allowedToken, true);
+    await setTxn.wait();
+  }
 }
 
 async function verifyTokensStableGaugeProxy() {
@@ -232,16 +224,13 @@ async function verifyTokensStableGaugeProxy() {
   const gaugeProxy = await ethers.getContractAt("StableGaugeProxy", STABLE_GAUGE_PROXY);
 
   console.log('Starting token verification');
-  const setTxn1 = await gaugeProxy.setBaseToken(USDC, true);
+  const [BaseToken, ...others] = allowedStableToken
+  const setTxn1 = await gaugeProxy.setBaseToken(BaseToken, true);
   await setTxn1.wait();
-  const setTxn2 = await gaugeProxy.setVerifiedToken(DAI, true);
-  await setTxn2.wait();
-  const setTxn3 = await gaugeProxy.setVerifiedToken(FRAX, true);
-  await setTxn3.wait();
-  const setTxn4 = await gaugeProxy.setVerifiedToken(MIM, true);
-  await setTxn4.wait();
-  const setTxn5 = await gaugeProxy.setVerifiedToken(USDT, true);
-  await setTxn5.wait();
+  for (const allowedToken of others) {
+    const setTxn = await gaugeProxy.setVerifiedToken(allowedToken, true);
+    await setTxn.wait();
+  }
 }
 
 async function main() {
@@ -262,10 +251,10 @@ async function main() {
 
     // await initVariableGaugeProxy();
     // await initStableGaugeProxy();
-    await initAdminGaugeProxy();
+    // await initAdminGaugeProxy();
 
-    // await verifyTokensVariableGaugeProxy();
-    // await verifyTokensStableGaugeProxy();
+    await verifyTokensVariableGaugeProxy();
+    await verifyTokensStableGaugeProxy();
 }
 
 // We recommend this pattern to be able to use async/await everywhere
