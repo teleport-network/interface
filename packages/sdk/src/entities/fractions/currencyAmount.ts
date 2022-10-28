@@ -69,7 +69,10 @@ export class CurrencyAmount extends Fraction {
     format?: object,
     rounding: Rounding = Rounding.ROUND_DOWN
   ): string {
-    invariant(decimalPlaces <= this.currency.decimals, 'DECIMALS')
+    // invariant(decimalPlaces <= this.currency.decimals, 'DECIMALS')
+    if(decimalPlaces > this.currency.decimals){
+      console.log('decimalPlaces > this.currency.decimals',decimalPlaces, this.currency)
+    }
     return super.toFixed(decimalPlaces, format, rounding)
   }
 
