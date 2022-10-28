@@ -747,7 +747,7 @@ export const DEFAULT_TOKEN_LIST = {
         "symbol": "USDC",
         "decimals": 18,
         "chainId": 420,
-        "logoURI": "https://raw.githubusercontent.com/teleport-network/teleport-assets/master/blockchains/ethereum/assets/0x0000000000085d4780B73119b644AE5ecd22b376/logo.png"
+        "logoURI": "https://raw.githubusercontent.com/teleport-network/teleport-assets/master/blockchains/ethereum/assets/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48/logo.png"
       },
       {
         "name": "def",
@@ -763,7 +763,7 @@ export const DEFAULT_TOKEN_LIST = {
         "symbol": "Dai",
         "decimals": 18,
         "chainId": 420,
-        "logoURI": "https://raw.githubusercontent.com/teleport-network/teleport-assets/master/blockchains/ethereum/assets/0x0000000000085d4780B73119b644AE5ecd22b376/logo.png"
+        "logoURI": "https://raw.githubusercontent.com/teleport-network/teleport-assets/master/blockchains/ethereum/assets/0x6B175474E89094C44Da98b954EedeAC495271d0F/logo.png"
       },
       {
         "name": "Wrapped Ether",
