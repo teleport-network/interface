@@ -1,4 +1,4 @@
-import { Currency, ETHER, Token, WETH } from '@teleswap/sdk'
+import { Currency, ETHER, Token } from '@teleswap/sdk'
 import React, { useMemo } from 'react'
 import styled from 'styled-components'
 
