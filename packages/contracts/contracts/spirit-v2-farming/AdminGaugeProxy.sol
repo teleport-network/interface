@@ -2,6 +2,7 @@
 pragma solidity ^0.8.11;
 
 import "./utils.sol";
+import "../interfaces/ITeleswapV2Pair.sol";
 
 contract AdminGauge is ReentrancyGuard {
     using SafeERC20 for IERC20;
@@ -46,28 +47,28 @@ contract AdminGauge is ReentrancyGuard {
         DISTRIBUTION = msg.sender;
     }
 
-    function claimVotingFees() external nonReentrant returns (uint claimed0, uint claimed1) {
-        // require address(TOKEN) is BaseV1Pair
-        return _claimVotingFees();
-    }
+    // function claimVotingFees() external nonReentrant returns (uint claimed0, uint claimed1) {
+    //     // require address(TOKEN) is BaseV1Pair
+    //     return _claimVotingFees();
+    // }
 
-    function _claimVotingFees() internal returns (uint claimed0, uint claimed1) {
-        (claimed0, claimed1) = IBaseV1Pair(address(TOKEN)).claimFees();
-        if (claimed0 > 0 || claimed1 > 0) {
-            (address _token0, address _token1) = IBaseV1Pair(address(TOKEN)).tokens();
-            address spiritMaker = IBaseV1Pair(address(TOKEN)).spiritMaker();
-            address protocolAddress = IBaseV1Pair(address(TOKEN)).protocol();
-            if (claimed0 > 0) {
-                IERC20(_token0).safeTransfer(spiritMaker, claimed0 / 2);
-                IERC20(_token0).safeTransfer(protocolAddress, claimed0 / 2);
-            }
-            if (claimed1 > 0) {
-                IERC20(_token1).safeTransfer(spiritMaker, claimed1 / 2);
-                IERC20(_token1).safeTransfer(protocolAddress, claimed1 / 2);
-            }
-            emit ClaimVotingFees(msg.sender, claimed0, claimed1);
-        }
-    }
+    // function _claimVotingFees() internal returns (uint claimed0, uint claimed1) {
+    //     (claimed0, claimed1) = ITeleswapV2Pair(address(TOKEN)).claimFees();
+    //     if (claimed0 > 0 || claimed1 > 0) {
+    //         (address _token0, address _token1) = ITeleswapV2Pair(address(TOKEN)).tokens();
+    //         address spiritMaker = ITeleswapV2Pair(address(TOKEN)).spiritMaker();
+    //         address protocolAddress = ITeleswapV2Pair(address(TOKEN)).protocol();
+    //         if (claimed0 > 0) {
+    //             IERC20(_token0).safeTransfer(spiritMaker, claimed0 / 2);
+    //             IERC20(_token0).safeTransfer(protocolAddress, claimed0 / 2);
+    //         }
+    //         if (claimed1 > 0) {
+    //             IERC20(_token1).safeTransfer(spiritMaker, claimed1 / 2);
+    //             IERC20(_token1).safeTransfer(protocolAddress, claimed1 / 2);
+    //         }
+    //         emit ClaimVotingFees(msg.sender, claimed0, claimed1);
+    //     }
+    // }
 
     function totalSupply() external view returns (uint256) {
         return _totalSupply;
