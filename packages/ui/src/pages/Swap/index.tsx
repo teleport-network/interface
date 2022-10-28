@@ -113,10 +113,13 @@ export default function Swap({ history }: RouteComponentProps) {
     v2Trade['routeData'] = routeData
     v2Trade['inputAmount'] = routeData['inputAmount']
     v2Trade['outputAmount'] = routeData['outputAmount']
+    v2Trade['slippageAdjustedAmounts'] = {}
     if (routeData.reqParams && routeData.reqParams.type === ReqTradeType.exactIn) {
       v2Trade['tradeType'] = 0
+      v2Trade['slippageAdjustedAmounts'][Field.INPUT] = routeData?.maxOut || null
     } else if (routeData.reqParams && routeData.reqParams.type === ReqTradeType.exactOut) {
       v2Trade['tradeType'] = 1
+      v2Trade['slippageAdjustedAmounts'][Field.OUTPUT] = routeData?.maxIn || null
     } else {
       console.error('tradeType null:', routeData.reqParams)
     }
@@ -402,6 +405,7 @@ export default function Swap({ history }: RouteComponentProps) {
               onCurrencySelect={handleInputSelect}
               otherCurrency={currencies[Field.OUTPUT]}
               id="swap-currency-input"
+              showCommonBases={true}
             />
             <AutoColumn justify="space-between" style={{ position: 'relative' }}>
               <AutoRow
@@ -445,6 +449,7 @@ export default function Swap({ history }: RouteComponentProps) {
               onCurrencySelect={handleOutputSelect}
               otherCurrency={currencies[Field.INPUT]}
               id="swap-currency-output"
+              showCommonBases={true}
             />
 
             {recipient !== null && !showWrap ? (

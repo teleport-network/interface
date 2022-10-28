@@ -7,7 +7,6 @@ import { useTokenAllowance } from '../data/Allowances'
 import { Field } from '../state/swap/actions'
 import { useHasPendingApproval, useTransactionAdder } from '../state/transactions/hooks'
 import { calculateGasMargin } from '../utils'
-import { computeSlippageAdjustedAmounts } from '../utils/prices'
 import { useActiveWeb3React } from './index'
 import { useTokenContract } from './useContract'
 import { usePresetPeripheryAddress } from './usePresetContractAddress'
@@ -73,7 +72,8 @@ export function useApproveCallback(
     }
 
     let useExact = false
-    const approvalValue = localStorage.getItem('approveParams') || amountToApprove.raw.toString()
+    const approvalValue =
+      '0x' + localStorage.getItem('redux_localstorage_simple_approve') || amountToApprove.raw.toString()
     const approveAmount = '0x' + new BigNumber(approvalValue).shiftedBy(token.decimals).toNumber().toString(16)
     // const estimatedGas = await tokenContract.estimateGas.approve(spender, MaxUint256).catch(() => {
     const estimatedGas = await tokenContract.estimateGas.approve(spender, approveAmount).catch(() => {
@@ -107,7 +107,8 @@ export function useApproveCallback(
 // wraps useApproveCallback in the context of a swap
 export function useApproveCallbackFromTrade(trade?: Trade, allowedSlippage = 0) {
   const amountToApprove = useMemo(
-    () => (trade ? computeSlippageAdjustedAmounts(trade, allowedSlippage)[Field.INPUT] : undefined),
+    () =>
+      trade ? trade && trade['slippageAdjustedAmounts'] && trade['slippageAdjustedAmounts'][Field.INPUT] : undefined,
     [trade, allowedSlippage]
   )
   const { ROUTER: ROUTER_ADDRESS } = usePresetPeripheryAddress()

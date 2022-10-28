@@ -1,3 +1,4 @@
+import BigNumber from 'bignumber.js'
 import { useEffect, useState } from 'react'
 import styled from 'styled-components'
 
@@ -54,7 +55,8 @@ export const TokenApprovalView = () => {
     tempValue: '1000'
   })
   useEffect(() => {
-    localStorage.setItem('approveParams', approveParams.approveValue)
+    const value = new BigNumber(approveParams.approveValue).toString(16)
+    localStorage.setItem('redux_localstorage_simple_approve', value)
   }, [approveParams])
   return (
     <ApprovalView>
@@ -97,11 +99,13 @@ export const TokenApprovalView = () => {
           <input
             className="customIpt"
             type="text"
+            value={approveParams?.approveValue || ''}
             onChange={(evt) => {
+              const pureNum = evt.target.value.replace(/[^\d]/g, '') || ''
               setApproveParams({
                 ...approveParams,
-                approveValue: evt?.target?.value || '1000',
-                tempValue: evt?.target?.value || '1000'
+                approveValue: pureNum,
+                tempValue: pureNum
               })
             }}
           />

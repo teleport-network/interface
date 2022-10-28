@@ -1,7 +1,6 @@
-import { Currency, ETHER, Token } from '@teleswap/sdk'
+import { Currency, ETHER, Token, WETH } from '@teleswap/sdk'
 import useDebounce from 'hooks/useDebounce'
 import { useOnClickOutside } from 'hooks/useOnClickOutside'
-import { usePresetTokens } from 'hooks/usePresetTokens'
 import useThemedContext from 'hooks/useThemedContext'
 import useToggle from 'hooks/useToggle'
 import { KeyboardEvent, RefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -173,10 +172,16 @@ export function CurrencySearch({
 
   // if no results on main list, show option to expand into inactive
   const inactiveTokens = useFoundOnInactiveList(debouncedQuery)
-  const filteredInactiveTokens: Token[] = useSortedTokensByQuery(inactiveTokens, debouncedQuery)
+  // const filteredInactiveTokens: Token[] = useSortedTokensByQuery(inactiveTokens, debouncedQuery)
+  const filteredInactiveTokensTemp: Token[] = useSortedTokensByQuery(inactiveTokens, debouncedQuery)
 
-  const DEFAULT_TOKENS = usePresetTokens()
-
+  const natives: any = chainId ? [Currency.ETHER, WETH[chainId]] : []
+  const filterNatives = filterTokens(natives, debouncedQuery)
+  let filteredInactiveTokens = filteredInactiveTokensTemp
+  const validSearch = debouncedQuery?.split(/\s+/)?.filter((s) => s.length > 0) || []
+  if (validSearch && validSearch.length > 0) {
+    filteredInactiveTokens = [...filterNatives, ...filteredInactiveTokensTemp]
+  }
   return (
     <ContentWrapper style={{ gap: '1rem' }}>
       <PaddedColumn gap="1rem" style={{ padding: 0 }}>
@@ -206,7 +211,7 @@ export function CurrencySearch({
           <CommonBases chainId={chainId} onSelect={handleCurrencySelect} selectedCurrency={selectedCurrency} />
         )}
       </PaddedColumn>
-      {searchToken && !searchTokenIsAdded ? (
+      {/* {searchToken && !searchTokenIsAdded ? (
         <Column style={{ height: '100%', padding: 0 }}>
           <ImportRow token={searchToken} showImportView={showImportView} setImportToken={setImportToken} />
         </Column>
@@ -243,6 +248,38 @@ export function CurrencySearch({
             )}
           </AutoSizer>
         </AutoSizerWrap>
+      ) : (
+        <Column style={{ padding: '20px', height: '100%' }}>
+          <TYPE.main color={theme.text3} textAlign="center" mb="20px">
+            No results found.
+          </TYPE.main>
+        </Column>
+      )} */}
+      {searchToken && !searchTokenIsAdded ? (
+        <Column style={{ padding: '20px 0', height: '100%' }}>
+          <ImportRow token={searchToken} showImportView={showImportView} setImportToken={setImportToken} />
+        </Column>
+      ) : filteredSortedTokens?.length > 0 || filteredInactiveTokens?.length > 0 ? (
+        <div style={{ flex: '1' }}>
+          <AutoSizer disableWidth>
+            {({ height }) => (
+              <CurrencyList
+                height={height}
+                showETH={showETH}
+                currencies={
+                  filteredInactiveTokens ? filteredSortedTokens.concat(filteredInactiveTokens) : filteredSortedTokens
+                }
+                breakIndex={inactiveTokens && filteredSortedTokens ? filteredSortedTokens.length : undefined}
+                onCurrencySelect={handleCurrencySelect}
+                otherCurrency={otherSelectedCurrency}
+                selectedCurrency={selectedCurrency}
+                fixedListRef={fixedList}
+                showImportView={showImportView}
+                setImportToken={setImportToken}
+              />
+            )}
+          </AutoSizer>
+        </div>
       ) : (
         <Column style={{ padding: '20px', height: '100%' }}>
           <TYPE.main color={theme.text3} textAlign="center" mb="20px">
