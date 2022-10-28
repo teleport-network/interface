@@ -110,19 +110,19 @@ export const MINICHEF_ADDRESS: { [chainId in ChainId]?: string } = {
 }
 
 export const ADMIN_GAUGE_PROXY_ADDRESS: { [chainId in ChainId]?: string } = {
-  // [ChainId.OP_GOERLI]: '0x1cBc94a262e2a578B97aF4Fd47f6851cC76349d0'
+  [ChainId.OP_GOERLI]: '0x9D8C4DA04D9eaFD03e1318801A74c8d30e0c5E78'
 }
 
 export const STABLE_GAUGE_PROXY_ADDRESS: { [chainId in ChainId]?: string } = {
-  // [ChainId.OP_GOERLI]: '0x1cBc94a262e2a578B97aF4Fd47f6851cC76349d0'
+  [ChainId.OP_GOERLI]: '0xd79Cd14f1CDaca51a1808853ECa716e6c33be932'
 }
 
 export const VARIABLE_GAUGE_PROXY_ADDRESS: { [chainId in ChainId]?: string } = {
-  // [ChainId.OP_GOERLI]: '0x1cBc94a262e2a578B97aF4Fd47f6851cC76349d0'
+  [ChainId.OP_GOERLI]: '0xDAc4bEd1Bb8f8cfDDbaD6B233596C05dfa502A95'
 }
 
 export const BRIBE_FACTORY_ADDRESS: { [chainId in ChainId]?: string } = {
-  // [ChainId.OP_GOERLI]: '0x1cBc94a262e2a578B97aF4Fd47f6851cC76349d0'
+  [ChainId.OP_GOERLI]: '0x1cBc94a262e2a578B97aF4Fd47f6851cC76349d0'
 }
 
 export const SUSHI_ADDRESS: { [chainId in ChainId]?: string } = {
