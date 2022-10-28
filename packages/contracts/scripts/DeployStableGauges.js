@@ -7,14 +7,9 @@ const { ethers } = require("hardhat");
 const { utils, BigNumber } = require("ethers")
 // import from constant.js
 const { 
-  USDT, USDC: USDCAddr, VOTER_ESCROW_TOKEN, REWARD_TOKEN,
-  FACTORY: FACTORYV2, ROUTER,
-  TREASURY_ADDRESS, FEE_DISTRIBUTOR,
-  VARIABLE_BRIBE_FACTORY, STABLE_BRIBE_FACTORY,
-  VARIABLE_GAUGE_PROXY, STABLE_GAUGE_PROXY 
+  USDT, USDC: USDCAddr, FACTORY: FACTORYV2, STABLE_GAUGE_PROXY 
 } = require('./constant')
 
-const convert = (amount, decimals) => ethers.utils.parseUnits(amount, decimals);
 
 const tokensWithUSDC = [
   {
@@ -49,7 +44,6 @@ async function main() {
 
     // 4. Using that LP create a gauge in GaugeProxy contract
     const gaugeProxy = await ethers.getContractAt("StableGaugeProxy", STABLE_GAUGE_PROXY);
-    const estimatedGasLimit = await gaugeProxy.estimateGas.addGauge(LP).catch(e => console.error('e', e.reason));
 
     const addGaugeTrx = await gaugeProxy.addGauge(LP);
     await addGaugeTrx.wait(5);
