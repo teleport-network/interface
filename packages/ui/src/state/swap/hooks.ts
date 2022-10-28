@@ -240,7 +240,7 @@ export function useDerivedSwapInfo():
           nodeTags[k].parentNode.removeChild(nodeTags[k])
         }
       }
-    }, 2000)
+    }, 3000)
   }
   const getData = async () => {
     try {
