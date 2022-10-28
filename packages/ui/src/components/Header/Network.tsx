@@ -82,7 +82,7 @@ const NetBodyRowStyle = styled.div`
   }
 `
 
-function getRpcUrl(chainId: SupportedChainId): string {
+export function getRpcUrl(chainId: SupportedChainId): string {
   switch (chainId) {
     case SupportedChainId.MAINNET:
     case SupportedChainId.RINKEBY:
@@ -105,42 +105,43 @@ const NETWORK_SELECTOR_CHAINS = [
   SupportedChainId.OPTIMISM_GOERLI
 ]
 
+const switchNet = (connector, chainIdNumber) => {
+  ;(async () => {
+    if (connector) {
+      const chainIdHex = Number(chainIdNumber).toString(16)
+      const chainId = `0x${chainIdHex}`
+      const provider = await connector.getProvider()
+      if (!chainIdHex || !provider) {
+        return
+      }
+      try {
+        await provider.request({
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId }]
+        })
+      } catch (error) {
+        const info = getChainInfo(chainIdNumber)
+        const addChainParameter = {
+          chainId,
+          chainName: info.label,
+          rpcUrls: [getRpcUrl(chainIdNumber)],
+          nativeCurrency: info.nativeCurrency,
+          blockExplorerUrls: [info.explorer]
+        }
+        await provider.request({
+          method: 'wallet_addEthereumChain',
+          params: [addChainParameter]
+        })
+      }
+    }
+  })()
+}
+
 export default function Network() {
   const { connector, chainId } = useWeb3React()
   const [showNetSelect, setShowNetSelect] = useState(false)
   const info = getChainInfo(chainId)
 
-  const switchNet = (chainIdNumber) => {
-    ;(async () => {
-      if (connector) {
-        const chainIdHex = Number(chainIdNumber).toString(16)
-        const chainId = `0x${chainIdHex}`
-        const provider = await connector.getProvider()
-        if (!chainIdHex || !provider) {
-          return
-        }
-        try {
-          await provider.request({
-            method: 'wallet_switchEthereumChain',
-            params: [{ chainId }]
-          })
-        } catch (error) {
-          const info = getChainInfo(chainIdNumber)
-          const addChainParameter = {
-            chainId,
-            chainName: info.label,
-            rpcUrls: [getRpcUrl(chainIdNumber)],
-            nativeCurrency: info.nativeCurrency,
-            blockExplorerUrls: [info.explorer]
-          }
-          await provider.request({
-            method: 'wallet_addEthereumChain',
-            params: [addChainParameter]
-          })
-        }
-      }
-    })()
-  }
   return (
     <NetworkStyled onMouseEnter={() => setShowNetSelect(true)} onMouseLeave={() => setShowNetSelect(false)}>
       <NetHeadStyle>
@@ -190,7 +191,7 @@ export default function Network() {
             {NETWORK_SELECTOR_CHAINS.map((chainIdNumber) => {
               const info = getChainInfo(chainIdNumber)
               return (
-                <NetBodyRowStyle key={chainIdNumber} onClick={() => switchNet(chainIdNumber)}>
+                <NetBodyRowStyle key={chainIdNumber} onClick={() => switchNet(connector, chainIdNumber)}>
                   <img src={info.logoUrl} alt="" />
                   <span>{info.label}</span>
                 </NetBodyRowStyle>
