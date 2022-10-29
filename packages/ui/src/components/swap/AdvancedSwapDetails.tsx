@@ -1,7 +1,6 @@
 import { Trade, TradeType } from '@teleswap/sdk'
 // TradeType
 import LineVIcon from 'assets/images/tele/lineV.png'
-import ArrowHGreen from 'assets/svg/arrowHGreen.svg'
 import ArrowHLoneLine from 'assets/svg/arrowHLoneLine.svg'
 import arrowShowRoute from 'assets/svg/arrowShowRoute.svg'
 import axios from 'axios'
@@ -117,38 +116,49 @@ const RouteCellStyled = styled(Box)`
   display: flex;
   justify-content: flex-start;
   align-items: center;
+  flex-flow: row wrap;
+  /* border: 1px solid red; */
+  margin-bottom: 0.4rem;
+  .pathBlock {
+  }
   :nth-of-type(2) {
     margin-top: 0.9rem !important;
   }
   .routeCellBlock {
     .ArrowHLoneLine {
-      width: 4.1rem;
-      height: 0.8rem;
+      width: 3.1rem;
+      height: auto;
       margin: 2px 0 5px 0;
       position: relative;
       right: 5px;
     }
   }
+  .percentView {
+    color: #1ec9a1;
+  }
   .tokenImgWrap {
-    background: rgba(57, 225, 186, 0.1);
+    /* background: rgba(57, 225, 186, 0.1); */
     border-radius: 16px;
-    padding: 0.4rem 0.5rem;
+    /* padding: 0.4rem 0; */
     display: flex;
     justify-content: flex-start;
     align-items: center;
     position: relative;
-    img {
-      width: 1.7rem;
-      height: auto;
+    width: 100%;
+    margin-left: -10px;
+    img,
+    svg {
+      width: 2rem;
+      height: 2rem;
     }
-    img:nth-of-type(1) {
-      margin-right: 10px;
-      position: relative;
-      left: 8px;
+    .tokenLeft {
+      /* margin-right: 10px; */
+      position: absolute;
+      left: 0;
     }
-    img:nth-of-type(2) {
-      position: relative;
-      right: 8px;
+    .tokenRight {
+      position: absolute;
+      left: 1rem;
       z-index: -1;
     }
   }
@@ -177,6 +187,12 @@ export function AdvancedSwapDetails({ trade }: AdvancedSwapDetailsProps) {
   // const showRoute = Boolean(trade && trade.route.path.length > 2)
   const showRoute = Boolean(trade && trade.routeData && trade.routeData.route.length > 0)
   const routeData = (trade && trade['routeData']) || null
+  // if (routeData && routeData.route && routeData.route.length < 3) {
+  //   routeData.route = [...routeData.route, ...routeData.route]
+  // }
+  // if (routeData && routeData.route && routeData.route[0] && routeData.route[0].length < 3) {
+  //   routeData.route[0] = [...routeData.route[0], ...routeData.route[0]]
+  // }
   return (
     <AutoColumn gap="0.4rem">
       {trade && (
@@ -215,7 +231,7 @@ export function AdvancedSwapDetails({ trade }: AdvancedSwapDetailsProps) {
                 />
                 {/* <img className="leftTokenImg" src={TeleRouteIcon} alt="" /> */}
                 <img className="LineVIcon" style={{ margin: '0 0.5rem 0 0.89rem' }} src={LineVIcon} alt="" />
-                <div>
+                <div className="flex1">
                   {
                     // @ts-ignore
                     routeData &&
@@ -223,13 +239,20 @@ export function AdvancedSwapDetails({ trade }: AdvancedSwapDetailsProps) {
                       routeData.route.map((item, index) => (
                         <RouteCellStyled key={index} className="text-detail">
                           {item.map((routeItem, routeItemIndex) => (
-                            <>
-                              <div
-                                key={routeItemIndex}
-                                className="routeCellBlock ColumnStartCenter"
-                                style={{ marginRight: '10px' }}
-                              >
-                                {routeItemIndex == 0 ? <span>{routeData.percents[index]}%</span> : <span>　</span>}
+                            <div
+                              key={routeItemIndex}
+                              className="rowStartCenter"
+                              style={{
+                                width: item.length > 3 ? '33%' : item.length > 1 ? '50%' : '100%',
+                                display: 'flex'
+                              }}
+                            >
+                              <div className="ColumnStartCenter routeCellBlock" style={{}}>
+                                {routeItemIndex == 0 ? (
+                                  <span className="percentView">{routeData.percents[index]}%</span>
+                                ) : (
+                                  <span>　</span>
+                                )}
                                 <img className="ArrowHLoneLine" src={ArrowHLoneLine} alt="" />
                                 <span
                                   style={{
@@ -242,12 +265,12 @@ export function AdvancedSwapDetails({ trade }: AdvancedSwapDetailsProps) {
                                 </span>
                               </div>
                               <div className="tokenImgWrap">
-                                <CurrencyLogo currency={routeItem && routeItem.tokenIn} />
-                                <CurrencyLogo currency={routeItem && routeItem.tokenOut} />
+                                <CurrencyLogo className="tokenLeft" currency={routeItem && routeItem.tokenIn} />
+                                <CurrencyLogo className="tokenRight" currency={routeItem && routeItem.tokenOut} />
                                 {/* <img src={TeleRouteIcon} alt="" />
                                 <img src={TeleRouteIcon} alt="" /> */}
                               </div>
-                            </>
+                            </div>
                           ))}
                           {/* <div className="routeCellBlock ColumnStartCenter" style={{ marginRight: '.5rem' }}>
                           <span>　</span>
@@ -258,7 +281,7 @@ export function AdvancedSwapDetails({ trade }: AdvancedSwapDetailsProps) {
                           <img src={TeleRouteIcon} alt="" />
                           <img src={TeleRouteIcon} alt="" />
                         </div> */}
-                          <img className="justArrowHead" src={ArrowHGreen} alt="" />
+                          {/* <img className="justArrowHead" src={ArrowHGreen} alt="" /> */}
                         </RouteCellStyled>
                       ))
                   }

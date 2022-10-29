@@ -743,19 +743,19 @@ export const DEFAULT_TOKEN_LIST = {
       // },
       {
         "name": "abc",
-        "address": "0x4603cff6498c46583300fc5f1c31f872f5514182",
+        "address": "0x4603cff6498C46583300FC5f1c31f872F5514182",
         "symbol": "USDC",
         "decimals": 18,
         "chainId": 420,
-        "logoURI": "https://raw.githubusercontent.com/teleport-network/teleport-assets/master/blockchains/ethereum/assets/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48/logo.png"
+        "logoURI": "https://raw.githubusercontent.com/teleport-network/teleport-assets/master/blockchains/teleport/assets/0x4603cff6498C46583300FC5f1c31f872F5514182/logo.png"
       },
       {
         "name": "def",
-        "address": "0xec6b24429ab7012afc1b083d4e6763f738047792",
+        "address": "0xec6B24429Ab7012afC1B083d4E6763f738047792",
         "symbol": "USDT",
         "decimals": 18,
         "chainId": 420,
-        "logoURI": "https://raw.githubusercontent.com/teleport-network/teleport-assets/master/blockchains/ethereum/assets/0x0000000000085d4780B73119b644AE5ecd22b376/logo.png"
+        "logoURI": "https://raw.githubusercontent.com/teleport-network/teleport-assets/master/blockchains/teleport/assets/0xec6B24429Ab7012afC1B083d4E6763f738047792/logo.png"
       },
       {
         "name": "adoop",
@@ -763,7 +763,7 @@ export const DEFAULT_TOKEN_LIST = {
         "symbol": "Dai",
         "decimals": 18,
         "chainId": 420,
-        "logoURI": "https://raw.githubusercontent.com/teleport-network/teleport-assets/master/blockchains/ethereum/assets/0x6B175474E89094C44Da98b954EedeAC495271d0F/logo.png"
+        "logoURI": "https://raw.githubusercontent.com/teleport-network/teleport-assets/master/blockchains/teleport/assets/0x38fA58a6a83d97389Be88752DAa408E2FEA40C8b/logo.png"
       },
       {
         "name": "Wrapped Ether",

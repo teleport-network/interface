@@ -1,4 +1,4 @@
-import { Currency, ETHER, Token } from '@teleswap/sdk'
+import { Currency, ETHER } from '@teleswap/sdk'
 import React, { useMemo } from 'react'
 import styled from 'styled-components'
 
@@ -50,7 +50,8 @@ export default function CurrencyLogo({
 
   const srcs: string[] = useMemo(() => {
     if (currency === ETHER) return []
-    if (currency instanceof Token) {
+    if (currency?.symbol?.toLocaleLowerCase() === 'weth') return []
+    if (currency && currency.address && currency?.address?.length > 0) {
       if (currency instanceof WrappedTokenInfo) {
         // @ts-ignore
         return [...uriLocations, getTokenLogoURL(currency.address)]
@@ -59,7 +60,6 @@ export default function CurrencyLogo({
     }
     return []
   }, [currency, uriLocations])
-
   if (currency === ETHER) {
     return <StyledEthereumLogo src={EthereumLogo} size={size} style={style} {...props} />
   }
