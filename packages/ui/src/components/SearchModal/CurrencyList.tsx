@@ -211,7 +211,7 @@ export default function CurrencyList({
       formatted = [...formatted.slice(0, breakIndex), undefined, ...formatted.slice(breakIndex, formatted.length)]
     } */
     return formatted
-  }, [currencies, showETH])
+  }, [chainId, currencies, showETH])
 
   const theme = useThemedContext()
 
@@ -289,6 +289,7 @@ export default function CurrencyList({
   return (
     <FixedSizeList
       height={height}
+      style={{ border: '1px solid rgba(255,255,255,0.2)', borderRadius: '1rem' }}
       ref={fixedListRef as any}
       width="100%"
       itemData={itemData}
