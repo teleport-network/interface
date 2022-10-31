@@ -3,7 +3,6 @@ import useThemedContext from 'hooks/useThemedContext'
 import { useMemo, useState } from 'react'
 import { Text } from 'rebass'
 
-import { Field } from '../../state/swap/actions'
 import { TYPE } from '../../theme'
 import {
   computeTradePriceBreakdown,
@@ -32,7 +31,9 @@ export default function SwapModalFooter({
 }) {
   const [showInverted, setShowInverted] = useState<boolean>(false)
   const theme = useThemedContext()
-  const slippageAdjustedAmounts = (trade && trade['slippageAdjustedAmounts']) || null
+  const isExactIn = trade?.tradeType === TradeType.EXACT_INPUT
+  const slippageAdjustedAmounts = isExactIn ? trade?.routeData?.minOut || '' : trade?.routeData?.maxIn || ''
+
   // realizedLPFee
   const { priceImpactWithoutFee, gasUseEstimateUSD } = useMemo(() => computeTradePriceBreakdown(trade), [trade])
   const severity = warningSeverity(priceImpactWithoutFee)
@@ -66,15 +67,15 @@ export default function SwapModalFooter({
         <RowBetween>
           <RowFixed>
             <TYPE.black fontSize={14} fontWeight={400} color={theme.text2}>
-              {trade.tradeType === TradeType.EXACT_INPUT ? 'Minimum received' : 'Maximum sold'}
+              {trade.tradeType === TradeType.EXACT_INPUT ? 'Minimum received' : 'Maximum spent'}
             </TYPE.black>
             <QuestionHelper text="Your transaction will revert if there is a large, unfavorable price movement before it is confirmed." />
           </RowFixed>
           <RowFixed>
             <TYPE.black fontSize={14}>
               {trade.tradeType === TradeType.EXACT_INPUT
-                ? (slippageAdjustedAmounts && slippageAdjustedAmounts[Field.OUTPUT]?.toSignificant(4)) ?? '-'
-                : (slippageAdjustedAmounts && slippageAdjustedAmounts[Field.INPUT]?.toSignificant(4)) ?? '-'}
+                ? (slippageAdjustedAmounts && slippageAdjustedAmounts?.toSignificant(4)) ?? '-'
+                : (slippageAdjustedAmounts && slippageAdjustedAmounts?.toSignificant(4)) ?? '-'}
             </TYPE.black>
             <TYPE.black fontSize={14} marginLeft={'4px'}>
               {trade.tradeType === TradeType.EXACT_INPUT
