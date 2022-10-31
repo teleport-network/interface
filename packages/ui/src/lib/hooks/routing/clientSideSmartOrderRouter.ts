@@ -136,6 +136,11 @@ export async function getClientSideQuote(
     tokenOut.decimals = WETH[tokenInChainId].decimals
     tokenOut.symbol = WETH[tokenInChainId].symbol
   }
+  const swapOptions = {
+    deadline: parseDeadline(deadline ?? '600'),
+    slippageTolerance: parseSlippageTolerance(slippageTolerance),
+    recipient: recipient ?? ''
+  }
   return getQuote(
     {
       type,
@@ -144,13 +149,15 @@ export async function getClientSideQuote(
       amount
     },
     router,
-    config
+    config,
+    swapOptions
   )
 }
 
+// 0.5 represent 0.5%
 export function parseSlippageTolerance(slippageTolerance: string): Percent {
   const slippagePer10k = Math.round(parseFloat(slippageTolerance) * 100)
-  return new Percent(slippagePer10k, 10_000)
+  return new Percent(slippagePer10k, '1000000')
 }
 
 export function parseDeadline(deadline: string): number {

@@ -42,11 +42,11 @@ export function transformSwapRouteToGetQuoteResult(
 
     const slippageAdjustedAmounts = computeSlippageAdjustedAmountsByRoute(
       subRoute as V2RouteWithValidQuote,
-      // TODO: hard code
-      50
+      swapConfig
+        ? new Percent(swapConfig!.slippageTolerance.numerator, swapConfig!.slippageTolerance.denominator)
+        : new Percent('1')
     )
 
-    console.log('debug joy', amount)
     maxIn = maxIn.add(
       CurrencyAmount.fromRawAmount(
         type === 'exactIn' ? amount.currency : quote.currency,

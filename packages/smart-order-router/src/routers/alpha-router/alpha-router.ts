@@ -78,7 +78,6 @@ import {
 } from '../../util/chains';
 import {log} from '../../util/log';
 import {
-  buildSwapMethodParameters,
   buildTrade,
 } from '../../util/methodParameters';
 import {metric, MetricLoggerUnit} from '../../util/metric';
@@ -113,7 +112,6 @@ import {
 import {
   CandidatePoolsBySelectionCriteria,
   getV2CandidatePools,
-  PoolId,
 } from './functions/get-candidate-pools';
 import {
   IOnChainGasModelFactory,
@@ -814,12 +812,6 @@ export class AlphaRouter
     swapConfig?: SwapOptions,
     partialRoutingConfig: Partial<AlphaRouterConfig> = {}
   ): Promise<SwapRoute | null> {
-    metric.putMetric(
-      `QuoteRequestedForChain${this.chainId}`,
-      1,
-      MetricLoggerUnit.Count
-    );
-
     // Get a block number to specify in all our calls. Ensures data we fetch from chain is
     // from the same block.
     const blockNumber =
@@ -898,8 +890,6 @@ export class AlphaRouter
     }
 
     // Given all the quotes for all the amounts for all the routes, find the best combination.
-    const beforeBestSwap = Date.now();
-
     const swapRouteRaw = await getBestSwapRoute(
       amount,
       percents,
@@ -936,23 +926,11 @@ export class AlphaRouter
 
     // If user provided recipient, deadline etc. we also generate the calldata required to execute
     // the swap and return it too.
-    if (swapConfig) {
-      methodParameters = buildSwapMethodParameters(trade, swapConfig);
-    }
+    // if (swapConfig) {
+    //   methodParameters = buildSwapMethodParameters(trade, swapConfig);
+    // }
 
-    metric.putMetric(
-      'FindBestSwapRoute',
-      Date.now() - beforeBestSwap,
-      MetricLoggerUnit.Milliseconds
-    );
-
-    metric.putMetric(
-      `QuoteFoundForChain${this.chainId}`,
-      1,
-      MetricLoggerUnit.Count
-    );
-
-    this.emitPoolSelectionMetrics(swapRouteRaw, allCandidatePools);
+    // this.emitPoolSelectionMetrics(swapRouteRaw, allCandidatePools);
 
     const swapRoute: SwapRoute = {
       quote,
@@ -1577,143 +1555,143 @@ export class AlphaRouter
     );
   }
 
-  private emitPoolSelectionMetrics(
-    swapRouteRaw: {
-      quote: CurrencyAmount;
-      quoteGasAdjusted: CurrencyAmount;
-      routes: RouteWithValidQuote[];
-      estimatedGasUsed: BigNumber;
-    },
-    allPoolsBySelection: CandidatePoolsBySelectionCriteria[]
-  ) {
-    const poolAddressesUsed = new Set<string>();
-    const { routes: routeAmounts } = swapRouteRaw;
-    _(routeAmounts)
-      .flatMap((routeAmount) => {
-        const { poolAddresses } = routeAmount;
-        return poolAddresses;
-      })
-      .forEach((address: string) => {
-        poolAddressesUsed.add(address.toLowerCase());
-      });
-
-    for (const poolsBySelection of allPoolsBySelection) {
-      const { protocol } = poolsBySelection;
-      _.forIn(
-        poolsBySelection.selections,
-        (pools: PoolId[], topNSelection: string) => {
-          const topNUsed =
-            _.findLastIndex(pools, (pool) =>
-              poolAddressesUsed.has(pool.id.toLowerCase())
-            ) + 1;
-          metric.putMetric(
-            _.capitalize(`${protocol}${topNSelection}`),
-            topNUsed,
-            MetricLoggerUnit.Count
-          );
-        }
-      );
-    }
-
-    let hasV3Route = false;
-    let hasV2Route = false;
-    let hasMixedRoute = false;
-    for (const routeAmount of routeAmounts) {
-      if (routeAmount.protocol == Protocol.V3) {
-        hasV3Route = true;
-      }
-      if (routeAmount.protocol == Protocol.V2) {
-        hasV2Route = true;
-      }
-      if (routeAmount.protocol == Protocol.MIXED) {
-        hasMixedRoute = true;
-      }
-    }
-
-    if (hasMixedRoute && (hasV3Route || hasV2Route)) {
-      if (hasV3Route && hasV2Route) {
-        metric.putMetric(
-          `MixedAndV3AndV2SplitRoute`,
-          1,
-          MetricLoggerUnit.Count
-        );
-        metric.putMetric(
-          `MixedAndV3AndV2SplitRouteForChain${this.chainId}`,
-          1,
-          MetricLoggerUnit.Count
-        );
-      } else if (hasV3Route) {
-        metric.putMetric(`MixedAndV3SplitRoute`, 1, MetricLoggerUnit.Count);
-        metric.putMetric(
-          `MixedAndV3SplitRouteForChain${this.chainId}`,
-          1,
-          MetricLoggerUnit.Count
-        );
-      } else if (hasV2Route) {
-        metric.putMetric(`MixedAndV2SplitRoute`, 1, MetricLoggerUnit.Count);
-        metric.putMetric(
-          `MixedAndV2SplitRouteForChain${this.chainId}`,
-          1,
-          MetricLoggerUnit.Count
-        );
-      }
-    } else if (hasV3Route && hasV2Route) {
-      metric.putMetric(`V3AndV2SplitRoute`, 1, MetricLoggerUnit.Count);
-      metric.putMetric(
-        `V3AndV2SplitRouteForChain${this.chainId}`,
-        1,
-        MetricLoggerUnit.Count
-      );
-    } else if (hasMixedRoute) {
-      if (routeAmounts.length > 1) {
-        metric.putMetric(`MixedSplitRoute`, 1, MetricLoggerUnit.Count);
-        metric.putMetric(
-          `MixedSplitRouteForChain${this.chainId}`,
-          1,
-          MetricLoggerUnit.Count
-        );
-      } else {
-        metric.putMetric(`MixedRoute`, 1, MetricLoggerUnit.Count);
-        metric.putMetric(
-          `MixedRouteForChain${this.chainId}`,
-          1,
-          MetricLoggerUnit.Count
-        );
-      }
-    } else if (hasV3Route) {
-      if (routeAmounts.length > 1) {
-        metric.putMetric(`V3SplitRoute`, 1, MetricLoggerUnit.Count);
-        metric.putMetric(
-          `V3SplitRouteForChain${this.chainId}`,
-          1,
-          MetricLoggerUnit.Count
-        );
-      } else {
-        metric.putMetric(`V3Route`, 1, MetricLoggerUnit.Count);
-        metric.putMetric(
-          `V3RouteForChain${this.chainId}`,
-          1,
-          MetricLoggerUnit.Count
-        );
-      }
-    } else if (hasV2Route) {
-      if (routeAmounts.length > 1) {
-        metric.putMetric(`V2SplitRoute`, 1, MetricLoggerUnit.Count);
-        metric.putMetric(
-          `V2SplitRouteForChain${this.chainId}`,
-          1,
-          MetricLoggerUnit.Count
-        );
-      } else {
-        metric.putMetric(`V2Route`, 1, MetricLoggerUnit.Count);
-        metric.putMetric(
-          `V2RouteForChain${this.chainId}`,
-          1,
-          MetricLoggerUnit.Count
-        );
-      }
-    }
-  }
+  // private emitPoolSelectionMetrics(
+  //   swapRouteRaw: {
+  //     quote: CurrencyAmount;
+  //     quoteGasAdjusted: CurrencyAmount;
+  //     routes: RouteWithValidQuote[];
+  //     estimatedGasUsed: BigNumber;
+  //   },
+  //   allPoolsBySelection: CandidatePoolsBySelectionCriteria[]
+  // ) {
+  //   const poolAddressesUsed = new Set<string>();
+  //   const { routes: routeAmounts } = swapRouteRaw;
+  //   _(routeAmounts)
+  //     .flatMap((routeAmount) => {
+  //       const { poolAddresses } = routeAmount;
+  //       return poolAddresses;
+  //     })
+  //     .forEach((address: string) => {
+  //       poolAddressesUsed.add(address.toLowerCase());
+  //     });
+  //
+  //   for (const poolsBySelection of allPoolsBySelection) {
+  //     const { protocol } = poolsBySelection;
+  //     _.forIn(
+  //       poolsBySelection.selections,
+  //       (pools: PoolId[], topNSelection: string) => {
+  //         const topNUsed =
+  //           _.findLastIndex(pools, (pool) =>
+  //             poolAddressesUsed.has(pool.id.toLowerCase())
+  //           ) + 1;
+  //         metric.putMetric(
+  //           _.capitalize(`${protocol}${topNSelection}`),
+  //           topNUsed,
+  //           MetricLoggerUnit.Count
+  //         );
+  //       }
+  //     );
+  //   }
+  //
+  //   let hasV3Route = false;
+  //   let hasV2Route = false;
+  //   let hasMixedRoute = false;
+  //   for (const routeAmount of routeAmounts) {
+  //     if (routeAmount.protocol == Protocol.V3) {
+  //       hasV3Route = true;
+  //     }
+  //     if (routeAmount.protocol == Protocol.V2) {
+  //       hasV2Route = true;
+  //     }
+  //     if (routeAmount.protocol == Protocol.MIXED) {
+  //       hasMixedRoute = true;
+  //     }
+  //   }
+  //
+  //   if (hasMixedRoute && (hasV3Route || hasV2Route)) {
+  //     if (hasV3Route && hasV2Route) {
+  //       metric.putMetric(
+  //         `MixedAndV3AndV2SplitRoute`,
+  //         1,
+  //         MetricLoggerUnit.Count
+  //       );
+  //       metric.putMetric(
+  //         `MixedAndV3AndV2SplitRouteForChain${this.chainId}`,
+  //         1,
+  //         MetricLoggerUnit.Count
+  //       );
+  //     } else if (hasV3Route) {
+  //       metric.putMetric(`MixedAndV3SplitRoute`, 1, MetricLoggerUnit.Count);
+  //       metric.putMetric(
+  //         `MixedAndV3SplitRouteForChain${this.chainId}`,
+  //         1,
+  //         MetricLoggerUnit.Count
+  //       );
+  //     } else if (hasV2Route) {
+  //       metric.putMetric(`MixedAndV2SplitRoute`, 1, MetricLoggerUnit.Count);
+  //       metric.putMetric(
+  //         `MixedAndV2SplitRouteForChain${this.chainId}`,
+  //         1,
+  //         MetricLoggerUnit.Count
+  //       );
+  //     }
+  //   } else if (hasV3Route && hasV2Route) {
+  //     metric.putMetric(`V3AndV2SplitRoute`, 1, MetricLoggerUnit.Count);
+  //     metric.putMetric(
+  //       `V3AndV2SplitRouteForChain${this.chainId}`,
+  //       1,
+  //       MetricLoggerUnit.Count
+  //     );
+  //   } else if (hasMixedRoute) {
+  //     if (routeAmounts.length > 1) {
+  //       metric.putMetric(`MixedSplitRoute`, 1, MetricLoggerUnit.Count);
+  //       metric.putMetric(
+  //         `MixedSplitRouteForChain${this.chainId}`,
+  //         1,
+  //         MetricLoggerUnit.Count
+  //       );
+  //     } else {
+  //       metric.putMetric(`MixedRoute`, 1, MetricLoggerUnit.Count);
+  //       metric.putMetric(
+  //         `MixedRouteForChain${this.chainId}`,
+  //         1,
+  //         MetricLoggerUnit.Count
+  //       );
+  //     }
+  //   } else if (hasV3Route) {
+  //     if (routeAmounts.length > 1) {
+  //       metric.putMetric(`V3SplitRoute`, 1, MetricLoggerUnit.Count);
+  //       metric.putMetric(
+  //         `V3SplitRouteForChain${this.chainId}`,
+  //         1,
+  //         MetricLoggerUnit.Count
+  //       );
+  //     } else {
+  //       metric.putMetric(`V3Route`, 1, MetricLoggerUnit.Count);
+  //       metric.putMetric(
+  //         `V3RouteForChain${this.chainId}`,
+  //         1,
+  //         MetricLoggerUnit.Count
+  //       );
+  //     }
+  //   } else if (hasV2Route) {
+  //     if (routeAmounts.length > 1) {
+  //       metric.putMetric(`V2SplitRoute`, 1, MetricLoggerUnit.Count);
+  //       metric.putMetric(
+  //         `V2SplitRouteForChain${this.chainId}`,
+  //         1,
+  //         MetricLoggerUnit.Count
+  //       );
+  //     } else {
+  //       metric.putMetric(`V2Route`, 1, MetricLoggerUnit.Count);
+  //       metric.putMetric(
+  //         `V2RouteForChain${this.chainId}`,
+  //         1,
+  //         MetricLoggerUnit.Count
+  //       );
+  //     }
+  //   }
+  // }
 
   private calculateOptimalRatio(
     position: Position,
