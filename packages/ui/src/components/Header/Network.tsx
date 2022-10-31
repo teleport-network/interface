@@ -141,7 +141,7 @@ export default function Network() {
   const { connector, chainId } = useWeb3React()
   const [showNetSelect, setShowNetSelect] = useState(false)
   const info = getChainInfo(chainId)
-
+  const defaultNetwork = getChainInfo(SupportedChainId.OPTIMISM_GOERLI)
   return (
     <NetworkStyled onMouseEnter={() => setShowNetSelect(true)} onMouseLeave={() => setShowNetSelect(false)}>
       <NetHeadStyle>
@@ -166,7 +166,11 @@ export default function Network() {
           </>
         ) : (
           <>
-            <span>Switch Network</span>
+            <NetBodyRowStyle>
+              <img src={defaultNetwork.logoUrl} alt="" />
+              <span>{defaultNetwork.label}</span>
+            </NetBodyRowStyle>
+            {/* <span>Switch Network</span>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="24"
@@ -180,7 +184,7 @@ export default function Network() {
               className="NetworkSelector__StyledChevronDown-sc-w04zhs-16 fxCAMp"
             >
               <polyline points="6 9 12 15 18 9"></polyline>
-            </svg>
+            </svg> */}
           </>
         )}
       </NetHeadStyle>
