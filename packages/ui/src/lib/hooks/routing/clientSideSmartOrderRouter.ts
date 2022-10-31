@@ -1,6 +1,6 @@
 // This file is lazy-loaded, so the import of smart-order-router is intentional.
 // eslint-disable-next-line no-restricted-imports
-import { Fraction } from '@teleswap/sdk'
+import { Fraction, WETH } from '@teleswap/sdk'
 import { AlphaRouter, AlphaRouterConfig, ChainId, SwapOptions } from '@teleswap/smart-order-router'
 import { BigintIsh, CurrencyAmount, Percent, Token, TradeType } from '@uniswap/sdk-core'
 import { SupportedChainId } from 'constants/chains'
@@ -114,31 +114,50 @@ export async function getClientSideQuote(
   router: AlphaRouter,
   config: Partial<AlphaRouterConfig>
 ) {
+  const tokenIn = {
+    address: tokenInAddress,
+    chainId: tokenInChainId,
+    decimals: tokenInDecimals,
+    symbol: tokenInSymbol
+  }
+  const tokenOut = {
+    address: tokenOutAddress,
+    chainId: tokenOutChainId,
+    decimals: tokenOutDecimals,
+    symbol: tokenOutSymbol
+  }
+  if (tokenInAddress === 'ETH') {
+    tokenIn.address = WETH[tokenInChainId].address
+    tokenIn.decimals = WETH[tokenInChainId].decimals
+    tokenIn.symbol = WETH[tokenInChainId].symbol
+  }
+  if (tokenOutAddress === 'ETH') {
+    tokenOut.address = WETH[tokenInChainId].address
+    tokenOut.decimals = WETH[tokenInChainId].decimals
+    tokenOut.symbol = WETH[tokenInChainId].symbol
+  }
+  const swapOptions = {
+    deadline: parseDeadline(deadline ?? '600'),
+    slippageTolerance: parseSlippageTolerance(slippageTolerance),
+    recipient: recipient ?? ''
+  }
   return getQuote(
     {
       type,
-      tokenIn: {
-        address: tokenInAddress,
-        chainId: tokenInChainId,
-        decimals: tokenInDecimals,
-        symbol: tokenInSymbol
-      },
-      tokenOut: {
-        address: tokenOutAddress,
-        chainId: tokenOutChainId,
-        decimals: tokenOutDecimals,
-        symbol: tokenOutSymbol
-      },
+      tokenIn,
+      tokenOut,
       amount
     },
     router,
-    config
+    config,
+    swapOptions
   )
 }
 
+// 0.5 represent 0.5%
 export function parseSlippageTolerance(slippageTolerance: string): Percent {
   const slippagePer10k = Math.round(parseFloat(slippageTolerance) * 100)
-  return new Percent(slippagePer10k, 10_000)
+  return new Percent(slippagePer10k, '1000000')
 }
 
 export function parseDeadline(deadline: string): number {
