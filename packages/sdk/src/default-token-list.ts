@@ -759,11 +759,11 @@ export const DEFAULT_TOKEN_LIST = {
       },
       {
         "name": "adoop",
-        "address": "0x38fA58a6a83d97389Be88752DAa408E2FEA40C8b",
+        "address": "0xb9297783D0D568dc378e23D5BA9C32031a4A5132",
         "symbol": "Dai",
         "decimals": 18,
         "chainId": 420,
-        "logoURI": "https://raw.githubusercontent.com/teleport-network/teleport-assets/master/blockchains/teleport/assets/0x38fA58a6a83d97389Be88752DAa408E2FEA40C8b/logo.png"
+        "logoURI": "https://raw.githubusercontent.com/teleport-network/teleport-assets/master/blockchains/teleport/assets/0xb9297783D0D568dc378e23D5BA9C32031a4A5132/logo.png"
       },
       {
         "name": "Wrapped Ether",
