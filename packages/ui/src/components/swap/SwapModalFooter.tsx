@@ -73,14 +73,10 @@ export default function SwapModalFooter({
           </RowFixed>
           <RowFixed>
             <TYPE.black fontSize={14}>
-              {trade.tradeType === TradeType.EXACT_INPUT
-                ? (slippageAdjustedAmounts && slippageAdjustedAmounts?.toSignificant(4)) ?? '-'
-                : (slippageAdjustedAmounts && slippageAdjustedAmounts?.toSignificant(4)) ?? '-'}
+              {(slippageAdjustedAmounts && slippageAdjustedAmounts?.toSignificant(4)) ?? '-'}
             </TYPE.black>
             <TYPE.black fontSize={14} marginLeft={'4px'}>
-              {trade.tradeType === TradeType.EXACT_INPUT
-                ? trade.outputAmount.currency.symbol
-                : trade.inputAmount.currency.symbol}
+              {isExactIn ? trade.outputAmount.currency.symbol : trade.inputAmount.currency.symbol}
             </TYPE.black>
           </RowFixed>
         </RowBetween>
