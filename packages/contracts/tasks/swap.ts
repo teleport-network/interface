@@ -271,6 +271,7 @@ task("qAllowanceERC20", "查询允许调用的额度")
 
         console.log("allowances: ", allowances)
         console.log("time: ", (new Date()).valueOf())
+        //console.log("router02: ", taskArgs.wallet,taskArgs.router02,taskArgs.token)
     });
 
 /**

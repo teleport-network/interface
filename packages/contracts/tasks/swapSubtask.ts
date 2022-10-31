@@ -219,7 +219,7 @@ task("swapEthAndToken","eth->erc20")
  * hh deployToken --network opg
  * 部署合约并获取token对
  */
-subtask("deployToken", "Deploy Token")
+subtask("deployToken1", "Deploy Token")
     .setAction(async (taskArgs, hre) => {
         const tokenFactory = await hre.ethers.getContractFactory('TT')
         const token = await tokenFactory.deploy()
