@@ -157,7 +157,7 @@ export async function getClientSideQuote(
 // 0.5 represent 0.5%
 export function parseSlippageTolerance(slippageTolerance: string): Percent {
   const slippagePer10k = Math.round(parseFloat(slippageTolerance) * 100)
-  return new Percent(slippagePer10k, '1000000')
+  return new Percent(slippagePer10k, '10000')
 }
 
 export function parseDeadline(deadline: string): number {
