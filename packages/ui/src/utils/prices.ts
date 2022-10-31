@@ -9,7 +9,6 @@ import {
   BLOCKED_PRICE_IMPACT_NON_EXPERT
 } from '../constants'
 import { Field } from '../state/swap/actions'
-import { basisPointsToPercent } from './index'
 
 const BASE_FEE_VOLATILE = new Percent(JSBI.BigInt(30), JSBI.BigInt(10000))
 const BASE_FEE_STABLE = new Percent(JSBI.BigInt(1), JSBI.BigInt(10000))
