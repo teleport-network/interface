@@ -1,11 +1,7 @@
-// import {
-//   ChainId
-//   // TokenAmount
-// } from '@teleswap/sdk'
-// import { darken } from 'polished'
 import { Rounding } from '@teleswap/sdk'
 import TeleLogo from 'assets/images/tele/logo.svg'
 import TextLogo from 'assets/svg/textLogo.svg'
+import { getChainInfo } from 'constants/chainInfo'
 import useThemedContext from 'hooks/useThemedContext'
 import React, { useLayoutEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -13,39 +9,24 @@ import { NavLink, NavLinkProps } from 'react-router-dom'
 import { Box, Flex, Text } from 'rebass'
 import styled from 'styled-components'
 
-// import usePrevious from '../../hooks/usePrevious'
-// import TeleLogoText from '../../assets/images/tele/logoText.svg'
 import { useActiveWeb3React } from '../../hooks'
 import { useDarkModeManager } from '../../state/user/hooks'
-import {
-  useETHBalances
-  // useAggregateUniBalance
-} from '../../state/wallet/hooks'
-// import { CardNoise } fro.0m '../earn/styled'
-// import { CountUp } from 'use-count-up'
-// import { TYPE, ExternalLink } from '../../theme'
+import { useETHBalances } from '../../state/wallet/hooks'
 import { YellowCard } from '../Card'
-// import ClaimModal from '../claim/ClaimModal'
-// import { useToggleSelfClaimModal, useShowClaimPopup } from '../../state/application/hooks'
-// import { useUserHasAvailableClaim } from '../../state/claim/hooks'
-// import { useUserHasSubmittedClaim } from '../../state/transactions/hooks'
-// import { Dots } from '../swap/styleds'
 import Modal from '../Modal'
-// import Menu from '../Menu'
-import { getChainInfo } from 'constants/chainInfo'
 import Row, { RowFixed } from '../Row'
 import Web3Status from '../Web3Status'
 import Network from './Network'
 import UniBalanceContent from './UniBalanceContent'
 
 const HeaderFrame = styled.div`
-  padding-top: 0.5rem;
   display: grid;
   grid-template-columns: 1fr;
   justify-content: space-between;
   align-items: center;
   width: 100%;
   top: 0;
+  height: 72px;
   position: relative;
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
   /* padding: 1rem; */
@@ -63,7 +44,7 @@ const HeaderFrame = styled.div`
 `
 
 const HeaderControls = styled.div`
-  padding: 0 1.3rem;
+  padding: 0 2.5%;
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -83,7 +64,9 @@ const HeadLogoView = styled.div`
     display: none;
   }
   .textLogo {
-    width: calc(120px + 7vw);
+    width: 200px;
+    max-width: 200px;
+    min-width: 180px;
   }
   ${({ theme }) => theme.mediaWidth.upToSmall`
       height: 3.5rem;
@@ -96,14 +79,7 @@ const HeadLogoView = styled.div`
       .textLogo {
         display: none;
       }
-  `}/*  .logoText {
-    width: 6.6rem;
-    height: 'auto';
-    margin-left: 0.4rem;
-    ${({ theme }) => theme.mediaWidth.upToSmall`
-      display: none;
-    `}
-  } */
+  `}
 `
 const HeadTabView = styled.div`
   height: 100%;
@@ -166,7 +142,7 @@ const HeaderRow = styled(RowFixed)`
 
 const HeaderLinks = styled(Row)`
   justify-content: center;
-  height: 2.5rem;
+  height: 3rem;
   width: unset;
   padding: 0.3rem 0.4rem;
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -525,7 +501,7 @@ export default function Header() {
               display: 'flex',
               justifyContent: 'flex-end',
               alignItems: 'center',
-              height: 'calc(2.5rem - 2px)',
+              height: '3rem',
               gridArea: 'a3',
               '&>*': {
                 display: 'flex',
@@ -534,7 +510,7 @@ export default function Header() {
               }
             }}
           >
-            {<Network></Network>}
+            {<Network />}
             {/* <HideSmall>
               {chainId && ENABLED_NETWORK_LABELS[chainId] && (
                 <NetworkCard className="secondary-title" title={ENABLED_NETWORK_LABELS[chainId]}>
@@ -549,11 +525,12 @@ export default function Header() {
                 pointerEvents: 'auto',
                 minWidth: 'fit-content',
                 display: 'flex',
+                backgroundColor: 'rgba(255,255,255,0.1)',
                 '*': { height: '100%', display: 'flex', alignItems: 'center' }
               }}
             >
               {account && userEthBalance ? (
-                <BalanceText style={{ flexShrink: 0, color: theme.common2 }} pl="0.75rem" pr="0.5rem" fontWeight={500}>
+                <BalanceText style={{ flexShrink: 0, color: theme.common2 }} pl="1rem" pr="0.5rem" fontWeight={500}>
                   {userEthBalance?.toSignificant(4, undefined, Rounding.ROUND_HALF_UP)}{' '}
                   {info?.nativeCurrency?.symbol || ''}
                 </BalanceText>

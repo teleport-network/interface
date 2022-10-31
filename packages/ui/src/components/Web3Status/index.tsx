@@ -139,7 +139,7 @@ const SOCK = (
 // eslint-disable-next-line react/prop-types
 function StatusIcon({ connector }: { connector: AbstractConnector }) {
   return (
-    <IconWrapper size={16}>
+    <IconWrapper size={16} style={{ padding: '0 0.5rem' }}>
       <img src={userActiveIcon} alt={''} />
     </IconWrapper>
   )
@@ -200,7 +200,12 @@ function Web3StatusInner() {
 
   if (account) {
     return (
-      <Web3StatusConnected id="web3-status-connected" onClick={toggleWalletModal} pending={hasPendingTransactions}>
+      <Web3StatusConnected
+        id="web3-status-connected"
+        className="secondary-title"
+        onClick={toggleWalletModal}
+        pending={hasPendingTransactions}
+      >
         {hasPendingTransactions ? (
           <RowBetween>
             <Text>{pending?.length} Pending</Text> <Loader stroke="white" />
