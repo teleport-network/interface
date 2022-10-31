@@ -6,7 +6,7 @@ contract TT {
     using SafeMath for uint;
 
     string public constant name = 'Test Token';
-    string public constant symbol = 'USDTB';
+    string public constant symbol = 'DAI';
     uint8 public constant decimals = 18;
     uint  public totalSupply;
     mapping(address => uint) public balanceOf;
