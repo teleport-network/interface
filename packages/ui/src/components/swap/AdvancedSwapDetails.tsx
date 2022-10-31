@@ -119,23 +119,30 @@ const RouteCellStyled = styled(Box)`
   flex-flow: row wrap;
   /* border: 1px solid red; */
   margin-bottom: 0.4rem;
+  .ml25 {
+    margin-left: 1.8rem !important;
+  }
   .pathBlock {
   }
   :nth-of-type(2) {
     margin-top: 0.9rem !important;
   }
   .routeCellBlock {
+    font-family: 'Poppins';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.8);
     .ArrowHLoneLine {
-      width: 3.1rem;
+      width: 1.8rem;
       height: auto;
-      margin: 2px 0 5px 0;
-      position: relative;
-      right: 5px;
+      margin: 0.6rem 0 0.9rem 0;
+    }
+    .percentView {
+      font-weight: 600;
     }
   }
-  .percentView {
-    color: #1ec9a1;
-  }
+
   .tokenImgWrap {
     /* background: rgba(57, 225, 186, 0.1); */
     border-radius: 16px;
@@ -144,21 +151,21 @@ const RouteCellStyled = styled(Box)`
     justify-content: flex-start;
     align-items: center;
     position: relative;
-    width: 100%;
-    margin-left: -10px;
+    width: 3rem;
+    margin-left: -2px;
     img,
     svg {
-      width: 2rem;
-      height: 2rem;
+      width: 1.7rem;
+      height: 1.7rem;
     }
     .tokenLeft {
       /* margin-right: 10px; */
-      position: absolute;
+      position: relative;
       left: 0;
     }
     .tokenRight {
-      position: absolute;
-      left: 1rem;
+      position: relative;
+      left: -0.6rem;
       z-index: -1;
     }
   }
@@ -190,9 +197,9 @@ export function AdvancedSwapDetails({ trade }: AdvancedSwapDetailsProps) {
   // if (routeData && routeData.route && routeData.route.length < 3) {
   //   routeData.route = [...routeData.route, ...routeData.route]
   // }
-  // if (routeData && routeData.route && routeData.route[0] && routeData.route[0].length < 3) {
-  //   routeData.route[0] = [...routeData.route[0], ...routeData.route[0]]
-  // }
+  if (routeData && routeData.route && routeData.route[0] && routeData.route[0].length < 3) {
+    routeData.route[0] = [...routeData.route[0]]
+  }
   return (
     <AutoColumn gap="0.4rem">
       {trade && (
@@ -230,47 +237,76 @@ export function AdvancedSwapDetails({ trade }: AdvancedSwapDetailsProps) {
                   currency={trade && trade.inputAmount && trade.inputAmount.currency}
                 />
                 {/* <img className="leftTokenImg" src={TeleRouteIcon} alt="" /> */}
-                <img className="LineVIcon" style={{ margin: '0 0.5rem 0 0.89rem' }} src={LineVIcon} alt="" />
+                <img className="LineVIcon" style={{ margin: '0 0.57rem 0 0.7rem' }} src={LineVIcon} alt="" />
                 <div className="flex1">
                   {
                     // @ts-ignore
                     routeData &&
                       routeData.hasOwnProperty('route') &&
-                      routeData.route.map((item, index) => (
+                      routeData.route.map((percentItemArr, index) => (
                         <RouteCellStyled key={index} className="text-detail">
-                          {item.map((routeItem, routeItemIndex) => (
-                            <div
-                              key={routeItemIndex}
-                              className="rowStartCenter"
-                              style={{
-                                width: item.length > 3 ? '33%' : item.length > 1 ? '50%' : '100%',
-                                display: 'flex'
-                              }}
-                            >
-                              <div className="ColumnStartCenter routeCellBlock" style={{}}>
-                                {routeItemIndex == 0 ? (
-                                  <span className="percentView">{routeData.percents[index]}%</span>
-                                ) : (
-                                  <span>　</span>
-                                )}
-                                <img className="ArrowHLoneLine" src={ArrowHLoneLine} alt="" />
-                                <span
+                          {percentItemArr.map((pathItem, pathItemIndex) => (
+                            <>
+                              {pathItemIndex > 2 && pathItemIndex % 2 === 1 && (
+                                <div
+                                  key={pathItemIndex - 1}
+                                  className="rowStartCenter"
                                   style={{
-                                    border: '1px solid rgba(255, 255, 255, 0.2)',
-                                    borderRadius: '4px',
-                                    padding: '.1rem .3rem'
+                                    width: '33%',
+                                    display: 'flex'
                                   }}
+                                ></div>
+                              )}
+                              <div
+                                key={pathItemIndex}
+                                className={
+                                  routeData.route.length === 1 && percentItemArr.length <= 2
+                                    ? 'rowCenterCenter'
+                                    : 'rowStartCenter'
+                                }
+                                style={{
+                                  width:
+                                    routeData.route.length > 1
+                                      ? '33%'
+                                      : percentItemArr.length > 3
+                                      ? '33%'
+                                      : percentItemArr.length > 1
+                                      ? '50%'
+                                      : '100%',
+                                  display: 'flex'
+                                }}
+                              >
+                                <div className="ColumnStartCenter routeCellBlock" style={{}}>
+                                  {pathItemIndex == 0 ? (
+                                    <span className="percentView">{routeData.percents[index]}%</span>
+                                  ) : (
+                                    <span>　</span>
+                                  )}
+                                  <img className="ArrowHLoneLine" src={ArrowHLoneLine} alt="" />
+                                  <span
+                                    style={{
+                                      border: '1px solid rgba(255, 255, 255, 0.2)',
+                                      borderRadius: '4px',
+                                      padding: '.1rem .3rem'
+                                    }}
+                                  >
+                                    {pathItem.stable ? 'Stable' : 'Volatile'}
+                                  </span>
+                                </div>
+                                <div
+                                  className={
+                                    routeData.route.length === 1 && percentItemArr.length <= 2
+                                      ? 'tokenImgWrap ml25'
+                                      : 'tokenImgWrap'
+                                  }
                                 >
-                                  {routeItem.stable ? 'Stable' : 'Volatile'}
-                                </span>
-                              </div>
-                              <div className="tokenImgWrap">
-                                <CurrencyLogo className="tokenLeft" currency={routeItem && routeItem.tokenIn} />
-                                <CurrencyLogo className="tokenRight" currency={routeItem && routeItem.tokenOut} />
-                                {/* <img src={TeleRouteIcon} alt="" />
+                                  <CurrencyLogo className="tokenLeft" currency={pathItem && pathItem.tokenIn} />
+                                  <CurrencyLogo className="tokenRight" currency={pathItem && pathItem.tokenOut} />
+                                  {/* <img src={TeleRouteIcon} alt="" />
                                 <img src={TeleRouteIcon} alt="" /> */}
+                                </div>
                               </div>
-                            </div>
+                            </>
                           ))}
                           {/* <div className="routeCellBlock ColumnStartCenter" style={{ marginRight: '.5rem' }}>
                           <span>　</span>
@@ -286,7 +322,7 @@ export function AdvancedSwapDetails({ trade }: AdvancedSwapDetailsProps) {
                       ))
                   }
                 </div>
-                <img className="LineVIcon" style={{ margin: '0 0.89rem 0 0.5rem' }} src={LineVIcon} alt="" />
+                <img className="LineVIcon" style={{ margin: '0 0.7rem 0 0.57rem' }} src={LineVIcon} alt="" />
                 {/* <img className="rightTokenImg" src={TeleRouteIcon} alt="" /> */}
                 <CurrencyLogo
                   className="rightTokenImg"
