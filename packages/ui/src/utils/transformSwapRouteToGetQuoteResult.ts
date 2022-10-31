@@ -44,7 +44,7 @@ export function transformSwapRouteToGetQuoteResult(
       subRoute as V2RouteWithValidQuote,
       swapConfig
         ? new Percent(swapConfig!.slippageTolerance.numerator, swapConfig!.slippageTolerance.denominator)
-        : new Percent('1')
+        : new Percent('1', '100')
     )
 
     maxIn = maxIn.add(

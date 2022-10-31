@@ -4,16 +4,16 @@ import { route } from './slice'
 
 test('routing', async () => {
   const result = await route({
-    tokenInAddress: 'ETH',
+    tokenInAddress: '0xec6b24429ab7012afc1b083d4e6763f738047792',
     tokenInChainId: ChainId.OPTIMISTIC_GOERLI,
-    tokenInSymbol: 'ETH',
+    tokenInSymbol: 'USDT',
     tokenInDecimals: 18,
-    tokenOutAddress: '0x4603cff6498c46583300fc5f1c31f872f5514182',
+    tokenOutAddress: '0x4200000000000000000000000000000000000006',
     tokenOutChainId: ChainId.OPTIMISTIC_GOERLI,
-    tokenOutSymbol: 'USDT',
+    tokenOutSymbol: 'WETH',
     tokenOutDecimals: 18,
     amount: '1000000000000000000',
-    type: 'exactIn',
+    type: 'exactOut',
     slippageTolerance: '0.5'
   })
   console.log(
@@ -30,5 +30,6 @@ test('percent', () => {
   // 0.5 => 0.5%
   const slippagePer10k = Math.round(parseFloat('0.5') * 100).toString()
   console.log(slippagePer10k)
-  console.log(new Percent(slippagePer10k, '1000000').toSignificant(4))
+  console.log(new Percent(slippagePer10k, '10000').toSignificant(4))
+  console.log(new Percent('1').toSignificant())
 }, 10000)
