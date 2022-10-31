@@ -402,6 +402,57 @@ contract StableGaugeProxy is ProtocolGovernance, ReentrancyGuard {
         _vote(_owner, _tokenVote, _weights);
     }
 
+
+    /**
+     * @dev voteMore - NOT TESTED
+     * DO NOT DEPLOY THIS IN PRODUCTION
+     * Vote _owner's votes according to the leftover of _owner's vxTELE balance
+     */
+    function voteMore(address[] calldata _tokenVote, uint256[] calldata _weights) public {
+        require(_tokenVote.length == _weights.length, "Params Mismatch, please check your input or contact dev team");
+        address _owner = msg.sender;
+        uint256 time = block.timestamp - lastVote[_owner];
+        // must be in the voting period, otherwise please go with `vote()`
+        require(time < voteDelay, "Please use vote() instead as you can just revote");
+
+        uint256 _prevUsedWeight = usedWeights[_owner];
+        uint256 _weightForNow = governanceToken.balanceOf(_owner);
+
+        // must be not fully voted, otherwise wait for the next voting period
+        uint256 _remainingWeight = _weightForNow - _prevUsedWeight;
+        require(_remainingWeight > 0, "You fully voted now. Either get more vxTELE or wait for next round");
+        
+        uint256 _tokenCnt = _tokenVote.length;
+        uint256 _totalNewVoteWeight = 0;
+        for (uint256 i = 0; i < _tokenCnt; i++) {
+            _totalNewVoteWeight = _totalNewVoteWeight + _weights[i];
+        }
+
+        _remainingWeight -= _totalNewVoteWeight;
+        require(_remainingWeight >= 0, "Sorry but you voted more than you have left");
+
+        uint256 _usedNewVoteWeight = 0;
+        for (uint256 i = 0; i < _tokenCnt; i++) {
+            address _token = _tokenVote[i];
+            address _gauge = gauges[_token];
+            uint256 _tokenWeight = _weights[i] * _remainingWeight / _totalNewVoteWeight;
+
+            if (_gauge != address(0x0) && gaugeStatus[_token]) {
+                _usedNewVoteWeight = _usedNewVoteWeight + _tokenWeight;
+                totalWeight = totalWeight + _tokenWeight;
+                weights[_token] = weights[_token] + _tokenWeight;
+                if (votes[_owner][_token] == 0) {
+                    tokenVote[_owner].push(_token);
+                }
+                votes[_owner][_token] += _tokenWeight;
+                // Bribe vote deposit
+                IBribe(bribes[_gauge])._deposit(uint256(_tokenWeight), _owner);
+            }
+        }
+
+        usedWeights[_owner] += _usedNewVoteWeight;
+    }
+
     function _vote(
         address _owner,
         address[] memory _tokenVote,
