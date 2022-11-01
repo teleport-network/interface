@@ -13,6 +13,7 @@ const Big = toFormat(_Big)
 
 Big.strict = true
 
+
 export class CurrencyAmount extends Fraction {
   public readonly currency: Currency
 
@@ -81,3 +82,5 @@ export class CurrencyAmount extends Fraction {
     return new Big(this.numerator.toString()).div(this.denominator.toString()).toFormat(format)
   }
 }
+export class AliseCurrencyAmount extends CurrencyAmount {}
+
