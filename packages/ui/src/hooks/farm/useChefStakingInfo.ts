@@ -1,6 +1,6 @@
 import { CurrencyAmount, Pair, Token, TokenAmount } from '@teleswap/sdk'
 import { Chef } from 'constants/farm/chef.enum'
-import { CHAINID_TO_GAUGES, FarmingPool } from 'constants/gauges.config'
+import { CHAINID_TO_GAUGES, Gauge } from 'constants/gauges.config'
 import { UNI } from 'constants/index'
 import { PairState, usePairs } from 'data/Reserves'
 import { BigNumber } from 'ethers'
@@ -38,7 +38,7 @@ interface AdditionalStakingInfo {
    */
   id: number
 }
-export type ChefStakingInfo = MasterChefRawPoolInfo & FarmingPool & AdditionalStakingInfo
+export type ChefStakingInfo = MasterChefRawPoolInfo & Gauge & AdditionalStakingInfo
 
 export function useChefStakingInfo(): (ChefStakingInfo | undefined)[] {
   const { chainId } = useActiveWeb3React()

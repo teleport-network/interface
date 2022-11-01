@@ -27,12 +27,14 @@ export interface TokenAsset {
 
 type StakingAsset = TokenAsset | LiquidityAsset
 
-export type Gauges = {
+export type Gauge = {
   type: GaugeType
   stakingAsset: StakingAsset
 }
 
-const GAUGES_FOR_OP_GOERLI: Gauges[] = [
+export type Gauges = Gauge[]
+
+const GAUGES_FOR_OP_GOERLI: Gauges = [
   {
     type: GaugeType.VARIABLE,
     stakingAsset: {
@@ -58,6 +60,6 @@ const GAUGES_FOR_OP_GOERLI: Gauges[] = [
   }
 ]
 
-export const CHAINID_TO_GAUGES: { [chainId in ChainId]?: Gauges[] } = {
+export const CHAINID_TO_GAUGES: { [chainId in ChainId]?: Gauges } = {
   [ChainId.OP_GOERLI]: GAUGES_FOR_OP_GOERLI
 }
