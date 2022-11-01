@@ -37,7 +37,7 @@ const ApprovalView = styled.div`
       height: 1.8rem;
       border: 1px solid rgba(255, 255, 255, 0.4);
       border-radius: 8px;
-      width: 6rem;
+      width: 9rem;
       background: transparent;
       outline: none;
       color: #d7dce0;
@@ -64,7 +64,7 @@ export const TokenApprovalView = () => {
       <div className="approvalTitle">Token Approval</div>
       <div className="approvalRow">
         <div
-          className="approvalFlexBetweenCenter"
+          className="approvalFlexBetweenCenter cp"
           onClick={() => {
             setApproveParams({
               ...approveParams,
@@ -78,7 +78,7 @@ export const TokenApprovalView = () => {
         </div>
         <div>
           <span>1000 </span>
-          <span>USDT</span>
+          {/* <span>USDT</span> */}
         </div>
       </div>
       <div className="approvalRow">
@@ -101,7 +101,7 @@ export const TokenApprovalView = () => {
             type="text"
             value={approveParams?.approveValue || ''}
             onChange={(evt) => {
-              const pureNum = evt.target.value.replace(/[^\d]/g, '') || ''
+              const pureNum = evt.target.value.replace(/[^1-9]{0,1}(\d*(?:\.\d{0,30})?).*$/g, '$1') || ''
               setApproveParams({
                 ...approveParams,
                 approveValue: pureNum,
@@ -109,7 +109,7 @@ export const TokenApprovalView = () => {
               })
             }}
           />
-          <span>USDT</span>
+          {/* <span>USDT</span> */}
         </div>
       </div>
       <div className="approvalLine"></div>
