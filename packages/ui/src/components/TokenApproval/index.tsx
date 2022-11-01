@@ -9,6 +9,9 @@ const ApprovalView = styled.div`
   font-weight: 400;
   font-size: 0.9rem;
   color: #d7dce0;
+  .symbolLabel {
+    margin-left: 0.5rem;
+  }
   .approvalLine {
     border: 1px solid rgba(255, 255, 255, 0.2);
     margin: 1.7rem 0;
@@ -85,7 +88,7 @@ export const TokenApprovalView = ({ tokenSymbol }: ITokenApprovalView) => {
         </div>
         <div>
           <span>+∞</span>
-          <span>{tokenSymbol}</span>
+          <span className="symbolLabel">{tokenSymbol}</span>
         </div>
       </div>
       <div className="approvalRow">
@@ -116,7 +119,7 @@ export const TokenApprovalView = ({ tokenSymbol }: ITokenApprovalView) => {
               })
             }}
           />
-          <span>{tokenSymbol}</span>
+          <span className="symbolLabel">{tokenSymbol}</span>
         </div>
       </div>
       <div className="approvalLine"></div>

@@ -1,5 +1,5 @@
 import { TransactionResponse } from '@ethersproject/providers'
-import { CurrencyAmount, ETHER, TokenAmount, Trade } from '@teleswap/sdk'
+import { CurrencyAmount, ETHER, Trade } from '@teleswap/sdk'
 import BigNumber from 'bignumber.js'
 import { useCallback, useMemo } from 'react'
 
@@ -24,7 +24,9 @@ export function useApproveCallback(
   spender?: string
 ): [ApprovalState, () => Promise<void>] {
   const { account } = useActiveWeb3React()
-  const token = amountToApprove instanceof TokenAmount ? amountToApprove.token : undefined
+  // const token = amountToApprove instanceof TokenAmount ? amountToApprove.token : undefined
+  // @ts-ignore
+  const token = amountToApprove?.token || undefined
   const currentAllowance = useTokenAllowance(token, account ?? undefined, spender)
   const pendingApproval = useHasPendingApproval(token?.address, spender)
 

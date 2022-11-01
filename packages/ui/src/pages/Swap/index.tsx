@@ -520,7 +520,9 @@ export default function Swap({ history }: RouteComponentProps) {
               <UnsupportedCurrencyFooter show={swapIsUnsupported} currencies={[currencies.INPUT, currencies.OUTPUT]} />
             )}
             {/* showApproveFlow */}
-            {showApproveFlow && <TokenApprovalView></TokenApprovalView>}
+            {showApproveFlow && (
+              <TokenApprovalView tokenSymbol={currencies[Field.INPUT]?.symbol || ''}></TokenApprovalView>
+            )}
             {!isMobile && !loading && (
               <BottomGrouping>
                 {swapIsUnsupported ? (
@@ -561,7 +563,7 @@ export default function Swap({ history }: RouteComponentProps) {
                     <ButtonConfirmed
                       className="secondary-title"
                       onClick={approveCallback}
-                      disabled={approval !== ApprovalState.NOT_APPROVED || approvalSubmitted}
+                      disabled={approval !== ApprovalState.NOT_APPROVED}
                       width="48%"
                       altDisabledStyle={approval === ApprovalState.PENDING} // show solid button while waiting
                       confirmed={approval === ApprovalState.APPROVED}
@@ -686,7 +688,7 @@ export default function Swap({ history }: RouteComponentProps) {
                 <ButtonConfirmed
                   className="secondary-title"
                   onClick={approveCallback}
-                  disabled={approval !== ApprovalState.NOT_APPROVED || approvalSubmitted}
+                  disabled={approval !== ApprovalState.NOT_APPROVED}
                   width="48%"
                   altDisabledStyle={approval === ApprovalState.PENDING} // show solid button while waiting
                   confirmed={approval === ApprovalState.APPROVED}
