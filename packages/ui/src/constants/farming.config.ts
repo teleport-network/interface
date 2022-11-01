@@ -43,7 +43,13 @@ interface FarmConfig {
    */
   pools: (FarmingPool | undefined)[]
 }
-
+/**
+ * @deprecated
+ * we will go with Curve's Gauge farming, so no more masterchef
+ * please checkout `gauges.config.ts` for farming config
+ * THIS FILE SHOULD BE REMOVED AFTER
+ * FRONTEND have IMPLEMENTED ALL GAUGE's FEATURES
+ */
 export const CHAINID_TO_FARMING_CONFIG: { [chainId in ChainId]?: FarmConfig } = {
   [ChainId.OP_GOERLI]: {
     chefType: Chef.MINICHEF,

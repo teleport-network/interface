@@ -1,6 +1,7 @@
 require('dotenv').config()
 require("@nomicfoundation/hardhat-toolbox");
 require('@openzeppelin/hardhat-upgrades')
+require("@nomiclabs/hardhat-vyper");
 require('hardhat-abi-exporter');
 require('./tasks/DeployForTest')
 require('./tasks/call')
@@ -85,6 +86,9 @@ module.exports = {
         }
     },
     defaultNetwork: "hardhat",
+    vyper: {
+      compilers: [{ version: "0.2.8" }],
+    },
     networks: {
         opg: { // Optimism Goerli
             url: "https://goerli.optimism.io/",

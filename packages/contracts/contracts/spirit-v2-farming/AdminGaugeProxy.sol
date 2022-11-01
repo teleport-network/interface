@@ -2,6 +2,7 @@
 pragma solidity ^0.8.11;
 
 import "./utils.sol";
+import "../interfaces/ITeleswapV2Pair.sol";
 
 contract AdminGauge is ReentrancyGuard {
     using SafeERC20 for IERC20;
@@ -46,28 +47,28 @@ contract AdminGauge is ReentrancyGuard {
         DISTRIBUTION = msg.sender;
     }
 
-    function claimVotingFees() external nonReentrant returns (uint claimed0, uint claimed1) {
-        // require address(TOKEN) is BaseV1Pair
-        return _claimVotingFees();
-    }
+    // function claimVotingFees() external nonReentrant returns (uint claimed0, uint claimed1) {
+    //     // require address(TOKEN) is BaseV1Pair
+    //     return _claimVotingFees();
+    // }
 
-    function _claimVotingFees() internal returns (uint claimed0, uint claimed1) {
-        (claimed0, claimed1) = IBaseV1Pair(address(TOKEN)).claimFees();
-        if (claimed0 > 0 || claimed1 > 0) {
-            (address _token0, address _token1) = IBaseV1Pair(address(TOKEN)).tokens();
-            address spiritMaker = IBaseV1Pair(address(TOKEN)).spiritMaker();
-            address protocolAddress = IBaseV1Pair(address(TOKEN)).protocol();
-            if (claimed0 > 0) {
-                IERC20(_token0).safeTransfer(spiritMaker, claimed0 / 2);
-                IERC20(_token0).safeTransfer(protocolAddress, claimed0 / 2);
-            }
-            if (claimed1 > 0) {
-                IERC20(_token1).safeTransfer(spiritMaker, claimed1 / 2);
-                IERC20(_token1).safeTransfer(protocolAddress, claimed1 / 2);
-            }
-            emit ClaimVotingFees(msg.sender, claimed0, claimed1);
-        }
-    }
+    // function _claimVotingFees() internal returns (uint claimed0, uint claimed1) {
+    //     (claimed0, claimed1) = ITeleswapV2Pair(address(TOKEN)).claimFees();
+    //     if (claimed0 > 0 || claimed1 > 0) {
+    //         (address _token0, address _token1) = ITeleswapV2Pair(address(TOKEN)).tokens();
+    //         address spiritMaker = ITeleswapV2Pair(address(TOKEN)).spiritMaker();
+    //         address protocolAddress = ITeleswapV2Pair(address(TOKEN)).protocol();
+    //         if (claimed0 > 0) {
+    //             IERC20(_token0).safeTransfer(spiritMaker, claimed0 / 2);
+    //             IERC20(_token0).safeTransfer(protocolAddress, claimed0 / 2);
+    //         }
+    //         if (claimed1 > 0) {
+    //             IERC20(_token1).safeTransfer(spiritMaker, claimed1 / 2);
+    //             IERC20(_token1).safeTransfer(protocolAddress, claimed1 / 2);
+    //         }
+    //         emit ClaimVotingFees(msg.sender, claimed0, claimed1);
+    //     }
+    // }
 
     function totalSupply() external view returns (uint256) {
         return _totalSupply;
@@ -244,12 +245,9 @@ contract AdminGauge is ReentrancyGuard {
 contract AdminGaugeProxy is ProtocolGovernance {
     using SafeERC20 for IERC20;
 
-    MasterChef public MASTER;
     IERC20 public governanceToken;
     IERC20 public rewardToken;
-    IERC20 public immutable TOKEN; // mInSpirit
 
-    uint256 public pid = type(uint256).max; // -1 means 0xFFF....F and hasn't been set yet
     uint256 public depositFeeRate = 0; // EX: 3000 = 30% : MAXIMUM-2000
 
     // VE bool
@@ -264,17 +262,14 @@ contract AdminGaugeProxy is ProtocolGovernance {
     mapping(address => uint256) public gaugeWeights; // token => weight
 
     constructor(
-        address _masterChef,
         address _spirit,
         address _inSpirit,
         address _treasury,
         address _feeDist,
         uint256 _depositFeeRate
     ) public {
-        MASTER = MasterChef(_masterChef);
         rewardToken = IERC20(_spirit);
         governanceToken = IERC20(_inSpirit);
-        TOKEN = IERC20(address(new MasterDill()));
         governance = msg.sender;
         admin = msg.sender;
         treasury = _treasury;
@@ -322,37 +317,12 @@ contract AdminGaugeProxy is ProtocolGovernance {
         gaugeWeights[_token] = _weight;
     }
 
-    // Sets MasterChef PID
-    function setPID(uint256 _pid) external {
-        require(msg.sender == governance, "!gov");
-        pid = _pid;
-    }
-
-    // Deposits minSPIRIT into MasterChef
-    function deposit() public {
-        require(pid != type(uint256).max, "pid not initialized");
-        IERC20 _token = TOKEN;
-        uint256 _balance = _token.balanceOf(address(this));
-        _token.safeApprove(address(MASTER), 0);
-        _token.safeApprove(address(MASTER), _balance);
-
-        MASTER.deposit(pid, _balance);
-    }
-
-    // Fetches Spirit
-    function collect() public {
-        (uint256 _locked, ) = MASTER.userInfo(pid, address(this));
-        MASTER.withdraw(pid, _locked);
-        deposit();
-    }
-
     function length() external view returns (uint256) {
         return _tokens.length;
     }
 
     // In this GaugeProxy the distribution will be equal amongst active gauges, irrespective of votes
     function distribute() external {
-        collect();
         uint256 _balance = rewardToken.balanceOf(address(this));
         uint256 _inSpiritRewards = 0;
         if (ve) {

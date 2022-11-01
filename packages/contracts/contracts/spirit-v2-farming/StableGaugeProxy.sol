@@ -2,6 +2,8 @@
 pragma solidity ^0.8.11;
 
 import "./utils.sol";
+import "../interfaces/ITeleswapV2Pair.sol";
+import "../interfaces/ITeleswapV2Factory.sol";
 
 contract StableGauge is ReentrancyGuard {
     using SafeERC20 for IERC20;
@@ -53,36 +55,36 @@ contract StableGauge is ReentrancyGuard {
         DISTRIBUTION = msg.sender;
     }
 
-    function claimVotingFees() external nonReentrant returns (uint claimed0, uint claimed1) {
-        // require address(TOKEN) is BaseV1Pair
-        return _claimVotingFees();
-    }
+    // function claimVotingFees() external nonReentrant returns (uint claimed0, uint claimed1) {
+    //     // require address(TOKEN) is BaseV1Pair
+    //     return _claimVotingFees();
+    // }
 
-    function _claimVotingFees() internal returns (uint claimed0, uint claimed1) {
-        (claimed0, claimed1) = IBaseV1Pair(address(TOKEN)).claimFees();
-        address bribe = IGaugeProxy(gaugeProxy).bribes(address(this));
-        if (claimed0 > 0 || claimed1 > 0) {
-            uint _fees0 = fees0 + claimed0;
-            uint _fees1 = fees1 + claimed1;
-            (address _token0, address _token1) = IBaseV1Pair(address(TOKEN)).tokens();
-            if (_fees0 > IBribe(bribe).left(_token0) && _fees0 / DURATION > 0) {
-                fees0 = 0;
-                IERC20(_token0).safeApprove(bribe, _fees0);
-                IBribe(bribe).notifyRewardAmount(_token0, _fees0);
-            } else {
-                fees0 = _fees0;
-            }
-            if (_fees1 > IBribe(bribe).left(_token1) && _fees1 / DURATION > 0) {
-                fees1 = 0;
-                IERC20(_token1).safeApprove(bribe, _fees1);
-                IBribe(bribe).notifyRewardAmount(_token1, _fees1);
-            } else {
-                fees1 = _fees1;
-            }
+    // function _claimVotingFees() internal returns (uint claimed0, uint claimed1) {
+    //     (claimed0, claimed1) = ITeleswapV2Pair(address(TOKEN)).claimFees();
+    //     address bribe = IGaugeProxy(gaugeProxy).bribes(address(this));
+    //     if (claimed0 > 0 || claimed1 > 0) {
+    //         uint _fees0 = fees0 + claimed0;
+    //         uint _fees1 = fees1 + claimed1;
+    //         (address _token0, address _token1) = ITeleswapV2Pair(address(TOKEN)).tokens();
+    //         if (_fees0 > IBribe(bribe).left(_token0) && _fees0 / DURATION > 0) {
+    //             fees0 = 0;
+    //             IERC20(_token0).safeApprove(bribe, _fees0);
+    //             IBribe(bribe).notifyRewardAmount(_token0, _fees0);
+    //         } else {
+    //             fees0 = _fees0;
+    //         }
+    //         if (_fees1 > IBribe(bribe).left(_token1) && _fees1 / DURATION > 0) {
+    //             fees1 = 0;
+    //             IERC20(_token1).safeApprove(bribe, _fees1);
+    //             IBribe(bribe).notifyRewardAmount(_token1, _fees1);
+    //         } else {
+    //             fees1 = _fees1;
+    //         }
 
-            emit ClaimVotingFees(msg.sender, claimed0, claimed1);
-        }
-    }
+    //         emit ClaimVotingFees(msg.sender, claimed0, claimed1);
+    //     }
+    // }
 
     function totalSupply() external view returns (uint256) {
         return _totalSupply;
@@ -248,10 +250,8 @@ contract StableGauge is ReentrancyGuard {
 contract StableGaugeProxy is ProtocolGovernance, ReentrancyGuard {
     using SafeERC20 for IERC20;
 
-    MasterChef public MASTER;
     IERC20 public governanceToken;
     IERC20 public rewardToken;
-    IERC20 public immutable TOKEN; // mInSpirit
 
     address public admin; //Admin address to manage gauges like add/deprecate/resurrect
     uint256 public minFee = 100 ether;
@@ -260,7 +260,6 @@ contract StableGaugeProxy is ProtocolGovernance, ReentrancyGuard {
     address public bribeFactory;
     uint256 public immutable MIN_INSPIRIT_FOR_VERIFY = 1e23; // 100k inSPIRIT
 
-    uint256 public pid = type(uint256).max; // -1 means 0xFFF....F and hasn't been set yet
     uint256 public totalWeight;
 
     // Time delays
@@ -313,17 +312,14 @@ contract StableGaugeProxy is ProtocolGovernance, ReentrancyGuard {
     }
 
     constructor(
-        address _masterChef,
         address _spirit,
         address _inSpirit,
         address _feeDist,
         address _bribeFactory, 
         address _pairFactory
     ) public {
-        MASTER = MasterChef(_masterChef);
         rewardToken = IERC20(_spirit);
         governanceToken = IERC20(_inSpirit);
-        TOKEN = IERC20(address(new MasterDill()));
         governance = msg.sender;
         admin = msg.sender;
         feeDistAddr = _feeDist;
@@ -491,9 +487,14 @@ contract StableGaugeProxy is ProtocolGovernance, ReentrancyGuard {
         returns (address)
     {
         require(gauges[_tokenLP] == address(0x0), "exists");
-        require(IBaseV1Factory(pairFactory).isPair(_tokenLP), "!_tokenLP");
-        require(IBaseV1Pair(_tokenLP).stable());
-        (address _token0, address _token1) = IBaseV1Pair(_tokenLP).tokens();
+        require(ITeleswapV2Pair(_tokenLP).stable());
+        address _token0 = ITeleswapV2Pair(_tokenLP).token0();
+        address _token1 = ITeleswapV2Pair(_tokenLP).token1();
+        /**
+         * query our pair factory to see if it's our pair or not
+         */
+        address pairAddress = ITeleswapV2Factory(pairFactory).getPair(_token0, _token1, true);
+        require(pairAddress == _tokenLP,  "!_tokenLP: not from out factory");
         require(baseTokens[_token0] && verifiedTokens[_token1] || 
                 baseTokens[_token1] && verifiedTokens[_token0], "!verified");
         require(governanceToken.balanceOf(msg.sender) > governanceToken.totalSupply() / 100 ||
@@ -540,30 +541,6 @@ contract StableGaugeProxy is ProtocolGovernance, ReentrancyGuard {
         emit GaugeResurrected(_token);
     }
 
-    // Sets MasterChef PID
-    function setPID(uint256 _pid) external {
-        require(msg.sender == governance, "!gov");
-        pid = _pid;
-    }
-
-    // Deposits minSPIRIT into MasterChef
-    function deposit() public {
-        require(pid != type(uint256).max, "pid not initialized");
-        IERC20 _token = TOKEN;
-        uint256 _balance = _token.balanceOf(address(this));
-        _token.safeApprove(address(MASTER), 0);
-        _token.safeApprove(address(MASTER), _balance);
-        MASTER.deposit(pid, _balance);
-    }
-
-    // Fetches Spirit
-    // Change from public to internal, ONLY preDistribute should be able to call
-    function collect() internal {
-        (uint256 _locked, ) = MASTER.userInfo(pid, address(this));
-        MASTER.withdraw(pid, _locked);
-        deposit();
-    }
-
     function length() external view returns (uint256) {
         return _tokens.length;
     }
@@ -574,7 +551,6 @@ contract StableGaugeProxy is ProtocolGovernance, ReentrancyGuard {
             lockedWeights[_tokens[i]] = weights[_tokens[i]];
             hasDistributed[_tokens[i]] = false;
         }
-        collect();
         lastDistribute = block.timestamp;
         uint256 _balance = rewardToken.balanceOf(address(this));
         lockedBalance = _balance;
