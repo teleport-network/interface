@@ -274,7 +274,7 @@ export const WETH_OPTIMISTIC_GOERLI = new Token(
 );
 export const DAI_OPTIMISTIC_GOERLI = new Token(
   ChainId.OPTIMISTIC_GOERLI,
-  '0x38fa58a6a83d97389be88752daa408e2fea40c8b',
+  '0xb9297783D0D568dc378e23D5BA9C32031a4A5132',
   18,
   'DAI',
   'Dai Stablecoin'
