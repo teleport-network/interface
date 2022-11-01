@@ -1,7 +1,7 @@
-import { ChainId, Token } from '@teleswap/sdk'
+import { ChainId, Token, WETH } from '@teleswap/sdk'
+import { USDC, USDT } from 'constants/index'
 
 import { GaugeType } from './farm/gauge.enum'
-// import { UNI, USDC, USDT } from 'constants/index'
 
 export interface LiquidityAsset {
   isLpToken: true
@@ -32,6 +32,32 @@ export type Gauges = {
   stakingAsset: StakingAsset
 }
 
+const GAUGES_FOR_OP_GOERLI: Gauges[] = [
+  {
+    type: GaugeType.VARIABLE,
+    stakingAsset: {
+      isLpToken: true,
+      name: 'WETH/USDC',
+      decimal: 18,
+      symbol: 'VLP',
+
+      tokenA: WETH[ChainId.OP_GOERLI],
+      tokenB: USDC
+    }
+  },
+  {
+    type: GaugeType.STABLE,
+    stakingAsset: {
+      isLpToken: true,
+      name: 'USDT/USDC',
+      decimal: 18,
+      symbol: 'SLP',
+      tokenA: USDT,
+      tokenB: USDC
+    }
+  }
+]
+
 export const CHAINID_TO_GAUGES: { [chainId in ChainId]?: Gauges[] } = {
-  [ChainId.OP_GOERLI]: []
+  [ChainId.OP_GOERLI]: GAUGES_FOR_OP_GOERLI
 }
