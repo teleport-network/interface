@@ -85,7 +85,7 @@ export function useApproveCallback(
     return (
       tokenContract
         // .approve(spender, useExact ? amountToApprove.raw.toString() : MaxUint256, {
-        .approve(spender, useExact ? approveAmount : approveAmount, {
+        .approve(spender, useExact ? amountToApprove.raw.toString() : approveAmount, {
           gasLimit: calculateGasMargin(estimatedGas)
         })
         .then((response: TransactionResponse) => {

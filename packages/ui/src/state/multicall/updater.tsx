@@ -31,7 +31,7 @@ async function fetchChunk(
   chunk: Call[],
   minBlockNumber: number
 ): Promise<{ results: string[]; blockNumber: number }> {
-  console.debug('Fetching chunk', multicallContract, chunk, minBlockNumber)
+  console.debug('Fetching chunk', multicallContract.address, chunk, minBlockNumber)
   let resultsBlockNumber, returnData
   try {
     ;[resultsBlockNumber, returnData] = await multicallContract.aggregate(
@@ -45,6 +45,7 @@ async function fetchChunk(
     console.debug(`Fetched results for old block number: ${resultsBlockNumber.toString()} vs. ${minBlockNumber}`)
     throw new RetryableError('Fetched for old block number')
   }
+  console.log('returnData', returnData)
   return { results: returnData, blockNumber: resultsBlockNumber.toNumber() }
 }
 

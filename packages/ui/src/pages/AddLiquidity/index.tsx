@@ -853,7 +853,15 @@ export default function AddLiquidity() {
                       approvalB === ApprovalState.PENDING) &&
                       isValid && (
                         <>
-                          {true && <TokenApprovalView></TokenApprovalView>}
+                          {true && (
+                            <TokenApprovalView
+                              tokenSymbol={
+                                approvalA !== ApprovalState.APPROVED
+                                  ? currencies[Field.CURRENCY_A]?.symbol
+                                  : currencies[Field.CURRENCY_B]?.symbol
+                              }
+                            ></TokenApprovalView>
+                          )}
                           <RowBetween>
                             {approvalA !== ApprovalState.APPROVED && (
                               <ButtonPrimary

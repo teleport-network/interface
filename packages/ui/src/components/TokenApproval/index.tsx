@@ -1,3 +1,4 @@
+import { MaxUint256 } from '@ethersproject/constants'
 import BigNumber from 'bignumber.js'
 import { useEffect, useState } from 'react'
 import styled from 'styled-components'
@@ -37,7 +38,7 @@ const ApprovalView = styled.div`
       height: 1.8rem;
       border: 1px solid rgba(255, 255, 255, 0.4);
       border-radius: 8px;
-      width: 9rem;
+      width: 6.5rem;
       background: transparent;
       outline: none;
       color: #d7dce0;
@@ -48,14 +49,20 @@ const ApprovalView = styled.div`
   }
 `
 
-export const TokenApprovalView = () => {
+interface ITokenApprovalView {
+  tokenSymbol?: string
+}
+
+export const TokenApprovalView = ({ tokenSymbol }: ITokenApprovalView) => {
   const [approveParams, setApproveParams] = useState({
     custom: false,
-    approveValue: '1000',
-    tempValue: '1000'
+    customValue: '0',
+    suggestValue: MaxUint256?.toString(),
+    tempValue: '0'
   })
   useEffect(() => {
-    const value = new BigNumber(approveParams.approveValue).toString(16)
+    const approveValue = approveParams.custom ? approveParams.customValue : approveParams.suggestValue
+    const value = new BigNumber(approveValue).toString(16)
     localStorage.setItem('redux_localstorage_simple_approve', value)
   }, [approveParams])
   return (
@@ -69,7 +76,7 @@ export const TokenApprovalView = () => {
             setApproveParams({
               ...approveParams,
               custom: false,
-              approveValue: '1000'
+              suggestValue: MaxUint256?.toString() || '1000'
             })
           }}
         >
@@ -77,8 +84,8 @@ export const TokenApprovalView = () => {
           <span>Suggest approval limit</span>
         </div>
         <div>
-          <span>1000 </span>
-          {/* <span>USDT</span> */}
+          <span>+∞</span>
+          <span>{tokenSymbol}</span>
         </div>
       </div>
       <div className="approvalRow">
@@ -88,7 +95,7 @@ export const TokenApprovalView = () => {
             setApproveParams({
               ...approveParams,
               custom: true,
-              approveValue: approveParams.tempValue
+              customValue: approveParams.tempValue
             })
           }}
         >
@@ -99,17 +106,17 @@ export const TokenApprovalView = () => {
           <input
             className="customIpt"
             type="text"
-            value={approveParams?.approveValue || ''}
+            value={approveParams?.customValue || ''}
             onChange={(evt) => {
               const pureNum = evt.target.value.replace(/[^1-9]{0,1}(\d*(?:\.\d{0,30})?).*$/g, '$1') || ''
               setApproveParams({
                 ...approveParams,
-                approveValue: pureNum,
+                customValue: pureNum,
                 tempValue: pureNum
               })
             }}
           />
-          {/* <span>USDT</span> */}
+          <span>{tokenSymbol}</span>
         </div>
       </div>
       <div className="approvalLine"></div>

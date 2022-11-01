@@ -116,13 +116,13 @@ export default function Swap({ history }: RouteComponentProps) {
     v2Trade['slippageAdjustedAmounts'] = {}
     if (routeData.reqParams && routeData.reqParams.type === ReqTradeType.exactIn) {
       v2Trade['tradeType'] = 0
-      v2Trade['slippageAdjustedAmounts'][Field.INPUT] = routeData?.maxOut || null
     } else if (routeData.reqParams && routeData.reqParams.type === ReqTradeType.exactOut) {
       v2Trade['tradeType'] = 1
-      v2Trade['slippageAdjustedAmounts'][Field.OUTPUT] = routeData?.maxIn || null
     } else {
       console.error('tradeType null:', routeData.reqParams)
     }
+    v2Trade['slippageAdjustedAmounts'][Field.INPUT] = routeData?.maxIn || null
+    v2Trade['slippageAdjustedAmounts'][Field.OUTPUT] = routeData?.minOut || null
 
     delete v2Trade['route']
     delete v2Trade['executionPrice']
