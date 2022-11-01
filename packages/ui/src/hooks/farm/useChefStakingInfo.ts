@@ -1,6 +1,6 @@
 import { CurrencyAmount, Pair, Token, TokenAmount } from '@teleswap/sdk'
-import { Chef } from 'constants/farm/chef.enum'
-import { CHAINID_TO_GAUGES, Gauge } from 'constants/gauges.config'
+import { GaugeType } from 'constants/farm/gauge.enum'
+import { CHAINID_TO_GAUGES, Gauge, LiquidityAsset } from 'constants/gauges.config'
 import { UNI } from 'constants/index'
 import { PairState, usePairs } from 'data/Reserves'
 import { BigNumber } from 'ethers'
@@ -10,7 +10,6 @@ import { useTokenBalances } from 'state/wallet/hooks'
 
 import { useChefContractForCurrentChain } from './useChefContract'
 import { ChefPosition, useChefPositions } from './useChefPositions'
-import { MasterChefRawPoolInfo, useMasterChefPoolInfo } from './useMasterChefPoolInfo'
 
 interface AdditionalStakingInfo {
   /**
@@ -38,9 +37,9 @@ interface AdditionalStakingInfo {
    */
   id: number
 }
-export type ChefStakingInfo = MasterChefRawPoolInfo & Gauge & AdditionalStakingInfo
+export type ChefStakingInfo = Gauge & AdditionalStakingInfo
 
-export function useChefStakingInfo(): (ChefStakingInfo | undefined)[] {
+export function useChefStakingInfo(): ChefStakingInfo[] {
   const { chainId } = useActiveWeb3React()
   const mchefContract = useChefContractForCurrentChain()
   const farmingConfig = CHAINID_TO_GAUGES[chainId || 420]
@@ -48,46 +47,35 @@ export function useChefStakingInfo(): (ChefStakingInfo | undefined)[] {
   const rewardToken = UNI[chainId || 420]
 
   const positions = useChefPositions(mchefContract, undefined, chainId)
-  const poolPresets = useMemo(() => farmingConfig?.pools || [], [farmingConfig])
-  const poolInfos = useMasterChefPoolInfo(farmingConfig?.chefType || Chef.MINICHEF)
 
   const stakingTokens = useMemo(() => {
-    return poolInfos.map((poolInfo, idx) => {
-      const poolPreset: FarmingPool | undefined = poolPresets[idx]
-      if (!poolPreset) {
-        return undefined
-      }
+    return (farmingConfig || []).map((gaugeInfo) => {
+      const { stakingAsset, type } = gaugeInfo
+      const getPairAddress = (lpAsset: LiquidityAsset) =>
+        Pair.getAddress(lpAsset.tokenA, lpAsset.tokenB, type === GaugeType.STABLE)
       return new Token(
         chainId || 420,
-        poolInfo.lpToken,
-        poolPreset.stakingAsset.decimal || 18,
-        !poolPreset.stakingAsset.isLpToken ? poolPreset?.stakingAsset.symbol : `${poolPreset.stakingAsset.name} LP`,
-        poolPreset.stakingAsset.name
+        !stakingAsset.isLpToken ? stakingAsset.address : getPairAddress(stakingAsset),
+        gaugeInfo.stakingAsset.decimal || 18,
+        !gaugeInfo.stakingAsset.isLpToken ? gaugeInfo?.stakingAsset.symbol : `${gaugeInfo.stakingAsset.name} LP`,
+        gaugeInfo.stakingAsset.name
       )
     })
-  }, [chainId, poolInfos, poolPresets])
+  }, [farmingConfig, chainId])
 
-  const stakingPairAsset: [Token | undefined, Token | undefined, boolean | undefined][] = poolPresets.map((preset) => {
-    if (!preset) {
-      return [undefined, undefined, undefined]
+  const stakingPairAsset: [Token | undefined, Token | undefined, boolean | undefined][] = (farmingConfig || []).map(
+    ({ stakingAsset, type }) => {
+      if (!stakingAsset.isLpToken) {
+        return [undefined, undefined, undefined]
+      } else {
+        return [stakingAsset.tokenA, stakingAsset.tokenB, type === GaugeType.STABLE] as [Token, Token, boolean]
+      }
     }
-    const { stakingAsset, isHidden } = preset
-    if (!stakingAsset.isLpToken || isHidden) {
-      return [undefined, undefined, undefined]
-    } else {
-      return [stakingAsset.tokenA, stakingAsset.tokenB, stakingAsset.isStable] as [Token, Token, boolean]
-    }
-  })
+  )
   const pairs = usePairs(stakingPairAsset)
   const tvls = useTokenBalances(mchefContract?.address, stakingTokens)
 
-  return poolInfos.map((info, idx) => {
-    const poolPreset: FarmingPool | undefined = poolPresets[idx]
-    if (!poolPreset) {
-      return undefined
-    }
-
-    const pool = poolPreset
+  return (farmingConfig || []).map((info, idx) => {
     const stakingToken = stakingTokens[idx] as Token
     const tvl = stakingToken ? tvls[stakingToken.address] : undefined
     const position = positions[idx]
@@ -96,10 +84,9 @@ export function useChefStakingInfo(): (ChefStakingInfo | undefined)[] {
       stakedAmount: parsedStakedTokenAmount(position, stakingToken)
     }
     return {
+      // @todo: id should be a string that represent the gauge contract address
       id: idx,
       ...info,
-      isHidden: pool?.isHidden,
-      stakingAsset: pool.stakingAsset,
       stakingToken,
       tvl,
       stakingPair: pairs[idx],
