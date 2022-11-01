@@ -2,13 +2,13 @@ import { TransactionResponse } from '@ethersproject/providers'
 import { JSBI, TokenAmount } from '@teleswap/sdk'
 import { LoadingView, SubmittedView } from 'components/ModalViews'
 import { Chef } from 'constants/farm/chef.enum'
-import { CHAINID_TO_FARMING_CONFIG } from 'constants/farming.config'
+import { CHAINID_TO_GAUGES } from 'constants/gauges.config'
 import { UNI } from 'constants/index'
 import { BigNumber, utils } from 'ethers'
 import { useChefContractForCurrentChain } from 'hooks/farm/useChefContract'
 import { useChefPositions } from 'hooks/farm/useChefPositions'
 import { ChefStakingInfo } from 'hooks/farm/useChefStakingInfo'
-import useMasterChef from 'hooks/farm/useMasterChef'
+import useGauge from 'hooks/farm/useGauge'
 import { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
@@ -74,8 +74,8 @@ export default function UnstakingModal({ isOpen, onDismiss, pid, stakingInfo }: 
   const userStakedAmount = stakingCurrency
     ? new TokenAmount(stakingCurrency, positions[pid].amount.toString())
     : undefined
-  const farmingConfig = CHAINID_TO_FARMING_CONFIG[chainId || 420]
-  const masterChef = useMasterChef(farmingConfig?.chefType || Chef.MINICHEF)
+  const farmingConfig = CHAINID_TO_GAUGES[chainId || 420]
+  const masterChef = useGauge(farmingConfig?.chefType || Chef.MINICHEF)
   // const [parsedAmount, setParsedAmount] = useState('0')
   // const stakingContract = useStakingContract(stakingInfo.stakingRewardAddress)
   async function onWithdraw() {

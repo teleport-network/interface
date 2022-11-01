@@ -2,11 +2,11 @@ import { TransactionResponse } from '@ethersproject/providers'
 import { JSBI, TokenAmount } from '@teleswap/sdk'
 import { LoadingView, SubmittedView } from 'components/ModalViews'
 import { Chef } from 'constants/farm/chef.enum'
-import { CHAINID_TO_FARMING_CONFIG } from 'constants/farming.config'
+import { CHAINID_TO_GAUGES } from 'constants/gauges.config'
 import { utils } from 'ethers'
 import { useChefContractForCurrentChain } from 'hooks/farm/useChefContract'
 import { ChefStakingInfo } from 'hooks/farm/useChefStakingInfo'
-import useMasterChef from 'hooks/farm/useMasterChef'
+import useGauge from 'hooks/farm/useGauge'
 import { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useTokenBalance } from 'state/wallet/hooks'
@@ -69,9 +69,9 @@ export default function StakingModal({ isOpen, onDismiss, pid, stakingInfo }: St
       : undefined
   const stakeTokenBalance = useTokenBalance(account === null ? undefined : account, stakingCurrency)
   const stakingContract = useChefContractForCurrentChain()
-  const farmingConfig = CHAINID_TO_FARMING_CONFIG[chainId || 420]
+  const farmingConfig = CHAINID_TO_GAUGES[chainId || 420]
   const [approval, approve] = useApproveCallback(tokenAmount, stakingContract?.address)
-  const mchef = useMasterChef(farmingConfig?.chefType || Chef.MINICHEF)
+  const mchef = useGauge(farmingConfig?.chefType || Chef.MINICHEF)
   console.debug('approval', approval)
   // const [parsedAmount, setParsedAmount] = useState('0')
   // const stakingContract = useStakingContract(stakingInfo.stakingRewardAddress)

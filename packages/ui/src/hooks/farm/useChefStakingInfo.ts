@@ -1,6 +1,6 @@
 import { CurrencyAmount, Pair, Token, TokenAmount } from '@teleswap/sdk'
 import { Chef } from 'constants/farm/chef.enum'
-import { CHAINID_TO_FARMING_CONFIG, FarmingPool } from 'constants/farming.config'
+import { CHAINID_TO_GAUGES, FarmingPool } from 'constants/gauges.config'
 import { UNI } from 'constants/index'
 import { PairState, usePairs } from 'data/Reserves'
 import { BigNumber } from 'ethers'
@@ -43,7 +43,7 @@ export type ChefStakingInfo = MasterChefRawPoolInfo & FarmingPool & AdditionalSt
 export function useChefStakingInfo(): (ChefStakingInfo | undefined)[] {
   const { chainId } = useActiveWeb3React()
   const mchefContract = useChefContractForCurrentChain()
-  const farmingConfig = CHAINID_TO_FARMING_CONFIG[chainId || 420]
+  const farmingConfig = CHAINID_TO_GAUGES[chainId || 420]
   // @todo: include rewardToken in the farmingConfig
   const rewardToken = UNI[chainId || 420]
 

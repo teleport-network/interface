@@ -1,7 +1,7 @@
 import { TransactionResponse } from '@ethersproject/providers'
 import { Chef } from 'constants/farm/chef.enum'
 import { ChefStakingInfo } from 'hooks/farm/useChefStakingInfo'
-import useMasterChef from 'hooks/farm/useMasterChef'
+import useGauge from 'hooks/farm/useGauge'
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
@@ -55,7 +55,7 @@ export default function ClaimRewardModal({ isOpen, onDismiss, pid, stakingInfo }
   const [hash, setHash] = useState<string | undefined>()
   const [attempting, setAttempting] = useState(false)
 
-  const masterChef = useMasterChef(Chef.MINICHEF)
+  const masterChef = useGauge(Chef.MINICHEF)
 
   const rewardTokenPrice = useUSDCPrice(stakingInfo?.rewardToken)
 

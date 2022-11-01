@@ -1,5 +1,5 @@
 import { Chef } from 'constants/farm/chef.enum'
-import { CHAINID_TO_FARMING_CONFIG } from 'constants/farming.config'
+import { CHAINID_TO_GAUGES } from 'constants/gauges.config'
 import { useActiveWeb3React } from 'hooks'
 import { useMasterChefContract, useMasterChefV2Contract, useMiniChefContract } from 'hooks/useContract'
 import { useMemo } from 'react'
@@ -38,6 +38,6 @@ export function useChefContracts(chefs: Chef[]) {
 
 export function useChefContractForCurrentChain() {
   const { chainId } = useActiveWeb3React()
-  const farmingConfig = CHAINID_TO_FARMING_CONFIG[chainId || 420]
+  const farmingConfig = CHAINID_TO_GAUGES[chainId || 420]
   return useChefContract(farmingConfig?.chefType || Chef.MINICHEF)
 }
