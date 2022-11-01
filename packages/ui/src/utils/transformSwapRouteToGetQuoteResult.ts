@@ -1,5 +1,5 @@
 import { Protocol, ZERO } from '@teleswap/router-sdk'
-import { Fraction, Percent } from '@teleswap/sdk'
+import { Fraction, Percent, Token } from '@teleswap/sdk'
 import { routeAmountsToString, SwapOptions, SwapRoute, V2RouteWithValidQuote } from '@teleswap/smart-order-router'
 import { Currency, CurrencyAmount } from '@uniswap/sdk-core'
 import { Pool } from '@uniswap/v3-sdk'
@@ -181,8 +181,26 @@ export function transformSwapRouteToGetQuoteResult(
         )
       )
     ),
-    maxIn,
-    minOut,
+    maxIn: {
+      token: new Token(
+        maxIn.currency.chainId,
+        maxIn.wrapped.currency.address,
+        maxIn.currency.decimals,
+        maxIn.currency.symbol,
+        maxIn.currency.name
+      ),
+      amount: new Fraction(maxIn.numerator, maxIn.denominator)
+    },
+    minOut: {
+      token: new Token(
+        minOut.currency.chainId,
+        minOut.wrapped.currency.address,
+        minOut.currency.decimals,
+        minOut.currency.symbol,
+        minOut.currency.name
+      ),
+      amount: new Fraction(minOut.numerator, minOut.denominator)
+    },
     percents
   }
 
