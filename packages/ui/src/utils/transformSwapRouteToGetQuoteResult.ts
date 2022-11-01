@@ -1,9 +1,10 @@
 import { Protocol, ZERO } from '@teleswap/router-sdk'
-import { Fraction, Percent, Token } from '@teleswap/sdk'
+import { AliseCurrencyAmount, Fraction, Percent } from '@teleswap/sdk'
 import { routeAmountsToString, SwapOptions, SwapRoute, V2RouteWithValidQuote } from '@teleswap/smart-order-router'
 import { Currency, CurrencyAmount } from '@uniswap/sdk-core'
 import { Pool } from '@uniswap/v3-sdk'
 import JSBI from 'jsbi'
+import { WrappedTokenInfo } from 'state/lists/hooks'
 import { GetQuoteResult, V2PoolInRoute, V3PoolInRoute } from 'state/routing/types'
 
 import { Field } from '../state/swap/actions'
@@ -35,7 +36,6 @@ export function transformSwapRouteToGetQuoteResult(
 
   let maxIn = CurrencyAmount.fromRawAmount(type === 'exactIn' ? amount.currency : quote.currency, ZERO)
   let minOut = CurrencyAmount.fromRawAmount(type === 'exactIn' ? quote.currency : amount.currency, ZERO)
-
   for (const subRoute of route) {
     const { amount, quote, tokenPath, percent } = subRoute
     percents.push(percent)
@@ -53,6 +53,7 @@ export function transformSwapRouteToGetQuoteResult(
         slippageAdjustedAmounts[Field.INPUT].quotient
       )
     )
+
     minOut = minOut.add(
       CurrencyAmount.fromRawAmount(
         type === 'exactIn' ? quote.currency : amount.currency,
@@ -153,7 +154,21 @@ export function transformSwapRouteToGetQuoteResult(
     routeResponse.push(curRoute)
   }
 
-  const result: GetQuoteResult = {
+  if (maxIn) {
+    // @ts-ignore
+    const { chainId, address, decimals, symbol, name } = maxIn.currency
+    // @ts-ignore
+    maxIn = new AliseCurrencyAmount(maxIn.currency, maxIn.quotient)
+    maxIn['token'] = new WrappedTokenInfo({ chainId, address, decimals, symbol: symbol || '', name: name || '' }, [])
+  }
+  if (minOut) {
+    // @ts-ignore
+    minOut = new AliseCurrencyAmount(minOut.currency, minOut.quotient)
+    // @ts-ignore
+    const { chainId, address, decimals, symbol, name } = maxIn.currency
+    minOut['token'] = new WrappedTokenInfo({ chainId, address, decimals, symbol: symbol || '', name: name || '' }, [])
+  }
+  const result: any = {
     methodParameters,
     invalidRoute: false,
     blockNumber: blockNumber.toString(),
@@ -181,26 +196,8 @@ export function transformSwapRouteToGetQuoteResult(
         )
       )
     ),
-    maxIn: {
-      token: new Token(
-        maxIn.currency.chainId,
-        maxIn.wrapped.currency.address,
-        maxIn.currency.decimals,
-        maxIn.currency.symbol,
-        maxIn.currency.name
-      ),
-      amount: new Fraction(maxIn.numerator, maxIn.denominator)
-    },
-    minOut: {
-      token: new Token(
-        minOut.currency.chainId,
-        minOut.wrapped.currency.address,
-        minOut.currency.decimals,
-        minOut.currency.symbol,
-        minOut.currency.name
-      ),
-      amount: new Fraction(minOut.numerator, minOut.denominator)
-    },
+    maxIn,
+    minOut,
     percents
   }
 

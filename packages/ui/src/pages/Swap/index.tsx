@@ -116,13 +116,13 @@ export default function Swap({ history }: RouteComponentProps) {
     v2Trade['slippageAdjustedAmounts'] = {}
     if (routeData.reqParams && routeData.reqParams.type === ReqTradeType.exactIn) {
       v2Trade['tradeType'] = 0
-      v2Trade['slippageAdjustedAmounts'][Field.INPUT] = routeData?.maxOut || null
     } else if (routeData.reqParams && routeData.reqParams.type === ReqTradeType.exactOut) {
       v2Trade['tradeType'] = 1
-      v2Trade['slippageAdjustedAmounts'][Field.OUTPUT] = routeData?.maxIn || null
     } else {
       console.error('tradeType null:', routeData.reqParams)
     }
+    v2Trade['slippageAdjustedAmounts'][Field.INPUT] = routeData?.maxIn || null
+    v2Trade['slippageAdjustedAmounts'][Field.OUTPUT] = routeData?.minOut || null
 
     delete v2Trade['route']
     delete v2Trade['executionPrice']
@@ -520,7 +520,9 @@ export default function Swap({ history }: RouteComponentProps) {
               <UnsupportedCurrencyFooter show={swapIsUnsupported} currencies={[currencies.INPUT, currencies.OUTPUT]} />
             )}
             {/* showApproveFlow */}
-            {showApproveFlow && <TokenApprovalView></TokenApprovalView>}
+            {showApproveFlow && (
+              <TokenApprovalView tokenSymbol={currencies[Field.INPUT]?.symbol || ''}></TokenApprovalView>
+            )}
             {!isMobile && !loading && (
               <BottomGrouping>
                 {swapIsUnsupported ? (
@@ -561,7 +563,7 @@ export default function Swap({ history }: RouteComponentProps) {
                     <ButtonConfirmed
                       className="secondary-title"
                       onClick={approveCallback}
-                      disabled={approval !== ApprovalState.NOT_APPROVED || approvalSubmitted}
+                      disabled={approval !== ApprovalState.NOT_APPROVED}
                       width="48%"
                       altDisabledStyle={approval === ApprovalState.PENDING} // show solid button while waiting
                       confirmed={approval === ApprovalState.APPROVED}
@@ -686,7 +688,7 @@ export default function Swap({ history }: RouteComponentProps) {
                 <ButtonConfirmed
                   className="secondary-title"
                   onClick={approveCallback}
-                  disabled={approval !== ApprovalState.NOT_APPROVED || approvalSubmitted}
+                  disabled={approval !== ApprovalState.NOT_APPROVED}
                   width="48%"
                   altDisabledStyle={approval === ApprovalState.PENDING} // show solid button while waiting
                   confirmed={approval === ApprovalState.APPROVED}

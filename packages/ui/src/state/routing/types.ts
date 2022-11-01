@@ -74,8 +74,8 @@ export interface GetQuoteResult {
   routeString: string
   priceImpactWithoutFee: Percent
   realizedLPFee: Fraction
-  minOut: { token: OriginToken; amount: Fraction }
-  maxIn: { token: OriginToken; amount: Fraction }
+  minOut: any
+  maxIn: any
 }
 
 export class InterfaceTrade<

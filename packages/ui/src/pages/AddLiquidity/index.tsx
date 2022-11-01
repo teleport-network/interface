@@ -853,7 +853,15 @@ export default function AddLiquidity() {
                       approvalB === ApprovalState.PENDING) &&
                       isValid && (
                         <>
-                          {true && <TokenApprovalView></TokenApprovalView>}
+                          {true && (
+                            <TokenApprovalView
+                              tokenSymbol={
+                                approvalA !== ApprovalState.APPROVED
+                                  ? currencies[Field.CURRENCY_A]?.symbol
+                                  : currencies[Field.CURRENCY_B]?.symbol
+                              }
+                            ></TokenApprovalView>
+                          )}
                           <RowBetween>
                             {approvalA !== ApprovalState.APPROVED && (
                               <ButtonPrimary
@@ -869,7 +877,7 @@ export default function AddLiquidity() {
                                 {approvalA === ApprovalState.PENDING ? (
                                   <Dots>Approving {currencies[Field.CURRENCY_A]?.symbol}</Dots>
                                 ) : (
-                                  'Approve ' + currencies[Field.CURRENCY_A]?.symbol
+                                  'Approve' + currencies[Field.CURRENCY_A]?.symbol
                                 )}
                               </ButtonPrimary>
                             )}
@@ -881,13 +889,13 @@ export default function AddLiquidity() {
                                   fontWeight: '400!important'
                                 }}
                                 onClick={approveBCallback}
-                                disabled={approvalB === ApprovalState.PENDING}
+                                disabled={approvalA !== ApprovalState.APPROVED || approvalB === ApprovalState.PENDING}
                                 width={approvalA !== ApprovalState.APPROVED ? '48%' : '100%'}
                               >
                                 {approvalB === ApprovalState.PENDING ? (
                                   <Dots>Approving {currencies[Field.CURRENCY_B]?.symbol}</Dots>
                                 ) : (
-                                  'Approve ' + currencies[Field.CURRENCY_B]?.symbol
+                                  'Approve' + currencies[Field.CURRENCY_B]?.symbol
                                 )}
                               </ButtonPrimary>
                             )}
@@ -1135,7 +1143,7 @@ export default function AddLiquidity() {
                           {approvalA === ApprovalState.PENDING ? (
                             <Dots>Approving {currencies[Field.CURRENCY_A]?.symbol}</Dots>
                           ) : (
-                            'Approve ' + currencies[Field.CURRENCY_A]?.symbol
+                            'Approve' + currencies[Field.CURRENCY_A]?.symbol
                           )}
                         </ButtonPrimary>
                       )}

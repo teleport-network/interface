@@ -106,6 +106,31 @@ function involvesAddress(trade: Trade, checksummedAddress: string): boolean {
   )
 }
 
+interface IRouteData {
+  amount: string
+  amountDecimals: string
+  blockNumber: string
+  gasPriceWei: string
+  gasUseEstimate: string
+  gasUseEstimateQuote: string
+  gasUseEstimateQuoteDecimals: string
+  gasUseEstimateUSD: string
+  quote: string
+  quoteDecimals: string
+  quoteGasAdjusted: string
+  quoteGasAdjustedDecimals: string
+  routeString: string
+  inputAmount: any
+  invalidRoute: boolean
+  maxIn: any
+  minOut: any
+  percents: Array<number>
+  priceImpactWithoutFee: any
+  realizedLPFee: any
+  reqParams: any
+  route: any
+}
+
 // from the current swap inputs, compute the best trade and return it.
 export function useDerivedSwapInfo():
   | any
@@ -115,7 +140,7 @@ export function useDerivedSwapInfo():
       parsedAmount: CurrencyAmount | undefined
       v2Trade: Trade | undefined
       inputError?: string
-      routeData?: any
+      routeData?: IRouteData
     } {
   const { account, chainId } = useActiveWeb3React()
   const [loading, setLoading] = useState(false)
@@ -290,12 +315,12 @@ export function useDerivedSwapInfo():
         console.log('res', response?.data || '')
         setLoading(false)
         if (response.data.hasOwnProperty('invalidRoute') && response.data.invalidRoute === true) {
+          setRouteData({})
           if (document && document.querySelector('body')) {
             alertMsg('No valid route matched')
           } else {
             alert('No valid route matched')
           }
-          setRouteData({})
         } else {
           if (response.data && response.data.hasOwnProperty('quoteDecimals')) {
             const slippageAdjustedAmountsMaxIn = response.data.maxIn
