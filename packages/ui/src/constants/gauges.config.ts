@@ -28,6 +28,8 @@ export interface TokenAsset {
 type StakingAsset = TokenAsset | LiquidityAsset
 
 export type Gauge = {
+  /** mark one gauge inactive to hide by default */
+  inactive?: boolean
   type: GaugeType
   address: string
   stakingAsset: StakingAsset

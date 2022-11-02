@@ -19,7 +19,7 @@ function isNotDisabledPool(a: ChefStakingInfo | undefined): a is ChefStakingInfo
 export function useFilterForStakingInfo({ stakedOnly, hideInactive = true, searchKeyword }: StakingInfoFilter) {
   const stakingInfos = useChefStakingInfo()
   const hideInactiveFilter = (stakingInfo: ChefStakingInfo) => {
-    const shouldHide = hideInactive && stakingInfo.isHidden
+    const shouldHide = hideInactive && stakingInfo.inactive
     return !shouldHide
   }
   const stakedOnlyFilter = (stakingInfo: ChefStakingInfo) => {

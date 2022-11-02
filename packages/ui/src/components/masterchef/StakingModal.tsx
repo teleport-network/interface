@@ -2,7 +2,6 @@ import { TransactionResponse } from '@ethersproject/providers'
 import { JSBI, TokenAmount } from '@teleswap/sdk'
 import { LoadingView, SubmittedView } from 'components/ModalViews'
 import { utils } from 'ethers'
-import { useChefContractForCurrentChain } from 'hooks/farm/useChefContract'
 import { ChefStakingInfo } from 'hooks/farm/useChefStakingInfo'
 import useGauge from 'hooks/farm/useGauge'
 import { useCallback, useState } from 'react'
@@ -65,12 +64,10 @@ export default function StakingModal({ isOpen, onDismiss, stakingInfo }: Staking
       ? new TokenAmount(stakingCurrency, utils.parseUnits(typedValue, stakingCurrency.decimals).toString())
       : undefined
   const stakeTokenBalance = useTokenBalance(account === null ? undefined : account, stakingCurrency)
-  const stakingContract = useChefContractForCurrentChain()
-  const [approval, approve] = useApproveCallback(tokenAmount, stakingContract?.address)
+  const [approval, approve] = useApproveCallback(tokenAmount, stakingInfo.address)
   const mchef = useGauge(stakingInfo.type, stakingInfo.address)
   console.debug('approval', approval)
   // const [parsedAmount, setParsedAmount] = useState('0')
-  // const stakingContract = useStakingContract(stakingInfo.stakingRewardAddress)
   async function onStake() {
     setAttempting(true)
     /**
@@ -84,18 +81,16 @@ export default function StakingModal({ isOpen, onDismiss, stakingInfo }: Staking
       alert('You do not have enough staked token')
       return
     }
-    if (stakingContract) {
-      if (approval === ApprovalState.APPROVED) {
-        mchef.deposit(utils.parseUnits(typedValue, stakingCurrency?.decimals)).then((response: TransactionResponse) => {
-          addTransaction(response, {
-            summary: `Deposit liquidity`
-          })
-          setHash(response.hash)
+    if (approval === ApprovalState.APPROVED) {
+      mchef.deposit(utils.parseUnits(typedValue, stakingCurrency?.decimals)).then((response: TransactionResponse) => {
+        addTransaction(response, {
+          summary: `Deposit liquidity`
         })
-      } else {
-        setAttempting(false)
-        throw new Error('Attempting to stake without approval or a signature. Please contact support.')
-      }
+        setHash(response.hash)
+      })
+    } else {
+      setAttempting(false)
+      throw new Error('Attempting to stake without approval or a signature. Please contact support.')
     }
   }
 
