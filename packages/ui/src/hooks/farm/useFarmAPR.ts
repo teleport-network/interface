@@ -1,10 +1,8 @@
 import { CurrencyAmount, JSBI, Pair, Price, Token, TokenAmount } from '@teleswap/sdk'
-import { BigNumber } from 'ethers'
-import { NEVER_RELOAD, useSingleCallResult } from 'state/multicall/hooks'
 
 import { useUSDEvaluation } from './evaluation/useUSDEvaluation'
-import { useChefContractForCurrentChain } from './useChefContract'
-import { MasterChefRawPoolInfo } from './useMasterChefPoolInfo'
+import { ChefStakingInfo } from './useChefStakingInfo'
+// import { useChefContractForCurrentChain } from './useChefContract'
 
 export function calculateFarmPoolAPR(
   rewardRatePerSecond: JSBI,
@@ -23,14 +21,14 @@ export function calculateFarmPoolAPR(
   return (Number(estimatedYearlyEarningForThisPoolInUSD.raw) / Number(totalStakedAmountInUSD.raw)) * 100
 }
 
-export function useMasterChefMiscData() {
-  const contract = useChefContractForCurrentChain()
-  const totalAllocPoint = useSingleCallResult(contract ? contract : null, 'totalAllocPoint', undefined, NEVER_RELOAD)
-    ?.result?.[0] as BigNumber | undefined
-  const sushiPerSecond = useSingleCallResult(contract ? contract : null, 'sushiPerSecond', undefined, NEVER_RELOAD)
-    ?.result?.[0] as BigNumber | undefined
-  return { totalAllocPoint, sushiPerSecond }
-}
+// export function useMasterChefMiscData() {
+//   const contract = useChefContractForCurrentChain()
+//   const totalAllocPoint = useSingleCallResult(contract ? contract : null, 'totalAllocPoint', undefined, NEVER_RELOAD)
+//     ?.result?.[0] as BigNumber | undefined
+//   const sushiPerSecond = useSingleCallResult(contract ? contract : null, 'sushiPerSecond', undefined, NEVER_RELOAD)
+//     ?.result?.[0] as BigNumber | undefined
+//   return { totalAllocPoint, sushiPerSecond }
+// }
 
 // export function useChefPoolAPRs(
 //   poolInfos: MasterChefRawPoolInfo[],
@@ -55,18 +53,30 @@ export function useMasterChefMiscData() {
 //   return aprs
 // }
 
-export function useChefPoolAPR(
-  poolInfo: MasterChefRawPoolInfo,
-  stakingToken: Token | Pair | null,
+// export function useChefPoolAPR(
+//   poolInfo: MasterChefRawPoolInfo,
+//   stakingToken: Token | Pair | null,
+//   totalTokenLocked: TokenAmount | undefined,
+//   usdPriceOfRewardToken?: Price
+// ) {
+//   const { totalAllocPoint, sushiPerSecond } = useMasterChefMiscData()
+//   const totalStakedAmountInUSD = useUSDEvaluation(stakingToken, totalTokenLocked)
+//   if (!sushiPerSecond || !totalAllocPoint || !usdPriceOfRewardToken) return undefined
+//   const { allocPoint } = poolInfo
+
+//   const rewardRatePerSecond = JSBI.BigInt(sushiPerSecond.mul(allocPoint).div(totalAllocPoint).toString())
+//   if (!totalStakedAmountInUSD) return undefined
+//   return calculateFarmPoolAPR(rewardRatePerSecond, totalStakedAmountInUSD, usdPriceOfRewardToken)
+// }
+
+export function useGaugeAPR(
+  stakingInfo: ChefStakingInfo,
+  stakingTokenOrPair: Token | Pair | null,
   totalTokenLocked: TokenAmount | undefined,
   usdPriceOfRewardToken?: Price
 ) {
-  const { totalAllocPoint, sushiPerSecond } = useMasterChefMiscData()
-  const totalStakedAmountInUSD = useUSDEvaluation(stakingToken, totalTokenLocked)
-  if (!sushiPerSecond || !totalAllocPoint || !usdPriceOfRewardToken) return undefined
-  const { allocPoint } = poolInfo
-
-  const rewardRatePerSecond = JSBI.BigInt(sushiPerSecond.mul(allocPoint).div(totalAllocPoint).toString())
+  const totalStakedAmountInUSD = useUSDEvaluation(stakingTokenOrPair, totalTokenLocked)
+  if (!stakingInfo || !usdPriceOfRewardToken) return undefined
   if (!totalStakedAmountInUSD) return undefined
-  return calculateFarmPoolAPR(rewardRatePerSecond, totalStakedAmountInUSD, usdPriceOfRewardToken)
+  return calculateFarmPoolAPR(stakingInfo.rewardRate.raw, totalStakedAmountInUSD, usdPriceOfRewardToken)
 }

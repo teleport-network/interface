@@ -10,12 +10,12 @@ import DoubleCurrencyLogo from 'components/DoubleLogo'
 import ClaimRewardModal from 'components/masterchef/ClaimRewardModal'
 import StakingModal from 'components/masterchef/StakingModal'
 import UnstakingModal from 'components/masterchef/UnstakingModal'
+import { GaugeType } from 'constants/farm/gauge.enum'
 import { LiquidityAsset } from 'constants/gauges.config'
 import { UNI } from 'constants/index'
 import { useActiveWeb3React } from 'hooks'
-import { useChefContractForCurrentChain } from 'hooks/farm/useChefContract'
 import { ChefStakingInfo } from 'hooks/farm/useChefStakingInfo'
-import { useChefPoolAPR } from 'hooks/farm/useFarmAPR'
+import { useGaugeAPR } from 'hooks/farm/useFarmAPR'
 import { ApprovalState, useApproveCallback } from 'hooks/useApproveCallback'
 import { usePairSidesValueEstimate, usePairUSDValue } from 'hooks/usePairValue'
 import React, { useEffect, useState } from 'react'
@@ -166,7 +166,6 @@ const StakingColumnTitle = ({ children }: { children: React.ReactNode }) => (
 
 export default function PoolCard({ pid, stakingInfo }: { pid: number; stakingInfo: ChefStakingInfo }) {
   const { chainId } = useActiveWeb3React()
-  const mchefContract = useChefContractForCurrentChain()
   const history = useHistory()
 
   const currency0: Token | undefined = (stakingInfo.stakingAsset as LiquidityAsset).tokenA
@@ -201,8 +200,8 @@ export default function PoolCard({ pid, stakingInfo }: { pid: number; stakingInf
   const [isMobileActionExpanded, setMobileActionExpansion] = useState(false)
   const priceOfRewardToken = useUSDCPrice(rewardToken)
   const totalValueLockedInUSD = usePairUSDValue(stakingTokenPair, stakingInfo.tvl)
-  const calculatedApr = useChefPoolAPR(stakingInfo, stakingTokenPair, stakingInfo.stakedAmount, priceOfRewardToken)
-  const [approval, approve] = useApproveCallback(new TokenAmount(stakingInfo.stakingToken, '1'), mchefContract?.address)
+  const calculatedApr = useGaugeAPR(stakingInfo, stakingTokenPair, stakingInfo.stakedAmount, priceOfRewardToken)
+  const [approval, approve] = useApproveCallback(new TokenAmount(stakingInfo.stakingToken, '1'), stakingInfo.address)
   useEffect(() => {
     if (process.env.NODE_ENV !== 'production') {
       console.debug(`approval status for ${stakingInfo.stakingAsset.name} is now: ${approval}`)
@@ -320,7 +319,7 @@ This amount is already included in all APR calculations for the farm`}
         >
           {stakingInfo.stakingAsset.name}
           {stakingInfo.stakingAsset.isLpToken && (
-            <LPTag>{stakingInfo.stakingAsset.isStable ? 'Stable' : 'Volatile'}</LPTag>
+            <LPTag>{stakingInfo.type === GaugeType.STABLE ? 'Stable' : 'Volatile'}</LPTag>
           )}
         </TYPE.white>
         {stakingInfo.stakingAsset.isLpToken && (
@@ -330,7 +329,7 @@ This amount is already included in all APR calculations for the farm`}
             onClick={() =>
               history.push(
                 `/add/${currency0?.address}/${currency1?.address}/${
-                  stakingInfo.stakingAsset.isLpToken && stakingInfo.stakingAsset.isStable
+                  stakingInfo.stakingAsset.isLpToken && stakingInfo.type === GaugeType.STABLE
                 }`
               )
             }
@@ -378,18 +377,15 @@ This amount is already included in all APR calculations for the farm`}
         <StakingModal
           stakingInfo={stakingInfo}
           isOpen={showStakingModal}
-          pid={pid}
           onDismiss={() => setShowStakingModal(false)}
         />
         <UnstakingModal
           stakingInfo={stakingInfo}
           isOpen={showUnstakingModal}
-          pid={pid}
           onDismiss={() => setShowUnstakingModal(false)}
         />
         <ClaimRewardModal
           isOpen={showClaimRewardModal}
-          pid={pid}
           stakingInfo={stakingInfo}
           onDismiss={() => setShowClaimRewardModal(false)}
         />
