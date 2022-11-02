@@ -1,12 +1,8 @@
 import { TransactionResponse } from '@ethersproject/providers'
 import { JSBI, TokenAmount } from '@teleswap/sdk'
 import { LoadingView, SubmittedView } from 'components/ModalViews'
-import { Chef } from 'constants/farm/chef.enum'
-import { CHAINID_TO_GAUGES } from 'constants/gauges.config'
 import { UNI } from 'constants/index'
 import { BigNumber, utils } from 'ethers'
-import { useChefContractForCurrentChain } from 'hooks/farm/useChefContract'
-import { useChefPositions } from 'hooks/farm/useChefPositions'
 import { ChefStakingInfo } from 'hooks/farm/useChefStakingInfo'
 import useGauge from 'hooks/farm/useGauge'
 import { useCallback, useState } from 'react'
@@ -39,16 +35,13 @@ const ContentWrapper = styled(AutoColumn)`
 interface UnstakingModalProps {
   isOpen: boolean
   onDismiss: () => void
-  pid: number
   stakingInfo: ChefStakingInfo
   // userLiquidityUnstaked: TokenAmount | undefined
 }
 
-export default function UnstakingModal({ isOpen, onDismiss, pid, stakingInfo }: UnstakingModalProps) {
+export default function UnstakingModal({ isOpen, onDismiss, stakingInfo }: UnstakingModalProps) {
   const { chainId } = useActiveWeb3React()
   const { t } = useTranslation()
-  const stakingContract = useChefContractForCurrentChain()
-  const positions = useChefPositions(stakingContract, undefined, chainId)
   const rewardToken = UNI[chainId || 420]
   // track and parse user input
   const [typedValue, setTypedValue] = useState('')
@@ -71,11 +64,8 @@ export default function UnstakingModal({ isOpen, onDismiss, pid, stakingInfo }: 
     stakingCurrency && typedValue
       ? new TokenAmount(stakingCurrency, utils.parseUnits(typedValue, stakingCurrency.decimals).toString())
       : undefined
-  const userStakedAmount = stakingCurrency
-    ? new TokenAmount(stakingCurrency, positions[pid].amount.toString())
-    : undefined
-  const farmingConfig = CHAINID_TO_GAUGES[chainId || 420]
-  const masterChef = useGauge(farmingConfig?.chefType || Chef.MINICHEF)
+  const userStakedAmount = stakingInfo.stakedAmount
+  const masterChef = useGauge(stakingInfo.type, stakingInfo.address)
   // const [parsedAmount, setParsedAmount] = useState('0')
   // const stakingContract = useStakingContract(stakingInfo.stakingRewardAddress)
   async function onWithdraw() {
@@ -92,7 +82,7 @@ export default function UnstakingModal({ isOpen, onDismiss, pid, stakingInfo }: 
     }
     setAttempting(true)
     masterChef
-      .withdraw(pid, BigNumber.from(userInputWithdrawAmount?.raw.toString()))
+      .withdraw(BigNumber.from(userInputWithdrawAmount?.raw.toString()))
       .then((response: TransactionResponse) => {
         addTransaction(response, {
           summary: `Withdraw staked token in Farming`

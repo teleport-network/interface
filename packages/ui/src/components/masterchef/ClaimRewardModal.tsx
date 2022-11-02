@@ -1,5 +1,4 @@
 import { TransactionResponse } from '@ethersproject/providers'
-import { Chef } from 'constants/farm/chef.enum'
 import { ChefStakingInfo } from 'hooks/farm/useChefStakingInfo'
 import useGauge from 'hooks/farm/useGauge'
 import { useMemo, useState } from 'react'
@@ -43,11 +42,10 @@ const RewardStats = styled.div`
 interface ClaimRewardModalProps {
   isOpen: boolean
   onDismiss: () => void
-  pid: number
   stakingInfo: ChefStakingInfo
 }
 
-export default function ClaimRewardModal({ isOpen, onDismiss, pid, stakingInfo }: ClaimRewardModalProps) {
+export default function ClaimRewardModal({ isOpen, onDismiss, stakingInfo }: ClaimRewardModalProps) {
   const { account } = useActiveWeb3React()
   const { t } = useTranslation()
   // monitor call to help UI loading state
@@ -55,7 +53,7 @@ export default function ClaimRewardModal({ isOpen, onDismiss, pid, stakingInfo }
   const [hash, setHash] = useState<string | undefined>()
   const [attempting, setAttempting] = useState(false)
 
-  const masterChef = useGauge(Chef.MINICHEF)
+  const gauge = useGauge(stakingInfo.type, stakingInfo.address)
 
   const rewardTokenPrice = useUSDCPrice(stakingInfo?.rewardToken)
 
@@ -69,8 +67,8 @@ export default function ClaimRewardModal({ isOpen, onDismiss, pid, stakingInfo }
 
   async function onHarvestButtonClicked() {
     setAttempting(true)
-    masterChef
-      .harvest(pid)
+    gauge
+      .harvest()
       .then((response: TransactionResponse) => {
         addTransaction(response, {
           summary: `Claim Reward of Staking ${stakingCurrency.name}`

@@ -1,8 +1,6 @@
 import { TransactionResponse } from '@ethersproject/providers'
 import { JSBI, TokenAmount } from '@teleswap/sdk'
 import { LoadingView, SubmittedView } from 'components/ModalViews'
-import { Chef } from 'constants/farm/chef.enum'
-import { CHAINID_TO_GAUGES } from 'constants/gauges.config'
 import { utils } from 'ethers'
 import { useChefContractForCurrentChain } from 'hooks/farm/useChefContract'
 import { ChefStakingInfo } from 'hooks/farm/useChefStakingInfo'
@@ -39,12 +37,11 @@ const ContentWrapper = styled(AutoColumn)`
 interface StakingModalProps {
   isOpen: boolean
   onDismiss: () => void
-  pid: number
   stakingInfo: ChefStakingInfo
   // userLiquidityUnstaked: TokenAmount | undefined
 }
 
-export default function StakingModal({ isOpen, onDismiss, pid, stakingInfo }: StakingModalProps) {
+export default function StakingModal({ isOpen, onDismiss, stakingInfo }: StakingModalProps) {
   const { chainId, account } = useActiveWeb3React()
   const { t } = useTranslation()
   // track and parse user input
@@ -69,9 +66,8 @@ export default function StakingModal({ isOpen, onDismiss, pid, stakingInfo }: St
       : undefined
   const stakeTokenBalance = useTokenBalance(account === null ? undefined : account, stakingCurrency)
   const stakingContract = useChefContractForCurrentChain()
-  const farmingConfig = CHAINID_TO_GAUGES[chainId || 420]
   const [approval, approve] = useApproveCallback(tokenAmount, stakingContract?.address)
-  const mchef = useGauge(farmingConfig?.chefType || Chef.MINICHEF)
+  const mchef = useGauge(stakingInfo.type, stakingInfo.address)
   console.debug('approval', approval)
   // const [parsedAmount, setParsedAmount] = useState('0')
   // const stakingContract = useStakingContract(stakingInfo.stakingRewardAddress)
@@ -90,14 +86,12 @@ export default function StakingModal({ isOpen, onDismiss, pid, stakingInfo }: St
     }
     if (stakingContract) {
       if (approval === ApprovalState.APPROVED) {
-        mchef
-          .deposit(pid, utils.parseUnits(typedValue, stakingCurrency?.decimals))
-          .then((response: TransactionResponse) => {
-            addTransaction(response, {
-              summary: `Deposit liquidity`
-            })
-            setHash(response.hash)
+        mchef.deposit(utils.parseUnits(typedValue, stakingCurrency?.decimals)).then((response: TransactionResponse) => {
+          addTransaction(response, {
+            summary: `Deposit liquidity`
           })
+          setHash(response.hash)
+        })
       } else {
         setAttempting(false)
         throw new Error('Attempting to stake without approval or a signature. Please contact support.')

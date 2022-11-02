@@ -9,7 +9,8 @@ import teleport from 'assets/images/teleport.png'
 import walletConnectIcon from 'assets/images/walletConnectIcon.svg'
 
 import { fortmatic, injected, portis, teleInjected, walletconnect, walletlink } from '../connectors'
-import { FarmingPool, LiquidityAsset } from './farming.config'
+import { GaugeType } from './farm/gauge.enum'
+import { Gauges, LiquidityAsset } from './gauges.config'
 
 export const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
 
@@ -191,46 +192,12 @@ export const BASES_TO_TRACK_LIQUIDITY_FOR: ChainTokenList = {
   [ChainId.MAINNET]: [...WETH_ONLY[ChainId.MAINNET], DAI, USDC, USDT, WBTC]
 }
 
-export const SHARING_PAIRS: FarmingPool[] = [
-  {
-    // pid 8
-    stakingAsset: {
-      name: 'USDC-USDT',
-      decimal: 18,
-      isLpToken: true,
-      isStable: true,
-      tokenA: USDC,
-      tokenB: USDT
-    } as LiquidityAsset
-  },
-  {
-    // pid 9
-    stakingAsset: {
-      name: 'USDC-ETH',
-      decimal: 18,
-      isLpToken: true,
-      isStable: false,
-      tokenA: USDC,
-      tokenB: WETH[420]
-    } as LiquidityAsset
-  },
-  {
-    // pid 10
-    stakingAsset: {
-      name: 'USDC-SUSHI',
-      decimal: 18,
-      isLpToken: true,
-      isStable: false,
-      tokenA: USDC,
-      tokenB: UNI[420]
-    } as LiquidityAsset
-  }
-]
+export const SHARING_PAIRS: Gauges = []
 
 export const PINNED_PAIRS: { readonly [chainId in ChainId]?: [Token, Token, boolean][] } = {
   [ChainId.OP_GOERLI]: SHARING_PAIRS.map((e) => {
     const pair = e.stakingAsset as LiquidityAsset
-    return [pair.tokenA, pair.tokenB, pair.isStable]
+    return [pair.tokenA, pair.tokenB, e.type === GaugeType.STABLE]
   })
 }
 
