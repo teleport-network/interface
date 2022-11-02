@@ -8,14 +8,6 @@ type StakingInfoFilter = {
   searchKeyword?: string
 }
 
-/**
- * @param `a` the object that need to check is ChefStakingInfo or not
- * @returns `a` will be type casted into ChefStakingInfo by ts safely
- */
-function isNotDisabledPool(a: ChefStakingInfo | undefined): a is ChefStakingInfo {
-  return !!a && !!a.id
-}
-
 export function useFilterForStakingInfo({ stakedOnly, hideInactive = true, searchKeyword }: StakingInfoFilter) {
   const stakingInfos = useChefStakingInfo()
   const hideInactiveFilter = (stakingInfo: ChefStakingInfo) => {
@@ -29,9 +21,5 @@ export function useFilterForStakingInfo({ stakedOnly, hideInactive = true, searc
   const nameSearchFilter = (stakingInfo: ChefStakingInfo) => {
     return !searchKeyword || stakingInfo.stakingAsset.name.search(searchKeyword) > -1
   }
-  return stakingInfos
-    .filter(isNotDisabledPool) // type safe filter to make sure all returned item are not undefined
-    .filter(hideInactiveFilter)
-    .filter(stakedOnlyFilter)
-    .filter(nameSearchFilter)
+  return stakingInfos.filter(hideInactiveFilter).filter(stakedOnlyFilter).filter(nameSearchFilter)
 }
