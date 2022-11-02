@@ -1,15 +1,13 @@
-import { CurrencyAmount, Pair, Token, TokenAmount } from '@teleswap/sdk'
+import { Pair, Token, TokenAmount } from '@teleswap/sdk'
 import { GaugeType } from 'constants/farm/gauge.enum'
 import { CHAINID_TO_GAUGES, Gauge, LiquidityAsset } from 'constants/gauges.config'
 import { UNI } from 'constants/index'
 import { PairState, usePairs } from 'data/Reserves'
 import { BigNumber } from 'ethers'
 import { useActiveWeb3React } from 'hooks'
+import { useGaugesData } from 'hooks/gauge-proxy/useGaugeData'
 import { useMemo } from 'react'
-import { useTokenBalances } from 'state/wallet/hooks'
-
-import { useChefContractForCurrentChain } from './useChefContract'
-import { ChefPosition, useChefPositions } from './useChefPositions'
+import { useSingleCallResult } from 'state/multicall/hooks'
 
 interface AdditionalStakingInfo {
   /**
@@ -22,34 +20,39 @@ interface AdditionalStakingInfo {
   stakingPair: [PairState, Pair | null]
   tvl?: TokenAmount
 
-  parsedData?: {
-    stakedAmount: string
-    pendingReward: string
-  }
-
   stakedAmount: TokenAmount
+  /**
+   * it differs from `stakedAmount`
+   * as `derivedStakedAmount` is depends by staked amount *AND* vxTELE that user have
+   * please refer `derivedBalance` func in Gauge contract for the calculation
+   */
+  derivedStakedAmount: TokenAmount
   pendingReward: TokenAmount
-  rewardDebt: CurrencyAmount
   rewardToken: Token
 
   /**
    * add `id` to identify a pool since we have filter now
    */
   id: number
+
+  /**
+   * not important but might be needed props
+   */
+  lastTimeRewardApplicable: ReturnType<typeof useSingleCallResult>
+  rewardPerToken: TokenAmount
 }
 export type ChefStakingInfo = Gauge & AdditionalStakingInfo
 
 export function useChefStakingInfo(): ChefStakingInfo[] {
   const { chainId } = useActiveWeb3React()
-  const mchefContract = useChefContractForCurrentChain()
-  const farmingConfig = CHAINID_TO_GAUGES[chainId || 420]
+  const farmingConfig = useMemo(() => {
+    return CHAINID_TO_GAUGES[chainId || 420] || []
+  }, [chainId])
   // @todo: include rewardToken in the farmingConfig
   const rewardToken = UNI[chainId || 420]
 
-  const positions = useChefPositions(mchefContract, undefined, chainId)
-
   const stakingTokens = useMemo(() => {
-    return (farmingConfig || []).map((gaugeInfo) => {
+    return farmingConfig.map((gaugeInfo) => {
       const { stakingAsset, type } = gaugeInfo
       const getPairAddress = (lpAsset: LiquidityAsset) =>
         Pair.getAddress(lpAsset.tokenA, lpAsset.tokenB, type === GaugeType.STABLE)
@@ -63,7 +66,7 @@ export function useChefStakingInfo(): ChefStakingInfo[] {
     })
   }, [farmingConfig, chainId])
 
-  const stakingPairAsset: [Token | undefined, Token | undefined, boolean | undefined][] = (farmingConfig || []).map(
+  const stakingPairAsset: [Token | undefined, Token | undefined, boolean | undefined][] = farmingConfig.map(
     ({ stakingAsset, type }) => {
       if (!stakingAsset.isLpToken) {
         return [undefined, undefined, undefined]
@@ -73,54 +76,32 @@ export function useChefStakingInfo(): ChefStakingInfo[] {
     }
   )
   const pairs = usePairs(stakingPairAsset)
-  const tvls = useTokenBalances(mchefContract?.address, stakingTokens)
+  const datas = useGaugesData(farmingConfig)
 
-  return (farmingConfig || []).map((info, idx) => {
-    const stakingToken = stakingTokens[idx] as Token
-    const tvl = stakingToken ? tvls[stakingToken.address] : undefined
-    const position = positions[idx]
-    const parsedData = {
-      pendingReward: parsedPendingRewardTokenAmount(position, rewardToken),
-      stakedAmount: parsedStakedTokenAmount(position, stakingToken)
-    }
+  const allGauges = farmingConfig.map((info, idx) => {
+    const stakingToken = stakingTokens[idx]
+    const gaugeData = datas[idx]
+    const tvl = gaugeData.totalSupply.result?.[0] as BigNumber
+    const stakedAmount = gaugeData.balanceOf.result?.[0] as BigNumber
+    const derivedBalance = gaugeData.derivedBalance.result?.[0] as BigNumber
+    const pendingReward = gaugeData.earned.result?.[0] as BigNumber
+    const rewardPerToken = gaugeData.rewardPerToken.result?.[0] as BigNumber
     return {
       // @todo: id should be a string that represent the gauge contract address
       id: idx,
       ...info,
       stakingToken,
-      tvl,
+      tvl: new TokenAmount(stakingToken, tvl.toBigInt()),
       stakingPair: pairs[idx],
-      parsedData,
       rewardToken,
-      stakedAmount: new TokenAmount(stakingToken, position.amount.toBigInt()),
-      pendingReward: new TokenAmount(rewardToken, position.pendingSushi.toBigInt()),
-      rewardDebt: CurrencyAmount.fromRawAmount(rewardToken, position.rewardDebt.toBigInt())
+      stakedAmount: new TokenAmount(stakingToken, stakedAmount.toBigInt()),
+      derivedStakedAmount: new TokenAmount(stakingToken, derivedBalance.toBigInt()),
+      pendingReward: new TokenAmount(rewardToken, pendingReward.toBigInt()),
+      // not important but might be needed props
+      lastTimeRewardApplicable: gaugeData.lastTimeRewardApplicable,
+      rewardPerToken: new TokenAmount(rewardToken, rewardPerToken.toBigInt())
     }
   })
-}
 
-/** Some utils to help our hook fns */
-
-const parsedStakedTokenAmount = (position: ChefPosition, stakingToken: Token) => {
-  try {
-    if (position.amount) {
-      const bi = position.amount.toBigInt()
-      return CurrencyAmount.fromRawAmount(stakingToken, bi)?.toSignificant(4)
-    }
-  } catch (error) {
-    console.error('parsedStakedAmount::error', error)
-  }
-  return '--.--'
-}
-
-const parsedPendingRewardTokenAmount = (position: ChefPosition, rewardToken: Token) => {
-  try {
-    if (position && position.pendingSushi) {
-      const bi = (position.pendingSushi as BigNumber).toBigInt()
-      return CurrencyAmount.fromRawAmount(rewardToken, bi).toSignificant(4)
-    }
-  } catch (error) {
-    console.error('parsedPendingSushiAmount::error', error)
-  }
-  return '--.--'
+  return allGauges
 }
