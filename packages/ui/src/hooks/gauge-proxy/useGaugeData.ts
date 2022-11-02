@@ -32,6 +32,7 @@ export function useGaugesData(gaugeList: { type: GaugeType; address: string }[])
   const totalSupplies = useMultipleContractSingleData(addresses, IGauge, 'totalSupply')
   const lastTimeRewardsApplicable = useMultipleContractSingleData(addresses, IGauge, 'lastTimeRewardApplicable')
   const rewardsPerToken = useMultipleContractSingleData(addresses, IGauge, 'rewardPerToken')
+  const rewardRates = useMultipleContractSingleData(addresses, IGauge, 'rewardRate')
 
   const balancesOf = useMultipleContractSingleData(addresses, IGauge, 'balanceOf', [account as string])
   const derivedBalances = useMultipleContractSingleData(addresses, IGauge, 'derivedBalance', [account as string])
@@ -43,6 +44,7 @@ export function useGaugesData(gaugeList: { type: GaugeType; address: string }[])
       totalSupply: totalSupplies[idx],
       lastTimeRewardApplicable: lastTimeRewardsApplicable[idx],
       rewardPerToken: rewardsPerToken[idx],
+      rewardRate: rewardRates[idx],
       balanceOf: balancesOf[idx],
       derivedBalance: derivedBalances[idx],
       earned: earnedInGauges[idx]

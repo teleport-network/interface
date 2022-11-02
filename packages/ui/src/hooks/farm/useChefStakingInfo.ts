@@ -29,7 +29,7 @@ interface AdditionalStakingInfo {
   derivedStakedAmount: TokenAmount
   pendingReward: TokenAmount
   rewardToken: Token
-
+  rewardRate: TokenAmount
   /**
    * add `id` to identify a pool since we have filter now
    */
@@ -86,6 +86,7 @@ export function useChefStakingInfo(): ChefStakingInfo[] {
     const derivedBalance = gaugeData.derivedBalance.result?.[0] as BigNumber
     const pendingReward = gaugeData.earned.result?.[0] as BigNumber
     const rewardPerToken = gaugeData.rewardPerToken.result?.[0] as BigNumber
+    const rewardRate = gaugeData.rewardRate.result?.[0] as BigNumber
     return {
       // @todo: id should be a string that represent the gauge contract address
       id: idx,
@@ -99,7 +100,8 @@ export function useChefStakingInfo(): ChefStakingInfo[] {
       pendingReward: new TokenAmount(rewardToken, pendingReward.toBigInt()),
       // not important but might be needed props
       lastTimeRewardApplicable: gaugeData.lastTimeRewardApplicable,
-      rewardPerToken: new TokenAmount(rewardToken, rewardPerToken.toBigInt())
+      rewardPerToken: new TokenAmount(rewardToken, rewardPerToken.toBigInt()),
+      rewardRate: new TokenAmount(rewardToken, rewardRate.toBigInt())
     }
   })
 
