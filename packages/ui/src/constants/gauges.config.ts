@@ -29,6 +29,7 @@ type StakingAsset = TokenAsset | LiquidityAsset
 
 export type Gauge = {
   type: GaugeType
+  address: string
   stakingAsset: StakingAsset
 }
 
@@ -37,6 +38,7 @@ export type Gauges = Gauge[]
 const GAUGES_FOR_OP_GOERLI: Gauges = [
   {
     type: GaugeType.VARIABLE,
+    address: '0x3b647042B5621C074b43f20230bf62fBfF8010F1',
     stakingAsset: {
       isLpToken: true,
       name: 'WETH/USDC',
@@ -49,6 +51,7 @@ const GAUGES_FOR_OP_GOERLI: Gauges = [
   },
   {
     type: GaugeType.STABLE,
+    address: '0x58B391d13BD71c10675b9c7a408772DAC38fe705',
     stakingAsset: {
       isLpToken: true,
       name: 'USDT/USDC',
