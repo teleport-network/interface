@@ -7,7 +7,7 @@ const { ethers } = require("hardhat");
 const { utils, BigNumber } = require("ethers")
 // import from constant.js
 const { 
-  NATIVE_TOKEN, USDC, FACTORY: FACTORYV2, VARIABLE_GAUGE_PROXY 
+  NATIVE_TOKEN, USDC, FACTORY: FACTORYV2, VARIABLE_GAUGE_PROXY, ZERO_ADDRESS
 } = require('./constant')
 
 
@@ -41,6 +41,13 @@ async function main() {
 
     // 4. Using that LP create a gauge in GaugeProxy contract
     const gaugeProxy = await ethers.getContractAt("VariableGaugeProxy", VARIABLE_GAUGE_PROXY);
+
+    const DEPLOYED_GAUGE_ADDR = await gaugeProxy.callStatic.gauges(LP);
+
+    if (DEPLOYED_GAUGE_ADDR !== ZERO_ADDRESS) {
+      console.log(`skipped for deployed gauge of '${token.address}', gauge addr: '${DEPLOYED_GAUGE_ADDR}'`);
+      return;
+    }
 
     const addGaugeTrx = await gaugeProxy.addGauge(LP);
     await addGaugeTrx.wait(5);
