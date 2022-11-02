@@ -81,29 +81,31 @@ export function useChefStakingInfo(): ChefStakingInfo[] {
   const allGauges = farmingConfig.map((info, idx) => {
     const stakingToken = stakingTokens[idx]
     const gaugeData = datas[idx]
-    const tvl = gaugeData.totalSupply.result?.[0] as BigNumber
-    const stakedAmount = gaugeData.balanceOf.result?.[0] as BigNumber
-    const derivedBalance = gaugeData.derivedBalance.result?.[0] as BigNumber
-    const pendingReward = gaugeData.earned.result?.[0] as BigNumber
-    const rewardPerToken = gaugeData.rewardPerToken.result?.[0] as BigNumber
-    const rewardRate = gaugeData.rewardRate.result?.[0] as BigNumber
+    const pendingReward = BigIntParserForCallState(gaugeData.earned)
+    const rewardPerToken = BigIntParserForCallState(gaugeData.rewardPerToken)
+    const rewardRate = BigIntParserForCallState(gaugeData.rewardRate)
     return {
       // @todo: id should be a string that represent the gauge contract address
       id: idx,
       ...info,
       stakingToken,
-      tvl: new TokenAmount(stakingToken, tvl.toBigInt()),
+      tvl: new TokenAmount(stakingToken, BigIntParserForCallState(gaugeData.totalSupply)),
       stakingPair: pairs[idx],
       rewardToken,
-      stakedAmount: new TokenAmount(stakingToken, stakedAmount.toBigInt()),
-      derivedStakedAmount: new TokenAmount(stakingToken, derivedBalance.toBigInt()),
-      pendingReward: new TokenAmount(rewardToken, pendingReward.toBigInt()),
+      stakedAmount: new TokenAmount(stakingToken, BigIntParserForCallState(gaugeData.balanceOf)),
+      derivedStakedAmount: new TokenAmount(stakingToken, BigIntParserForCallState(gaugeData.derivedBalance)),
+      pendingReward: new TokenAmount(rewardToken, pendingReward),
       // not important but might be needed props
       lastTimeRewardApplicable: gaugeData.lastTimeRewardApplicable,
-      rewardPerToken: new TokenAmount(rewardToken, rewardPerToken.toBigInt()),
-      rewardRate: new TokenAmount(rewardToken, rewardRate.toBigInt())
+      rewardPerToken: new TokenAmount(rewardToken, rewardPerToken),
+      rewardRate: new TokenAmount(rewardToken, rewardRate)
     }
   })
 
   return allGauges
+}
+
+function BigIntParserForCallState(cStateWithBN: ReturnType<typeof useSingleCallResult>, idx = 0) {
+  if (cStateWithBN.loading || !cStateWithBN.result) return BigNumber.from(0).toBigInt()
+  return (cStateWithBN.result[idx] as BigNumber).toBigInt()
 }
