@@ -148,12 +148,12 @@ export class V2RouteWithValidQuote implements IV2RouteWithValidQuote {
   public minimumAmountOut(slippageTolerance: Percent): CurrencyAmount {
     invariant(!slippageTolerance.lessThan(ZERO), 'SLIPPAGE_TOLERANCE');
     if (this.tradeType === TradeType.EXACT_OUTPUT) {
-      return this.quote;
+      return this.amount;
     } else {
       const slippageAdjustedAmountOut = new Fraction(ONE)
         .add(new Fraction(slippageTolerance.numerator, slippageTolerance.denominator))
         .invert()
-        .multiply(this.quote.numerator).quotient;
+        .multiply(this.quote.quotient).quotient;
       return CurrencyAmount.fromRawAmount(
         this.quote.currency,
         slippageAdjustedAmountOut
@@ -168,9 +168,9 @@ export class V2RouteWithValidQuote implements IV2RouteWithValidQuote {
     } else {
       const slippageAdjustedAmountIn = new Fraction(ONE)
         .add(new Fraction(slippageTolerance.numerator, slippageTolerance.denominator))
-        .multiply(this.amount.numerator)
+        .multiply(this.quote.quotient)
         .quotient
-      return CurrencyAmount.fromRawAmount(this.amount.currency, slippageAdjustedAmountIn)
+      return CurrencyAmount.fromRawAmount(this.quote.currency, slippageAdjustedAmountIn)
     }
   }
 }

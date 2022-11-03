@@ -1,7 +1,6 @@
 import { Trade, TradeType } from '@teleswap/sdk'
 // TradeType
 import LineVIcon from 'assets/images/tele/lineV.png'
-import ArrowHGreen from 'assets/svg/arrowHGreen.svg'
 import ArrowHLoneLine from 'assets/svg/arrowHLoneLine.svg'
 import arrowShowRoute from 'assets/svg/arrowShowRoute.svg'
 import axios from 'axios'
@@ -41,7 +40,7 @@ function TradeSummary({ trade, allowedSlippage }: { trade: Trade; allowedSlippag
         <RowBetween>
           <RowFixed>
             <TYPE.black fontWeight={400} color={theme.text2}>
-              {isExactIn ? 'Minimum received' : 'Maximum sold'}
+              {isExactIn ? 'Minimum received' : 'Maximum spent'}
             </TYPE.black>
             <QuestionHelper text="Your transaction will revert if there is a large, unfavorable price movement before it is confirmed." />
           </RowFixed>
@@ -117,38 +116,56 @@ const RouteCellStyled = styled(Box)`
   display: flex;
   justify-content: flex-start;
   align-items: center;
+  flex-flow: row wrap;
+  /* border: 1px solid red; */
+  margin-bottom: 0.4rem;
+  .ml25 {
+    margin-left: 1.8rem !important;
+  }
+  .pathBlock {
+  }
   :nth-of-type(2) {
     margin-top: 0.9rem !important;
   }
   .routeCellBlock {
+    font-family: 'Poppins';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.8);
     .ArrowHLoneLine {
-      width: 4.1rem;
-      height: 0.8rem;
-      margin: 2px 0 5px 0;
-      position: relative;
-      right: 5px;
+      width: 1.8rem;
+      height: auto;
+      margin: 0.6rem 0 0.9rem 0;
+    }
+    .percentView {
+      font-weight: 600;
     }
   }
+
   .tokenImgWrap {
-    background: rgba(57, 225, 186, 0.1);
+    /* background: rgba(57, 225, 186, 0.1); */
     border-radius: 16px;
-    padding: 0.4rem 0.5rem;
+    /* padding: 0.4rem 0; */
     display: flex;
     justify-content: flex-start;
     align-items: center;
     position: relative;
-    img {
+    width: 3rem;
+    margin-left: -2px;
+    img,
+    svg {
       width: 1.7rem;
-      height: auto;
+      height: 1.7rem;
     }
-    img:nth-of-type(1) {
-      margin-right: 10px;
+    .tokenLeft {
+      /* margin-right: 10px; */
       position: relative;
-      left: 8px;
+      left: 0;
     }
-    img:nth-of-type(2) {
+    .tokenRight {
       position: relative;
-      right: 8px;
+      left: -0.6rem;
       z-index: -1;
     }
   }
@@ -177,6 +194,12 @@ export function AdvancedSwapDetails({ trade }: AdvancedSwapDetailsProps) {
   // const showRoute = Boolean(trade && trade.route.path.length > 2)
   const showRoute = Boolean(trade && trade.routeData && trade.routeData.route.length > 0)
   const routeData = (trade && trade['routeData']) || null
+  // if (routeData && routeData.route && routeData.route.length < 3) {
+  //   routeData.route = [...routeData.route, ...routeData.route]
+  // }
+  if (routeData && routeData.route && routeData.route[0] && routeData.route[0].length < 3) {
+    routeData.route[0] = [...routeData.route[0]]
+  }
   return (
     <AutoColumn gap="0.4rem">
       {trade && (
@@ -214,38 +237,74 @@ export function AdvancedSwapDetails({ trade }: AdvancedSwapDetailsProps) {
                   currency={trade && trade.inputAmount && trade.inputAmount.currency}
                 />
                 {/* <img className="leftTokenImg" src={TeleRouteIcon} alt="" /> */}
-                <img className="LineVIcon" style={{ margin: '0 0.5rem 0 0.89rem' }} src={LineVIcon} alt="" />
-                <div>
+                <img className="LineVIcon" style={{ margin: '0 0.57rem 0 0.7rem' }} src={LineVIcon} alt="" />
+                <div className="flex1">
                   {
                     // @ts-ignore
                     routeData &&
                       routeData.hasOwnProperty('route') &&
-                      routeData.route.map((item, index) => (
+                      routeData.route.map((percentItemArr, index) => (
                         <RouteCellStyled key={index} className="text-detail">
-                          {item.map((routeItem, routeItemIndex) => (
+                          {percentItemArr.map((pathItem, pathItemIndex) => (
                             <>
-                              <div
-                                key={routeItemIndex}
-                                className="routeCellBlock ColumnStartCenter"
-                                style={{ marginRight: '10px' }}
-                              >
-                                {routeItemIndex == 0 ? <span>{routeData.percents[index]}%</span> : <span>　</span>}
-                                <img className="ArrowHLoneLine" src={ArrowHLoneLine} alt="" />
-                                <span
+                              {pathItemIndex > 2 && pathItemIndex % 2 === 1 && (
+                                <div
+                                  key={pathItemIndex - 1}
+                                  className="rowStartCenter"
                                   style={{
-                                    border: '1px solid rgba(255, 255, 255, 0.2)',
-                                    borderRadius: '4px',
-                                    padding: '.1rem .3rem'
+                                    width: '33%',
+                                    display: 'flex'
                                   }}
+                                ></div>
+                              )}
+                              <div
+                                key={pathItemIndex}
+                                className={
+                                  routeData.route.length === 1 && percentItemArr.length <= 2
+                                    ? 'rowCenterCenter'
+                                    : 'rowStartCenter'
+                                }
+                                style={{
+                                  width:
+                                    routeData.route.length > 1
+                                      ? '33%'
+                                      : percentItemArr.length > 3
+                                      ? '33%'
+                                      : percentItemArr.length > 1
+                                      ? '50%'
+                                      : '100%',
+                                  display: 'flex'
+                                }}
+                              >
+                                <div className="ColumnStartCenter routeCellBlock" style={{}}>
+                                  {pathItemIndex == 0 ? (
+                                    <span className="percentView">{routeData.percents[index]}%</span>
+                                  ) : (
+                                    <span>　</span>
+                                  )}
+                                  <img className="ArrowHLoneLine" src={ArrowHLoneLine} alt="" />
+                                  <span
+                                    style={{
+                                      border: '1px solid rgba(255, 255, 255, 0.2)',
+                                      borderRadius: '4px',
+                                      padding: '.1rem .3rem'
+                                    }}
+                                  >
+                                    {pathItem.stable ? 'Stable' : 'Volatile'}
+                                  </span>
+                                </div>
+                                <div
+                                  className={
+                                    routeData.route.length === 1 && percentItemArr.length <= 2
+                                      ? 'tokenImgWrap ml25'
+                                      : 'tokenImgWrap'
+                                  }
                                 >
-                                  {routeItem.stable ? 'Stable' : 'Volatile'}
-                                </span>
-                              </div>
-                              <div className="tokenImgWrap">
-                                <CurrencyLogo currency={routeItem && routeItem.tokenIn} />
-                                <CurrencyLogo currency={routeItem && routeItem.tokenOut} />
-                                {/* <img src={TeleRouteIcon} alt="" />
+                                  <CurrencyLogo className="tokenLeft" currency={pathItem && pathItem.tokenIn} />
+                                  <CurrencyLogo className="tokenRight" currency={pathItem && pathItem.tokenOut} />
+                                  {/* <img src={TeleRouteIcon} alt="" />
                                 <img src={TeleRouteIcon} alt="" /> */}
+                                </div>
                               </div>
                             </>
                           ))}
@@ -258,12 +317,12 @@ export function AdvancedSwapDetails({ trade }: AdvancedSwapDetailsProps) {
                           <img src={TeleRouteIcon} alt="" />
                           <img src={TeleRouteIcon} alt="" />
                         </div> */}
-                          <img className="justArrowHead" src={ArrowHGreen} alt="" />
+                          {/* <img className="justArrowHead" src={ArrowHGreen} alt="" /> */}
                         </RouteCellStyled>
                       ))
                   }
                 </div>
-                <img className="LineVIcon" style={{ margin: '0 0.89rem 0 0.5rem' }} src={LineVIcon} alt="" />
+                <img className="LineVIcon" style={{ margin: '0 0.7rem 0 0.57rem' }} src={LineVIcon} alt="" />
                 {/* <img className="rightTokenImg" src={TeleRouteIcon} alt="" /> */}
                 <CurrencyLogo
                   className="rightTokenImg"

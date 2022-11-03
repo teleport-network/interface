@@ -1,4 +1,4 @@
-import { Currency, CurrencyAmount, currencyEquals, ETHER, Token } from '@teleswap/sdk'
+import { Currency, CurrencyAmount, currencyEquals, ETHER, Token, WETH } from '@teleswap/sdk'
 import { LightGreyCard } from 'components/Card'
 import QuestionHelper from 'components/QuestionHelper'
 import useThemedContext from 'hooks/useThemedContext'
@@ -182,6 +182,7 @@ export default function CurrencyList({
   setImportToken: (token: Token) => void
   breakIndex: number | undefined
 }) {
+  const { chainId } = useActiveWeb3React()
   const itemData: (Currency | undefined)[] = useMemo(() => {
     const addressSet = new Set()
     const formatted: (Currency | undefined)[] = []
@@ -201,15 +202,17 @@ export default function CurrencyList({
         )
       })
     ) {
+      if (chainId && WETH && WETH[chainId]) {
+        formatted.unshift(WETH[chainId])
+      }
       formatted.unshift(Currency.ETHER)
     }
     /*  if (breakIndex !== undefined) {
       formatted = [...formatted.slice(0, breakIndex), undefined, ...formatted.slice(breakIndex, formatted.length)]
     } */
     return formatted
-  }, [currencies, showETH])
+  }, [chainId, currencies, showETH])
 
-  const { chainId } = useActiveWeb3React()
   const theme = useThemedContext()
 
   const inactiveTokens: {
@@ -286,6 +289,7 @@ export default function CurrencyList({
   return (
     <FixedSizeList
       height={height}
+      style={{ border: '1px solid rgba(255,255,255,0.2)', borderRadius: '1rem' }}
       ref={fixedListRef as any}
       width="100%"
       itemData={itemData}

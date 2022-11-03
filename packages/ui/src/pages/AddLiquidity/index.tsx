@@ -8,6 +8,7 @@ import { BackToMyLiquidity } from 'components/LiquidityDetail'
 import { MobileBottomShadowContainer } from 'components/MobileBottomShadowContainer'
 import QuestionHelper from 'components/QuestionHelper'
 import Settings from 'components/Settings'
+import { TokenApprovalView } from 'components/TokenApproval'
 // import UnsupportedCurrencyFooter from 'components/swap/UnsupportedCurrencyFooter'
 import { useIsTransactionUnsupported } from 'hooks/Trades'
 import { usePresetPeripheryAddress } from 'hooks/usePresetContractAddress'
@@ -851,44 +852,55 @@ export default function AddLiquidity() {
                       approvalB === ApprovalState.NOT_APPROVED ||
                       approvalB === ApprovalState.PENDING) &&
                       isValid && (
-                        <RowBetween>
-                          {approvalA !== ApprovalState.APPROVED && (
-                            <ButtonPrimary
-                              className="secondary-title"
-                              style={{
-                                marginBottom: '0.5rem',
-                                fontWeight: '400!important'
-                              }}
-                              onClick={approveACallback}
-                              disabled={approvalA === ApprovalState.PENDING}
-                              width={approvalB !== ApprovalState.APPROVED ? '48%' : '100%'}
-                            >
-                              {approvalA === ApprovalState.PENDING ? (
-                                <Dots>Approving {currencies[Field.CURRENCY_A]?.symbol}</Dots>
-                              ) : (
-                                'Approve ' + currencies[Field.CURRENCY_A]?.symbol
-                              )}
-                            </ButtonPrimary>
+                        <>
+                          {true && (
+                            <TokenApprovalView
+                              tokenSymbol={
+                                approvalA !== ApprovalState.APPROVED
+                                  ? currencies[Field.CURRENCY_A]?.symbol
+                                  : currencies[Field.CURRENCY_B]?.symbol
+                              }
+                            ></TokenApprovalView>
                           )}
-                          {approvalB !== ApprovalState.APPROVED && (
-                            <ButtonPrimary
-                              className="secondary-title"
-                              style={{
-                                marginBottom: '0.5rem',
-                                fontWeight: '400!important'
-                              }}
-                              onClick={approveBCallback}
-                              disabled={approvalB === ApprovalState.PENDING}
-                              width={approvalA !== ApprovalState.APPROVED ? '48%' : '100%'}
-                            >
-                              {approvalB === ApprovalState.PENDING ? (
-                                <Dots>Approving {currencies[Field.CURRENCY_B]?.symbol}</Dots>
-                              ) : (
-                                'Approve ' + currencies[Field.CURRENCY_B]?.symbol
-                              )}
-                            </ButtonPrimary>
-                          )}
-                        </RowBetween>
+                          <RowBetween>
+                            {approvalA !== ApprovalState.APPROVED && (
+                              <ButtonPrimary
+                                className="secondary-title"
+                                style={{
+                                  marginBottom: '0.5rem',
+                                  fontWeight: '400!important'
+                                }}
+                                onClick={approveACallback}
+                                disabled={approvalA === ApprovalState.PENDING}
+                                width={approvalB !== ApprovalState.APPROVED ? '48%' : '100%'}
+                              >
+                                {approvalA === ApprovalState.PENDING ? (
+                                  <Dots>Approving {currencies[Field.CURRENCY_A]?.symbol}</Dots>
+                                ) : (
+                                  'Approve' + currencies[Field.CURRENCY_A]?.symbol
+                                )}
+                              </ButtonPrimary>
+                            )}
+                            {approvalB !== ApprovalState.APPROVED && (
+                              <ButtonPrimary
+                                className="secondary-title"
+                                style={{
+                                  marginBottom: '0.5rem',
+                                  fontWeight: '400!important'
+                                }}
+                                onClick={approveBCallback}
+                                disabled={approvalA !== ApprovalState.APPROVED || approvalB === ApprovalState.PENDING}
+                                width={approvalA !== ApprovalState.APPROVED ? '48%' : '100%'}
+                              >
+                                {approvalB === ApprovalState.PENDING ? (
+                                  <Dots>Approving {currencies[Field.CURRENCY_B]?.symbol}</Dots>
+                                ) : (
+                                  'Approve' + currencies[Field.CURRENCY_B]?.symbol
+                                )}
+                              </ButtonPrimary>
+                            )}
+                          </RowBetween>
+                        </>
                       )}
                     <ButtonError
                       className="secondary-title"
@@ -1131,7 +1143,7 @@ export default function AddLiquidity() {
                           {approvalA === ApprovalState.PENDING ? (
                             <Dots>Approving {currencies[Field.CURRENCY_A]?.symbol}</Dots>
                           ) : (
-                            'Approve ' + currencies[Field.CURRENCY_A]?.symbol
+                            'Approve' + currencies[Field.CURRENCY_A]?.symbol
                           )}
                         </ButtonPrimary>
                       )}

@@ -1,6 +1,7 @@
 import { AbstractConnector } from '@web3-react/abstract-connector'
 import { UnsupportedChainIdError, useWeb3React } from '@web3-react/core'
 import { WalletConnectConnector } from '@web3-react/walletconnect-connector'
+import { getChainInfo } from 'constants/chainInfo'
 import { get } from 'lodash'
 import { useEffect, useState } from 'react'
 import { isMobile } from 'react-device-detect'
@@ -16,6 +17,8 @@ import usePrevious from '../../hooks/usePrevious'
 import { ApplicationModal } from '../../state/application/actions'
 import { useModalOpen, useWalletModalToggle } from '../../state/application/hooks'
 // import { ExternalLink } from '../../theme'
+import { getRpcUrl } from 'components/Header/Network'
+import { SupportedChainId } from 'constants/chains'
 import AccountDetails from '../AccountDetails'
 import Modal from '../Modal'
 import Option from './Option'
@@ -128,6 +131,38 @@ const WALLET_VIEWS = {
   PENDING: 'pending'
 }
 
+async function switchNetwork(chainIdNumber) {
+  const { ethereum } = global as any
+  if (!ethereum) {
+    console.log('MetaMask extension not available')
+    return
+  }
+  const chainIdHex = Number(chainIdNumber).toString(16)
+  const chainId = `0x${chainIdHex}`
+  try {
+    if (!chainIdHex) {
+      return
+    }
+    await ethereum.request({
+      method: 'wallet_switchEthereumChain',
+      params: [{ chainId: `0x${Number(420).toString(16)}` }]
+    })
+  } catch (error: any) {
+    const info = getChainInfo(chainIdNumber)
+    const addChainParameter = {
+      chainId,
+      chainName: info.label,
+      rpcUrls: [getRpcUrl(chainIdNumber)],
+      nativeCurrency: info.nativeCurrency,
+      blockExplorerUrls: [info.explorer]
+    }
+    await ethereum.request({
+      method: 'wallet_addEthereumChain',
+      params: [addChainParameter]
+    })
+  }
+}
+
 export default function WalletModal({
   pendingTransactions,
   confirmedTransactions,
@@ -200,7 +235,14 @@ export default function WalletModal({
     connector &&
       activate(connector, undefined, true).catch((error) => {
         if (error instanceof UnsupportedChainIdError) {
-          activate(connector) // a little janky...can't use setError because the connector isn't set
+          // activate(connector) // a little janky...can't use setError because the connector isn't set
+          switchNetwork(SupportedChainId.OPTIMISM_GOERLI)
+            .then(() => {
+              activate(connector, undefined, true)
+            })
+            .catch((error) => {
+              console.warn('[ConnectModal] Error activating account', error)
+            })
         } else {
           setPendingError(true)
         }

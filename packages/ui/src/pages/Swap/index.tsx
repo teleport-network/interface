@@ -113,6 +113,7 @@ export default function Swap({ history }: RouteComponentProps) {
     v2Trade['routeData'] = routeData
     v2Trade['inputAmount'] = routeData['inputAmount']
     v2Trade['outputAmount'] = routeData['outputAmount']
+    v2Trade['slippageAdjustedAmounts'] = {}
     if (routeData.reqParams && routeData.reqParams.type === ReqTradeType.exactIn) {
       v2Trade['tradeType'] = 0
     } else if (routeData.reqParams && routeData.reqParams.type === ReqTradeType.exactOut) {
@@ -120,6 +121,8 @@ export default function Swap({ history }: RouteComponentProps) {
     } else {
       console.error('tradeType null:', routeData.reqParams)
     }
+    v2Trade['slippageAdjustedAmounts'][Field.INPUT] = routeData?.maxIn || null
+    v2Trade['slippageAdjustedAmounts'][Field.OUTPUT] = routeData?.minOut || null
 
     delete v2Trade['route']
     delete v2Trade['executionPrice']
@@ -402,6 +405,7 @@ export default function Swap({ history }: RouteComponentProps) {
               onCurrencySelect={handleInputSelect}
               otherCurrency={currencies[Field.OUTPUT]}
               id="swap-currency-input"
+              showCommonBases={true}
             />
             <AutoColumn justify="space-between" style={{ position: 'relative' }}>
               <AutoRow
@@ -445,6 +449,7 @@ export default function Swap({ history }: RouteComponentProps) {
               onCurrencySelect={handleOutputSelect}
               otherCurrency={currencies[Field.INPUT]}
               id="swap-currency-output"
+              showCommonBases={true}
             />
 
             {recipient !== null && !showWrap ? (
@@ -515,7 +520,9 @@ export default function Swap({ history }: RouteComponentProps) {
               <UnsupportedCurrencyFooter show={swapIsUnsupported} currencies={[currencies.INPUT, currencies.OUTPUT]} />
             )}
             {/* showApproveFlow */}
-            {showApproveFlow && <TokenApprovalView></TokenApprovalView>}
+            {showApproveFlow && (
+              <TokenApprovalView tokenSymbol={currencies[Field.INPUT]?.symbol || ''}></TokenApprovalView>
+            )}
             {!isMobile && !loading && (
               <BottomGrouping>
                 {swapIsUnsupported ? (
@@ -556,7 +563,7 @@ export default function Swap({ history }: RouteComponentProps) {
                     <ButtonConfirmed
                       className="secondary-title"
                       onClick={approveCallback}
-                      disabled={approval !== ApprovalState.NOT_APPROVED || approvalSubmitted}
+                      disabled={approval !== ApprovalState.NOT_APPROVED}
                       width="48%"
                       altDisabledStyle={approval === ApprovalState.PENDING} // show solid button while waiting
                       confirmed={approval === ApprovalState.APPROVED}
@@ -681,7 +688,7 @@ export default function Swap({ history }: RouteComponentProps) {
                 <ButtonConfirmed
                   className="secondary-title"
                   onClick={approveCallback}
-                  disabled={approval !== ApprovalState.NOT_APPROVED || approvalSubmitted}
+                  disabled={approval !== ApprovalState.NOT_APPROVED}
                   width="48%"
                   altDisabledStyle={approval === ApprovalState.PENDING} // show solid button while waiting
                   confirmed={approval === ApprovalState.APPROVED}

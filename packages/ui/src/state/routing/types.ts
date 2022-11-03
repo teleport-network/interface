@@ -1,5 +1,5 @@
 import { MixedRouteSDK, Trade } from '@teleswap/router-sdk'
-import { Fraction, Percent } from '@teleswap/sdk'
+import { Fraction, Percent, Token as OriginToken } from '@teleswap/sdk'
 import { Route as V2Route } from '@teleswap/v2-sdk'
 import { Currency, CurrencyAmount, Token, TradeType } from '@uniswap/sdk-core'
 import { Route as V3Route } from '@uniswap/v3-sdk'
@@ -74,8 +74,8 @@ export interface GetQuoteResult {
   routeString: string
   priceImpactWithoutFee: Percent
   realizedLPFee: Fraction
-  minOut: CurrencyAmount<any>
-  maxIn: CurrencyAmount<any>
+  minOut: any
+  maxIn: any
 }
 
 export class InterfaceTrade<

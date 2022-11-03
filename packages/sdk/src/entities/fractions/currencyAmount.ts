@@ -13,6 +13,7 @@ const Big = toFormat(_Big)
 
 Big.strict = true
 
+
 export class CurrencyAmount extends Fraction {
   public readonly currency: Currency
 
@@ -69,7 +70,10 @@ export class CurrencyAmount extends Fraction {
     format?: object,
     rounding: Rounding = Rounding.ROUND_DOWN
   ): string {
-    invariant(decimalPlaces <= this.currency.decimals, 'DECIMALS')
+    // invariant(decimalPlaces <= this.currency.decimals, 'DECIMALS')
+    if(decimalPlaces > this.currency.decimals){
+      console.log('decimalPlaces > this.currency.decimals',decimalPlaces, this.currency)
+    }
     return super.toFixed(decimalPlaces, format, rounding)
   }
 
@@ -78,3 +82,5 @@ export class CurrencyAmount extends Fraction {
     return new Big(this.numerator.toString()).div(this.denominator.toString()).toFormat(format)
   }
 }
+export class AliseCurrencyAmount extends CurrencyAmount {}
+

@@ -96,6 +96,7 @@ export class V2PoolProvider implements IV2PoolProvider {
         tokenB,
         stable
       );
+
       if (poolAddressSet.has(poolAddress)) {
         continue;
       }

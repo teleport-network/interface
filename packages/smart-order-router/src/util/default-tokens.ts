@@ -751,7 +751,7 @@ export const DEFAULT_TOKENS = {
     },
     {
       "name": "Dai Stablecoin",
-      "address": "0x38fa58a6a83d97389be88752daa408e2fea40c8b",
+      "address": "0xb9297783D0D568dc378e23D5BA9C32031a4A5132",
       "symbol": "DAI",
       "decimals": 18,
       "chainId": 420,

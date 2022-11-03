@@ -14,7 +14,6 @@ import { useTradeExactIn, useTradeExactOut } from '../../hooks/Trades'
 import useENS from '../../hooks/useENS'
 import useParsedQueryString from '../../hooks/useParsedQueryString'
 import { isAddress } from '../../utils'
-import { computeSlippageAdjustedAmounts } from '../../utils/prices'
 import { AppDispatch, AppState } from '../index'
 import { useUserSlippageTolerance, useUserTransactionTTL } from '../user/hooks'
 import { useCurrencyBalances } from '../wallet/hooks'
@@ -107,6 +106,31 @@ function involvesAddress(trade: Trade, checksummedAddress: string): boolean {
   )
 }
 
+interface IRouteData {
+  amount: string
+  amountDecimals: string
+  blockNumber: string
+  gasPriceWei: string
+  gasUseEstimate: string
+  gasUseEstimateQuote: string
+  gasUseEstimateQuoteDecimals: string
+  gasUseEstimateUSD: string
+  quote: string
+  quoteDecimals: string
+  quoteGasAdjusted: string
+  quoteGasAdjustedDecimals: string
+  routeString: string
+  inputAmount: any
+  invalidRoute: boolean
+  maxIn: any
+  minOut: any
+  percents: Array<number>
+  priceImpactWithoutFee: any
+  realizedLPFee: any
+  reqParams: any
+  route: any
+}
+
 // from the current swap inputs, compute the best trade and return it.
 export function useDerivedSwapInfo():
   | any
@@ -116,7 +140,7 @@ export function useDerivedSwapInfo():
       parsedAmount: CurrencyAmount | undefined
       v2Trade: Trade | undefined
       inputError?: string
-      routeData?: any
+      routeData?: IRouteData
     } {
   const { account, chainId } = useActiveWeb3React()
   const [loading, setLoading] = useState(false)
@@ -144,7 +168,8 @@ export function useDerivedSwapInfo():
   const bestTradeExactIn = useTradeExactIn(isExactIn ? parsedAmount : undefined, outputCurrency ?? undefined)
   const bestTradeExactOut = useTradeExactOut(inputCurrency ?? undefined, !isExactIn ? parsedAmount : undefined)
 
-  const v2Trade = isExactIn ? bestTradeExactIn : bestTradeExactOut
+  let v2Trade: any = isExactIn ? bestTradeExactIn : bestTradeExactOut
+  v2Trade = v2Trade ? v2Trade : {}
   // const v2Trade: any = {}
   const currencyBalances = {
     [Field.INPUT]: relevantTokenBalances[0],
@@ -184,18 +209,6 @@ export function useDerivedSwapInfo():
 
   const [allowedSlippage] = useUserSlippageTolerance()
   const [ttl] = useUserTransactionTTL()
-
-  const slippageAdjustedAmounts = v2Trade && allowedSlippage && computeSlippageAdjustedAmounts(v2Trade, allowedSlippage)
-
-  // compare input balance to max input based on version
-  const [balanceIn, amountIn] = [
-    currencyBalances[Field.INPUT],
-    slippageAdjustedAmounts ? slippageAdjustedAmounts[Field.INPUT] : null
-  ]
-
-  if (balanceIn && amountIn && balanceIn.lessThan(amountIn)) {
-    inputError = 'Insufficient ' + amountIn.currency.symbol + ' balance'
-  }
 
   // api route
   const [routeData, setRouteData] = useState({})
@@ -240,7 +253,7 @@ export function useDerivedSwapInfo():
           nodeTags[k].parentNode.removeChild(nodeTags[k])
         }
       }
-    }, 2000)
+    }, 3000)
   }
   const getData = async () => {
     try {
@@ -302,14 +315,25 @@ export function useDerivedSwapInfo():
         console.log('res', response?.data || '')
         setLoading(false)
         if (response.data.hasOwnProperty('invalidRoute') && response.data.invalidRoute === true) {
+          setRouteData({})
           if (document && document.querySelector('body')) {
             alertMsg('No valid route matched')
           } else {
             alert('No valid route matched')
           }
-          setRouteData({})
         } else {
           if (response.data && response.data.hasOwnProperty('quoteDecimals')) {
+            const slippageAdjustedAmountsMaxIn = response.data.maxIn
+
+            // compare input balance to max input based on version
+            const [balanceIn, amountIn] = [
+              currencyBalances[Field.INPUT],
+              slippageAdjustedAmountsMaxIn ? slippageAdjustedAmountsMaxIn : null
+            ]
+
+            if (balanceIn && amountIn && new BigNumber(balanceIn.toSignificant(10)).lt(amountIn.toSignificant(10))) {
+              inputError = 'Insufficient ' + amountIn.currency.symbol + ' balance'
+            }
             const outputAmount = tryParseAmount(
               response.data.quoteDecimals,
               (isExactIn ? outputCurrency : inputCurrency) ?? undefined

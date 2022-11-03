@@ -1,5 +1,5 @@
-import { ChainId, Token } from '@teleswap/sdk'
-import DEFAULT_TOKEN_LIST from '@uniswap/default-token-list'
+import { ChainId, DEFAULT_TOKEN_LIST, Token } from '@teleswap/sdk'
+// import DEFAULT_TOKEN_LIST from '@uniswap/default-token-list'
 import { Tags, TokenInfo, TokenList } from '@uniswap/token-lists'
 import { useMemo } from 'react'
 import { useSelector } from 'react-redux'

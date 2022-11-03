@@ -182,7 +182,7 @@ export default function SlippageTabs({ rawSlippage, setRawSlippage, deadline, se
           <QuestionHelper text="Your transaction will revert if the price changes unfavorably by more than this percentage." />
         </RowFixed>
         <RowBetween
-          className={'text-extreme-small'}
+          className={'text-detail'}
           sx={{
             color: 'rgba(255, 255, 255, 0.8)',
             border: `1px solid rgba(255, 255, 255, 0.2)`,
@@ -277,7 +277,7 @@ export default function SlippageTabs({ rawSlippage, setRawSlippage, deadline, se
           <QuestionHelper text="Your transaction will revert if it is pending for more than this long." />
         </RowFixed>
         <RowFixed
-          className={'text-extreme-small'}
+          className={'text-detail'}
           sx={{
             color: 'rgba(255, 255, 255, 0.8)',
             border: `1px solid rgba(255, 255, 255, 0.2)`,

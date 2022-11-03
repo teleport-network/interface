@@ -7,7 +7,7 @@ import { Text } from 'rebass'
 import { Field } from '../../state/swap/actions'
 import { TYPE } from '../../theme'
 import { isAddress, shortenAddress } from '../../utils'
-import { computeSlippageAdjustedAmounts, computeTradePriceBreakdown, warningSeverity } from '../../utils/prices'
+import { computeTradePriceBreakdown, warningSeverity } from '../../utils/prices'
 import { ButtonPrimary } from '../Button'
 import { AutoColumn } from '../Column'
 import CurrencyLogo from '../CurrencyLogo'
@@ -27,10 +27,7 @@ export default function SwapModalHeader({
   showAcceptChanges: boolean
   onAcceptChanges: () => void
 }) {
-  const slippageAdjustedAmounts = useMemo(
-    () => computeSlippageAdjustedAmounts(trade, allowedSlippage),
-    [trade, allowedSlippage]
-  )
+  const slippageAdjustedAmounts = (trade && trade['slippageAdjustedAmounts']) || null
   const { priceImpactWithoutFee } = useMemo(() => computeTradePriceBreakdown(trade), [trade])
   const priceImpactSeverity = warningSeverity(priceImpactWithoutFee)
 
@@ -102,7 +99,8 @@ export default function SwapModalHeader({
           <TYPE.italic textAlign="left" style={{ width: '100%' }}>
             {`Output is estimated. You will receive at least `}
             <b>
-              {slippageAdjustedAmounts[Field.OUTPUT]?.toSignificant(6)} {trade.outputAmount.currency.symbol}
+              {slippageAdjustedAmounts && slippageAdjustedAmounts[Field.OUTPUT]?.toSignificant(6)}{' '}
+              {trade.outputAmount.currency.symbol}
             </b>
             {' or the transaction will revert.'}
           </TYPE.italic>
@@ -110,7 +108,8 @@ export default function SwapModalHeader({
           <TYPE.italic textAlign="left" style={{ width: '100%' }}>
             {`Input is estimated. You will sell at most `}
             <b>
-              {slippageAdjustedAmounts[Field.INPUT]?.toSignificant(6)} {trade.inputAmount.currency.symbol}
+              {slippageAdjustedAmounts && slippageAdjustedAmounts[Field.INPUT]?.toSignificant(6)}{' '}
+              {trade.inputAmount.currency.symbol}
             </b>
             {' or the transaction will revert.'}
           </TYPE.italic>

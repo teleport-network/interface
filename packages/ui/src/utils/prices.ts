@@ -9,7 +9,6 @@ import {
   BLOCKED_PRICE_IMPACT_NON_EXPERT
 } from '../constants'
 import { Field } from '../state/swap/actions'
-import { basisPointsToPercent } from './index'
 
 const BASE_FEE_VOLATILE = new Percent(JSBI.BigInt(30), JSBI.BigInt(10000))
 const BASE_FEE_STABLE = new Percent(JSBI.BigInt(1), JSBI.BigInt(10000))
@@ -48,24 +47,8 @@ export function computeTradePriceBreakdownByRoute(route: V2RouteWithValidQuote):
     route.tradeType === TradeType.EXACT_INPUT ? route.quote.quotient : route.amount.quotient
   ).subtract(realizedLPFee)
 
-  console.log(
-    'params',
-    route.tradeType.toString(),
-    route.route.midPrice.toSignificant(4),
-    route.amount.toSignificant(4),
-    route.quote.toSignificant(4)
-  )
-
-  console.log(
-    'priceImpactWithoutFeeFraction',
-    priceImpactWithoutFeeFraction.denominator.toString(),
-    priceImpactWithoutFeeFraction.toSignificant(4)
-  )
-
   // the amount of the input that accrues to LPs
   const realizedLPFeeAmount = realizedLPFee.multiply(new Fraction(route.amount.numerator, route.amount.denominator))
-
-  console.log('realizedLPFeeAmount', realizedLPFeeAmount.toSignificant(4), realizedLPFeeAmount.denominator.toString())
 
   return {
     priceImpactWithoutFee: new Percent(
@@ -116,9 +99,9 @@ export function computeTradePriceBreakdown(trade?: Trade | null): {
 
 export function computeSlippageAdjustedAmountsByRoute(
   route: V2RouteWithValidQuote,
-  allowedSlippage: number
+  allowedSlippage: Percent
 ): { [field in Field]: Fraction } {
-  const pct = basisPointsToPercent(allowedSlippage)
+  const pct = new Percent(allowedSlippage.numerator, allowedSlippage.denominator)
   return {
     [Field.INPUT]: new Fraction(route.maximumAmountIn(pct).numerator, route.maximumAmountIn(pct).denominator),
     [Field.OUTPUT]: new Fraction(route.minimumAmountOut(pct).numerator, route.minimumAmountOut(pct).denominator)
@@ -126,18 +109,18 @@ export function computeSlippageAdjustedAmountsByRoute(
 }
 
 // computes the minimum amount out and maximum amount in for a trade given a user specified allowed slippage in bips
-export function computeSlippageAdjustedAmounts(
-  trade: Trade | undefined,
-  allowedSlippage: number
-): { [field in Field]?: CurrencyAmount } {
-  const pct = basisPointsToPercent(allowedSlippage)
-  const a = trade?.maximumAmountIn(pct)
-  const b = trade?.minimumAmountOut(pct)
-  return {
-    [Field.INPUT]: a,
-    [Field.OUTPUT]: b
-  }
-}
+// export function computeSlippageAdjustedAmounts(
+//   trade: Trade | undefined,
+//   allowedSlippage: number
+// ): { [field in Field]?: CurrencyAmount } {
+//   const pct = basisPointsToPercent(allowedSlippage)
+//   const a = trade?.maximumAmountIn(pct)
+//   const b = trade?.minimumAmountOut(pct)
+//   return {
+//     [Field.INPUT]: a,
+//     [Field.OUTPUT]: b
+//   }
+// }
 
 export function warningSeverity(priceImpact: Percent | undefined): 0 | 1 | 2 | 3 | 4 {
   if (!priceImpact?.lessThan(BLOCKED_PRICE_IMPACT_NON_EXPERT)) return 4
