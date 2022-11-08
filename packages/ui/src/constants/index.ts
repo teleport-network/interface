@@ -193,7 +193,7 @@ export const BASES_TO_TRACK_LIQUIDITY_FOR: ChainTokenList = {
 
 export const SHARING_PAIRS: FarmingPool[] = [
   {
-    // pid 8
+    // pid 11
     stakingAsset: {
       name: 'USDC-USDT',
       decimal: 18,
@@ -204,7 +204,7 @@ export const SHARING_PAIRS: FarmingPool[] = [
     } as LiquidityAsset
   },
   {
-    // pid 9
+    // pid 12
     stakingAsset: {
       name: 'USDC-ETH',
       decimal: 18,
@@ -215,7 +215,7 @@ export const SHARING_PAIRS: FarmingPool[] = [
     } as LiquidityAsset
   },
   {
-    // pid 10
+    // pid 13
     stakingAsset: {
       name: 'USDC-SUSHI',
       decimal: 18,
