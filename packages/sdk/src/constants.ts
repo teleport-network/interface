@@ -31,9 +31,9 @@ export enum Rounding {
   ROUND_UP,
 }
 
-const initCodeHash = Web3.utils.keccak256(artifact.bytecode)
+// const initCodeHash = Web3.utils.keccak256(artifact.bytecode)
 
-export const INIT_CODE_HASH = initCodeHash
+export const INIT_CODE_HASH = '0xe0cf174e82555225473e368bef3eb6936c950332a77998fe479d23a0ee1b5ccf'
 
 type CONTRACT_ADDRESS_TYPE = {
   [x in ChainId]?: {
