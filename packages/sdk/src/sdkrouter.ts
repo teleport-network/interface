@@ -1,9 +1,8 @@
-import { TradeType } from './constants'
-import invariant from 'tiny-invariant'
-import { validateAndParseAddress } from './utils'
-import { ETHER, Percent, Trade } from './entities'
 import BigNumber from 'bignumber.js'
-
+import invariant from 'tiny-invariant'
+import { TradeType } from './constants'
+import { ETHER, Percent, Trade } from './entities'
+import { validateAndParseAddress } from './utils'
 
 export const swapETHForExactTokensMultiText = 'swapETHForExactTokensMulti'
 
@@ -73,14 +72,13 @@ export abstract class SDKRouter {
   /**
    * Cannot be constructed.
    */
-  private constructor() { }
+  private constructor() {}
   /**
    * Produces the on-chain method name to call and the hex encoded parameters to pass as arguments for a given trade.
    * @param trade to produce call parameters for
    * @param options options for the call parameters
    */
   public static swapCallParameters(trade: Trade, options: TradeOptions | TradeOptionsDeadline): SwapParameters {
-
     const etherIn = trade.inputAmount.currency === ETHER
     const etherOut = trade.outputAmount.currency === ETHER
     // the router does not support both ether in and out
@@ -106,15 +104,19 @@ export abstract class SDKRouter {
       let tempMuitcallParams: Array<any> = []
       let tempAmountIn: Array<any> = []
       let tempAmountOut: Array<any> = []
-      const maxInString = tempRouteDataRoute?.maxIn?.toSignificant() || ''
+      const maxInString = trade?.routeData?.maxIn?.quotient?.toString(16) || ''
       const maxInHex = '0x' + Number(maxInString).toString(16)
-      const minOutString = tempRouteDataRoute?.minOut?.toSignificant() || ''
+      const minOutString = trade?.routeData?.minOut?.quotient?.toString(16) || ''
       const minOutHex = '0x' + Number(minOutString).toString(16)
 
       tempRouteDataRoute.forEach((rowItem: any) => {
         let routePathArge: Array<any> = []
         rowItem.forEach((_routeDataItem: any, itemIndex: number) => {
-          routePathArge.push([rowItem[itemIndex]['tokenIn']['address'], rowItem[itemIndex]['tokenOut']['address'], rowItem[itemIndex]['stable']])
+          routePathArge.push([
+            rowItem[itemIndex]['tokenIn']['address'],
+            rowItem[itemIndex]['tokenOut']['address'],
+            rowItem[itemIndex]['stable'],
+          ])
         })
         let amountInString = rowItem[0]['amountIn']
         let amountInHex = '0x' + Number(amountInString).toString(16)
@@ -125,22 +127,22 @@ export abstract class SDKRouter {
         switch (type) {
           case 1:
             rowParams = [amountInHex, minOutHex, routePathArge, to, deadline]
-            break;
+            break
           case 2:
             rowParams = [amountInHex, minOutHex, routePathArge, to, deadline]
-            break;
+            break
           case 3:
             rowParams = [amountInHex, minOutHex, routePathArge, to, deadline]
-            break;
+            break
           case 4:
             rowParams = [amountOutHex, routePathArge, to, deadline]
-            break;
+            break
           case 5:
             rowParams = [amountOutHex, maxInHex, routePathArge, to, deadline]
-            break;
+            break
           case 6:
             rowParams = [amountOutHex, maxInHex, routePathArge, to, deadline]
-            break;
+            break
         }
         tempMuitcallParams.push(rowParams)
         tempAmountIn.push(amountInHex)
@@ -149,7 +151,7 @@ export abstract class SDKRouter {
       return {
         tempMuitcallParams,
         tempAmountIn,
-        tempAmountOut
+        tempAmountOut,
       }
     }
     let methodName: string
@@ -258,7 +260,7 @@ export abstract class SDKRouter {
       args,
       value,
       multiParams,
-      deadline
+      deadline,
     }
   }
 }

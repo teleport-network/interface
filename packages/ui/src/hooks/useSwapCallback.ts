@@ -177,7 +177,7 @@ export function useSwapCallback(
                 })
                 .catch((gasError) => {
                   console.debug('Gas estimate failed, trying eth_call to extract error', call)
-
+                  console.debug(gasError)
                   return contract.callStatic[methodName](...multiParams, options)
                     .then((result) => {
                       console.debug('Unexpected successful call after failed estimate gas', call, gasError, result)
@@ -193,7 +193,9 @@ export function useSwapCallback(
                             'This transaction will not succeed either due to price movement or fee on transfer. Try increasing your slippage tolerance.'
                           break
                         default:
-                          errorMessage = `The transaction cannot succeed due to error: ${callError.reason}. This is probably an issue with one of the tokens you are swapping.`
+                          errorMessage = `The transaction cannot succeed due to error: ${
+                            gasError?.reason || gasError
+                          }. This is probably an issue with one of the tokens you are swapping.`
                       }
                       return { call, error: new Error(errorMessage) }
                     })
