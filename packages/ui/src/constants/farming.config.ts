@@ -54,6 +54,8 @@ export const CHAINID_TO_FARMING_CONFIG: { [chainId in ChainId]?: FarmConfig } = 
   [ChainId.OP_GOERLI]: {
     chefType: Chef.MINICHEF,
     chainId: ChainId.OP_GOERLI,
-    pools: [undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, ...SHARING_PAIRS]
+    pools: Array(11)
+      .fill(undefined)
+      .concat(...SHARING_PAIRS)
   }
 }
