@@ -1,6 +1,4 @@
-import artifact from '@teleswap/contracts/artifacts/contracts/TeleswapV2Pair.sol/TeleswapV2Pair.json'
 import JSBI from 'jsbi'
-import Web3 from 'web3'
 
 // exports for external consumption
 export type BigintIsh = JSBI | bigint | string
@@ -18,7 +16,6 @@ export enum PERIPHERY_NAME {
   FACTORY = 'FACTORY',
   ROUTER = 'ROUTER',
 }
-
 
 export enum TradeType {
   EXACT_INPUT,

@@ -734,7 +734,7 @@ export async function getV2CandidatePools({
   let topByDirectSwapPool: V2SubgraphPool[] = [];
   if (topNDirectSwaps != 0) {
     [0, 1].forEach((v) => {
-      const stable = v == 0
+      const stable = v == 0;
       const { token0, token1, poolAddress } = poolProvider.getPoolAddress(
         tokenIn,
         tokenOut,
@@ -756,7 +756,7 @@ export async function getV2CandidatePools({
           reserveUSD: 10000, // Not used. Set to arbitrary number.
         },
       ];
-    })
+    });
   }
 
   addToAddressSet(topByDirectSwapPool);
@@ -933,22 +933,22 @@ export async function getV2CandidatePools({
     `V2 Candidate pools`
   );
 
-  const tokenPairsRaw = _.map<V2SubgraphPool, [Token, Token, boolean] | undefined>(
-    subgraphPools,
-    (subgraphPool) => {
-      const tokenA = tokenAccessor.getTokenByAddress(subgraphPool.token0.id);
-      const tokenB = tokenAccessor.getTokenByAddress(subgraphPool.token1.id);
+  const tokenPairsRaw = _.map<
+    V2SubgraphPool,
+    [Token, Token, boolean] | undefined
+  >(subgraphPools, (subgraphPool) => {
+    const tokenA = tokenAccessor.getTokenByAddress(subgraphPool.token0.id);
+    const tokenB = tokenAccessor.getTokenByAddress(subgraphPool.token1.id);
 
-      if (!tokenA || !tokenB) {
-        log.info(
-          `Dropping candidate pool for ${subgraphPool.token0.id}/${subgraphPool.token1.id}`
-        );
-        return undefined;
-      }
-
-      return [tokenA, tokenB, subgraphPool.stable];
+    if (!tokenA || !tokenB) {
+      log.info(
+        `Dropping candidate pool for ${subgraphPool.token0.id}/${subgraphPool.token1.id}`
+      );
+      return undefined;
     }
-  );
+
+    return [tokenA, tokenB, subgraphPool.stable];
+  });
 
   const tokenPairs = _.compact(tokenPairsRaw);
 
@@ -1145,22 +1145,22 @@ export async function getMixedRouteCandidatePools({
 
   const V3tokenPairs = _.compact(V3tokenPairsRaw);
 
-  const V2tokenPairsRaw = _.map<V2SubgraphPool, [Token, Token, boolean] | undefined>(
-    buildV2Pools,
-    (subgraphPool) => {
-      const tokenA = tokenAccessor.getTokenByAddress(subgraphPool.token0.id);
-      const tokenB = tokenAccessor.getTokenByAddress(subgraphPool.token1.id);
+  const V2tokenPairsRaw = _.map<
+    V2SubgraphPool,
+    [Token, Token, boolean] | undefined
+  >(buildV2Pools, (subgraphPool) => {
+    const tokenA = tokenAccessor.getTokenByAddress(subgraphPool.token0.id);
+    const tokenB = tokenAccessor.getTokenByAddress(subgraphPool.token1.id);
 
-      if (!tokenA || !tokenB) {
-        log.info(
-          `Dropping candidate pool for ${subgraphPool.token0.id}/${subgraphPool.token1.id}`
-        );
-        return undefined;
-      }
-
-      return [tokenA, tokenB, subgraphPool.stable];
+    if (!tokenA || !tokenB) {
+      log.info(
+        `Dropping candidate pool for ${subgraphPool.token0.id}/${subgraphPool.token1.id}`
+      );
+      return undefined;
     }
-  );
+
+    return [tokenA, tokenB, subgraphPool.stable];
+  });
 
   const V2tokenPairs = _.compact(V2tokenPairsRaw);
 
